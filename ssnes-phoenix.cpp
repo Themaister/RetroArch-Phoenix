@@ -3,6 +3,8 @@
 #include <unistd.h>
 #include <sys/types.h>
 #include <sys/wait.h>
+#include "config_file.hpp"
+#include <utility>
 
 using namespace nall;
 using namespace phoenix;
