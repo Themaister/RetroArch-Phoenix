@@ -19,7 +19,7 @@ class LogWindow : public Window
          append(layout);
       }
 
-      void push(const char *text) { log.append(text); box.setText(log); OS::process(); }
+      void push(const char *text) { log.append(text); box.setText(log); while(OS::pending()) OS::process(); }
       void clear() { log = ""; box.setText(log); }
 
       void show() { setVisible(); }
@@ -38,7 +38,7 @@ class MainWindow : public Window
       {
          setTitle("SSNES || Phoenix");
          //setBackgroundColor(64, 64, 64);
-         setGeometry({128, 128, 400, 240});
+         setGeometry({128, 128, 600, 240});
 
          init_menu();
          onClose = []() { OS::quit(); };
@@ -93,6 +93,7 @@ class MainWindow : public Window
          Label label;
          TextEdit edit;
          Button button;
+         string filter;
 
          entry()
          {
@@ -108,12 +109,13 @@ class MainWindow : public Window
                if (path)
                   start_path = path;
 
-               string file = OS::fileLoad(Window::None, start_path);
+               string file = OS::fileLoad(Window::None, start_path, filter);
                if (file.length() > 0)
                   edit.setText(file);
             };
          }
 
+         void setFilter(const string& _filter) { filter = _filter; }
          void setLabel(const string& name) { label.setText(name); }
          string getPath() { return edit.text(); }
          
@@ -122,6 +124,20 @@ class MainWindow : public Window
 
       void init_main_frame()
       {
+         rom.setFilter("Super Magicom, Super Famicom (*.smc,*.sfc)");
+         config.setFilter("Config file (*.cfg)");
+#ifdef _WIN32
+#define DYNAMIC_EXTENSION "dll"
+#elif defined(__APPLE__)
+#define DYNAMIC_EXTENSION "dylib"
+#else
+#define DYNAMIC_EXTENSION "so"
+#endif
+         libsnes.setFilter("Dynamic library (*." DYNAMIC_EXTENSION ")");
+#ifdef _WIN32
+         ssnes.setFilter("Executable file (*.exe)");
+#endif
+
          rom.setLabel("ROM path:");
          config.setLabel("SSNES config file:");
          ssnes.setLabel("SSNES path:");
@@ -185,9 +201,13 @@ class MainWindow : public Window
 #ifndef _WIN32
       void fork_ssnes(const string& path, const char **cmd)
       {
-         OS::process();
+         // I think we had to do this with GTK+ at least :v
+         while (OS::pending())
+            OS::process();
+
          hide();
 
+         // Gotta love Unix :)
          int fds[2];
          pipe(fds);
          close(2);
@@ -219,6 +239,9 @@ class MainWindow : public Window
             if (execvp(path, const_cast<char**>(cmd)) < 0)
                exit(255);
          }
+
+         close(fds[0]);
+         close(fds[1]);
 
          show();
       }
