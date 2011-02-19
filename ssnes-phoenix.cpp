@@ -265,7 +265,10 @@ class MainWindow : public Window
          vec_cmd.append(rom_path);
 
          if (config_path.length() > 0)
-            vec_cmd.append(string({"-c", config_path}));
+         {
+            vec_cmd.append("-c");
+            vec_cmd.append(config_path);
+         }
 
          vec_cmd.append("-v");
 
