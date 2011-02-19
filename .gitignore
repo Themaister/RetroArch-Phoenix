@@ -1,0 +1,3 @@
+*.o
+/ssnes-phoenix
+*.moc
