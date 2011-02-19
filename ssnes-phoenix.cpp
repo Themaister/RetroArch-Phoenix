@@ -12,6 +12,7 @@ class LogWindow : public Window
    public:
       LogWindow()
       {
+         setTitle("SSNES || Log window");
          layout.append(box, 0, 0);
          box.setEditable(false);
          onClose = [this]() { hide(); };
@@ -162,7 +163,6 @@ class MainWindow : public Window
       void start_ssnes()
       {
          linear_vector<const char*> vec_cmd;
-         string cmd;
          string ssnes_path = ssnes.getPath();
          if (ssnes_path.length() == 0) ssnes_path = "ssnes";
          string rom_path = rom.getPath();
@@ -170,7 +170,6 @@ class MainWindow : public Window
          //string libsnes_path = libsnes.getPath();
 
          vec_cmd.append("ssnes");
-         cmd.append(ssnes_path);
 
          if (rom_path.length() == 0)
          {
@@ -178,21 +177,12 @@ class MainWindow : public Window
             return;
          }
 
-         cmd.append(" ");
-         cmd.append(rom_path);
          vec_cmd.append(rom_path);
 
-         cmd.append(" ");
          if (config_path.length() > 0)
-         {
-            cmd.append(string({"-c ", config_path}));
             vec_cmd.append(string({"-c", config_path}));
-         }
 
          vec_cmd.append("-v");
-         cmd.append(" -v");
-
-         setStatusText({"Started SSNES with command: ", cmd});
 
          vec_cmd.append(NULL);
          fork_ssnes(ssnes_path, &vec_cmd[0]);
