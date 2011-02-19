@@ -90,7 +90,7 @@ class MainWindow : public Window
             label.setText("Show log window:");
             box.append(label, 100, 30);
             box.append(check, 20, 30);
-            check.onTick = [this]() { if (check.checked()) show(); else hide(); };
+            check.onTick = [this]() { if (check.checked()) this->show(); else this->hide(); };
          }
 
          HorizontalLayout box;
@@ -111,7 +111,9 @@ class MainWindow : public Window
          ConfigFile *conf;
          string config_key;
 
-         entry() : conf(NULL)
+         function<void (const string&)> cb;
+
+         entry() : conf(NULL), cb(&entry::dummy)
          {
             button.setText("Open ...");
 
@@ -128,26 +130,35 @@ class MainWindow : public Window
                string file = OS::fileLoad(Window::None, start_path, filter);
                if (file.length() > 0)
                   edit.setText(file);
-            };
 
-            edit.onChange = [this]() {
                if (conf)
                   conf->set(config_key, getPath());
+               cb(getPath());
             };
          }
+
 
          void setFilter(const string& _filter) { filter = _filter; }
          void setLabel(const string& name) { label.setText(name); }
          void setPath(const string& name) { edit.setText(name); }
-         void setConfig(ConfigFile& file, const string& key) { conf = &file; config_key = key; }
+         void setConfig(ConfigFile& file, const string& key, const function<void (const string&)>& _cb = &entry::dummy) 
+         { 
+            conf = &file;
+            config_key = key;
+            cb = _cb;
+         }
          string getPath() { return edit.text(); }
          
          HorizontalLayout& layout() { return hlayout; }
+
+         private:
+            static void dummy(const string&) {}
       } rom, config, ssnes, libsnes;
 
       void init_config()
       {
-         string gui_path;
+         string gui_path, cli_path;
+         string tmp;
          const char *path = std::getenv("XDG_CONFIG_HOME");
          if (path)
          {
@@ -157,19 +168,22 @@ class MainWindow : public Window
          else
             gui_path = "/etc/ssnes_phoenix.cfg";
 
-         configs.gui = ConfigFile(gui_path);
+         configs.gui = gui_path;
 
-         string tmp;
          if (configs.gui.get("ssnes_path", tmp)) ssnes.setPath(tmp);
+         ssnes.setConfig(configs.gui, "ssnes_path");
+         if (configs.gui.get("last_rom", tmp)) rom.setPath(tmp);
+         rom.setConfig(configs.gui, "last_rom");
+         if (configs.gui.get("config_path", tmp)) config.setPath(tmp);
+         config.setConfig(configs.gui, "config_path", {&MainWindow::reload_cli_config, this});
+         libsnes.setConfig(configs.cli, "libsnes_path");
 
          if (configs.gui.get("config_path", tmp))
          {
-            config.setPath(tmp);
-            configs.cli = ConfigFile(tmp);
+            cli_path = tmp;
          }
          else
          {
-            string cli_path;
             if (path)
             {
                cli_path = path;
@@ -177,18 +191,22 @@ class MainWindow : public Window
             }
             else
                cli_path = "/etc/ssnes.cfg";
-
-            configs.cli = ConfigFile(cli_path);
          }
+         configs.cli = ConfigFile(cli_path);
 
-         config.setConfig(configs.gui, "config_path");
-         ssnes.setConfig(configs.gui, "ssnes_path");
+         init_cli_config();
+      }
 
-         if (configs.gui.get("last_rom", tmp)) rom.setPath(tmp);
-         rom.setConfig(configs.gui, "last_rom");
+      void reload_cli_config(const string& path)
+      {
+         configs.cli = ConfigFile(path);
+         init_cli_config();
+      }
 
-         if (configs.cli.get("libsnes_path", tmp)) libsnes.setPath(tmp);
-         libsnes.setConfig(configs.cli, "libsnes_path");
+      void init_cli_config()
+      {
+         string tmp;
+         if (configs.cli.get("libsnes_path", tmp)) libsnes.setPath(tmp); else libsnes.setPath("");
       }
 
       void init_main_frame()
@@ -235,7 +253,6 @@ class MainWindow : public Window
          if (ssnes_path.length() == 0) ssnes_path = "ssnes";
          string rom_path = rom.getPath();
          string config_path = config.getPath();
-         //string libsnes_path = libsnes.getPath();
 
          vec_cmd.append("ssnes");
 
@@ -316,11 +333,6 @@ class MainWindow : public Window
 
       struct
       {
-         Menu open;
-         MenuItem open_normal, open_sgb, open_bsx, open_bsx_slot;
-         MenuSeparator open_sep;
-         MenuItem netplay_open;
-         MenuSeparator sep;
          MenuItem quit;
       } file;
 
@@ -347,19 +359,6 @@ class MainWindow : public Window
          append(settings_menu);
          append(help_menu);
 
-         file.open.setText("Open ROM");
-         file.open_normal.setText("Normal");
-         file.open_sgb.setText("Super GameBoy");
-         file.open_bsx.setText("BSX Satellaview");
-         file.open_bsx_slot.setText("BSX Satellaview (slotted)");
-         file.open.append(file.open_normal);
-         //file.open.append(file.open_sep);
-         //file.open.append(file.open_sgb);
-         //file.open.append(file.open_bsx);
-         //file.open.append(file.open_bsx_slot);
-
-         file.netplay_open.setText("Open ROM with Netplay");
-
          file.quit.setText("Quit");
 
          settings.general.setText("General");
@@ -367,12 +366,8 @@ class MainWindow : public Window
          settings.audio.setText("Audio");
          settings.input.setText("Input");
 
-
          help.about.setText("About");
 
-         //file_menu.append(file.open);
-         //file_menu.append(file.netplay_open);
-         //file_menu.append(file.sep);
          file_menu.append(file.quit);
          settings_menu.append(settings.general);
          settings_menu.append(settings.sep);
