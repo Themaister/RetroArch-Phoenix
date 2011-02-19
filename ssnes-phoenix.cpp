@@ -1,7 +1,35 @@
 #include <phoenix.hpp>
+#include <cstdlib>
+#include <unistd.h>
+#include <sys/types.h>
+#include <sys/wait.h>
 
 using namespace nall;
 using namespace phoenix;
+
+class LogWindow : public Window
+{
+   public:
+      LogWindow()
+      {
+         layout.append(box, 0, 0);
+         box.setEditable(false);
+         onClose = [this]() { hide(); };
+         layout.setMargin(5);
+         append(layout);
+      }
+
+      void push(const char *text) { log.append(text); box.setText(log); OS::process(); }
+      void clear() { log = ""; box.setText(log); }
+
+      void show() { setVisible(); }
+      void hide() { setVisible(false); }
+
+   private:
+      VerticalLayout layout;
+      TextEdit box;
+      string log;
+};
 
 class MainWindow : public Window
 {
@@ -10,7 +38,7 @@ class MainWindow : public Window
       {
          setTitle("SSNES || Phoenix");
          //setBackgroundColor(64, 64, 64);
-         setGeometry({128, 128, 400, 200});
+         setGeometry({128, 128, 400, 240});
 
          init_menu();
          onClose = []() { OS::quit(); };
@@ -41,6 +69,24 @@ class MainWindow : public Window
 
       Button start_btn;
 
+
+      struct logger : public LogWindow
+      {
+         logger()
+         {
+            label.setText("Show log window:");
+            box.append(label, 100, 30);
+            box.append(check, 20, 30);
+            check.onTick = [this]() { if (check.checked()) show(); else hide(); };
+         }
+
+         HorizontalLayout box;
+         Label label;
+         CheckBox check;
+
+         HorizontalLayout& layout() { return box; }
+      } log_win;
+
       struct entry
       {
          HorizontalLayout hlayout;
@@ -55,14 +101,24 @@ class MainWindow : public Window
             hlayout.append(label, 100, 30);
             hlayout.append(edit, 0, 30);
             hlayout.append(button, 60, 30);
+
+            button.onTick = [this]() {
+               string start_path;
+               const char *path = std::getenv("HOME");
+               if (path)
+                  start_path = path;
+
+               string file = OS::fileLoad(Window::None, start_path);
+               if (file.length() > 0)
+                  edit.setText(file);
+            };
          }
 
          void setLabel(const string& name) { label.setText(name); }
+         string getPath() { return edit.text(); }
          
          HorizontalLayout& layout() { return hlayout; }
-      };
-
-      entry rom, config, ssnes, libsnes;
+      } rom, config, ssnes, libsnes;
 
       void init_main_frame()
       {
@@ -72,12 +128,107 @@ class MainWindow : public Window
          libsnes.setLabel("libsnes path:");
 
          start_btn.setText("Start SSNES");
-         vbox.append(rom.layout(), 0, 0);
-         vbox.append(config.layout(), 0, 0);
-         vbox.append(ssnes.layout(), 0, 0);
-         vbox.append(libsnes.layout(), 0, 0);
-         vbox.append(start_btn, 0, 0, 20);
+         vbox.append(rom.layout(), 0, 0, 3);
+         vbox.append(config.layout(), 0, 0, 3);
+         vbox.append(ssnes.layout(), 0, 0, 3);
+         vbox.append(libsnes.layout(), 0, 0, 3);
+         vbox.append(start_btn, 0, 0, 15);
+         vbox.append(log_win.layout(), 0, 0);
+
+         start_btn.onTick = [this]() { start_ssnes(); };
       }
+
+      void show_error(const string& err)
+      {
+         MessageWindow::warning(Window::None, err);
+      }
+
+      void start_ssnes()
+      {
+         linear_vector<const char*> vec_cmd;
+         string cmd;
+         string ssnes_path = ssnes.getPath();
+         if (ssnes_path.length() == 0) ssnes_path = "ssnes";
+         string rom_path = rom.getPath();
+         string config_path = config.getPath();
+         //string libsnes_path = libsnes.getPath();
+
+         vec_cmd.append("ssnes");
+         cmd.append(ssnes_path);
+
+         if (rom_path.length() == 0)
+         {
+            show_error("No ROM selected :(");
+            return;
+         }
+
+         cmd.append(" ");
+         cmd.append(rom_path);
+         vec_cmd.append(rom_path);
+
+         cmd.append(" ");
+         if (config_path.length() > 0)
+         {
+            cmd.append(string({"-c ", config_path}));
+            vec_cmd.append(string({"-c", config_path}));
+         }
+
+         vec_cmd.append("-v");
+         cmd.append(" -v");
+
+         setStatusText({"Started SSNES with command: ", cmd});
+
+         vec_cmd.append(NULL);
+         fork_ssnes(ssnes_path, &vec_cmd[0]);
+      }
+
+#ifndef _WIN32
+      void fork_ssnes(const string& path, const char **cmd)
+      {
+         OS::process();
+         hide();
+
+         int fds[2];
+         pipe(fds);
+         close(2);
+         dup(fds[1]);
+
+         if (fork())
+         {
+            log_win.clear();
+            char line[1024] = {0};
+            ssize_t ret;
+            while((ret = read(fds[0], line, sizeof(line) - 1)) > 0)
+            {
+               line[ret] = '\0';
+               log_win.push(line);
+            }
+
+            int status = 0;
+            wait(&status);
+            status = WEXITSTATUS(status);
+            if (status == 255)
+               setStatusText({"Could not find SSNES in given path ", path});
+            else if (status != 0)
+               setStatusText({"Failed to open ROM!"});
+            else
+               setStatusText("SSNES exited successfully.");
+         }
+         else
+         {
+            if (execvp(path, const_cast<char**>(cmd)) < 0)
+               exit(255);
+         }
+
+         show();
+      }
+#else
+      // This will be hell on Earth :v
+      void fork_ssnes(const string& cmd)
+      {
+         setStatusText("This isn't implemented yet. :(");
+      }
+#endif
 
       struct
       {
