@@ -9,8 +9,8 @@ class MainWindow : public Window
       MainWindow()
       {
          setTitle("SSNES || Phoenix");
-         setBackgroundColor(64, 64, 64);
-         setGeometry({128, 128, 320, 160});
+         //setBackgroundColor(64, 64, 64);
+         setGeometry({128, 128, 400, 200});
 
          init_menu();
          onClose = []() { OS::quit(); };
@@ -41,54 +41,41 @@ class MainWindow : public Window
 
       Button start_btn;
 
-      HorizontalLayout rom_layout;
-      Label rom_name;
-      TextEdit rom_edit;
+      struct entry
+      {
+         HorizontalLayout hlayout;
+         Label label;
+         TextEdit edit;
+         Button button;
 
-      HorizontalLayout config_layout;
-      Label config_name;
-      TextEdit config_edit;
-      Button config_open;
+         entry()
+         {
+            button.setText("Open ...");
 
-      HorizontalLayout ssnes_layout;
-      Label ssnes_name;
-      TextEdit ssnes_edit;
-      Button ssnes_open;
+            hlayout.append(label, 100, 30);
+            hlayout.append(edit, 0, 30);
+            hlayout.append(button, 60, 30);
+         }
 
-      HorizontalLayout libsnes_layout;
-      Label libsnes_name;
-      TextEdit libsnes_edit;
-      Button libsnes_open;
+         void setLabel(const string& name) { label.setText(name); }
+         
+         HorizontalLayout& layout() { return hlayout; }
+      };
+
+      entry rom, config, ssnes, libsnes;
 
       void init_main_frame()
       {
-         rom_layout.append(rom_name, 100, 30);
-         rom_layout.append(rom_edit, 0, 30);
-         rom_name.setText("ROM path:");
-
-         config_layout.append(config_name, 100, 30);
-         config_layout.append(config_edit, 0, 30);
-         config_layout.append(config_open, 60, 30);
-         config_name.setText("SSNES config file:");
-         config_open.setText("Open ...");
-
-         ssnes_layout.append(ssnes_name, 100, 30);
-         ssnes_layout.append(ssnes_edit, 0, 30);
-         ssnes_layout.append(ssnes_open, 60, 30);
-         ssnes_name.setText("SSNES path:");
-         ssnes_open.setText("Find ...");
-
-         libsnes_layout.append(libsnes_name, 100, 30);
-         libsnes_layout.append(libsnes_edit, 0, 30);
-         libsnes_layout.append(libsnes_open, 60, 30);
-         libsnes_name.setText("libsnes path:");
-         libsnes_open.setText("Find ...");
+         rom.setLabel("ROM path:");
+         config.setLabel("SSNES config file:");
+         ssnes.setLabel("SSNES path:");
+         libsnes.setLabel("libsnes path:");
 
          start_btn.setText("Start SSNES");
-         vbox.append(rom_layout, 0, 0);
-         vbox.append(config_layout, 0, 0);
-         vbox.append(ssnes_layout, 0, 0);
-         vbox.append(libsnes_layout, 0, 0);
+         vbox.append(rom.layout(), 0, 0);
+         vbox.append(config.layout(), 0, 0);
+         vbox.append(ssnes.layout(), 0, 0);
+         vbox.append(libsnes.layout(), 0, 0);
          vbox.append(start_btn, 0, 0, 20);
       }
 
@@ -131,10 +118,10 @@ class MainWindow : public Window
          file.open_bsx.setText("BSX Satellaview");
          file.open_bsx_slot.setText("BSX Satellaview (slotted)");
          file.open.append(file.open_normal);
-         file.open.append(file.open_sep);
-         file.open.append(file.open_sgb);
-         file.open.append(file.open_bsx);
-         file.open.append(file.open_bsx_slot);
+         //file.open.append(file.open_sep);
+         //file.open.append(file.open_sgb);
+         //file.open.append(file.open_bsx);
+         //file.open.append(file.open_bsx_slot);
 
          file.netplay_open.setText("Open ROM with Netplay");
 
@@ -148,9 +135,9 @@ class MainWindow : public Window
 
          help.about.setText("About");
 
-         file_menu.append(file.open);
-         file_menu.append(file.netplay_open);
-         file_menu.append(file.sep);
+         //file_menu.append(file.open);
+         //file_menu.append(file.netplay_open);
+         //file_menu.append(file.sep);
          file_menu.append(file.quit);
          settings_menu.append(settings.general);
          settings_menu.append(settings.sep);
