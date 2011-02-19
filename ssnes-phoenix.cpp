@@ -5,6 +5,7 @@
 #include <sys/wait.h>
 #include "config_file.hpp"
 #include <utility>
+#include <functional>
 
 using namespace nall;
 using namespace phoenix;
@@ -55,6 +56,8 @@ class MainWindow : public Window
          append(vbox);
          setMenuVisible();
          setStatusVisible();
+
+         init_config();
       }
 
       void show()
@@ -75,6 +78,10 @@ class MainWindow : public Window
 
       Button start_btn;
 
+      struct
+      {
+         ConfigFile gui, cli;
+      } configs;
 
       struct logger : public LogWindow
       {
@@ -101,7 +108,10 @@ class MainWindow : public Window
          Button button;
          string filter;
 
-         entry()
+         ConfigFile *conf;
+         string config_key;
+
+         entry() : conf(NULL)
          {
             button.setText("Open ...");
 
@@ -119,14 +129,67 @@ class MainWindow : public Window
                if (file.length() > 0)
                   edit.setText(file);
             };
+
+            edit.onChange = [this]() {
+               if (conf)
+                  conf->set(config_key, getPath());
+            };
          }
 
          void setFilter(const string& _filter) { filter = _filter; }
          void setLabel(const string& name) { label.setText(name); }
+         void setPath(const string& name) { edit.setText(name); }
+         void setConfig(ConfigFile& file, const string& key) { conf = &file; config_key = key; }
          string getPath() { return edit.text(); }
          
          HorizontalLayout& layout() { return hlayout; }
       } rom, config, ssnes, libsnes;
+
+      void init_config()
+      {
+         string gui_path;
+         const char *path = std::getenv("XDG_CONFIG_HOME");
+         if (path)
+         {
+            gui_path = path;
+            gui_path.append("/ssnes/phoenix.cfg");
+         }
+         else
+            gui_path = "/etc/ssnes_phoenix.cfg";
+
+         configs.gui = ConfigFile(gui_path);
+
+         string tmp;
+         if (configs.gui.get("ssnes_path", tmp)) ssnes.setPath(tmp);
+
+         if (configs.gui.get("config_path", tmp))
+         {
+            config.setPath(tmp);
+            configs.cli = ConfigFile(tmp);
+         }
+         else
+         {
+            string cli_path;
+            if (path)
+            {
+               cli_path = path;
+               cli_path.append("/ssnes/ssnes.cfg");
+            }
+            else
+               cli_path = "/etc/ssnes.cfg";
+
+            configs.cli = ConfigFile(cli_path);
+         }
+
+         config.setConfig(configs.gui, "config_path");
+         ssnes.setConfig(configs.gui, "ssnes_path");
+
+         if (configs.gui.get("last_rom", tmp)) rom.setPath(tmp);
+         rom.setConfig(configs.gui, "last_rom");
+
+         if (configs.cli.get("libsnes_path", tmp)) libsnes.setPath(tmp);
+         libsnes.setConfig(configs.cli, "libsnes_path");
+      }
 
       void init_main_frame()
       {
@@ -190,6 +253,9 @@ class MainWindow : public Window
          vec_cmd.append("-v");
 
          vec_cmd.append(NULL);
+
+         configs.gui.write();
+         configs.cli.write();
          fork_ssnes(ssnes_path, &vec_cmd[0]);
       }
 

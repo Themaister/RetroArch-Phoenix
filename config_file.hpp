@@ -9,7 +9,7 @@ using namespace nall;
 class ConfigFile
 {
    public:
-      ConfigFile(const string& _path) : path(_path)
+      ConfigFile(const string& _path = "") : path(_path)
       {
          conf = config_file_new(path);
          if (!conf)
