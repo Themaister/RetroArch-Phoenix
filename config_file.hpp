@@ -12,6 +12,8 @@ class ConfigFile
       ConfigFile(const string& _path) : path(_path)
       {
          conf = config_file_new(path);
+         if (!conf)
+            conf = config_file_new(NULL);
       }
 
       ConfigFile(const ConfigFile&) = delete;
@@ -23,6 +25,7 @@ class ConfigFile
       { 
          if (conf) 
          {
+            config_file_write(conf, path);
             config_file_free(conf); 
             conf = _in.conf; 
             _in.conf = NULL;
@@ -116,6 +119,8 @@ class ConfigFile
       {
          if (conf) config_set_bool(conf, key, val);
       }
+
+      void write() { if (conf) config_file_write(conf, path); }
 
       ConfigFile(ConfigFile&& _in) { *this = std::move(_in); }
 

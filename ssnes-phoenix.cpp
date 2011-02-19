@@ -15,6 +15,8 @@ class LogWindow : public Window
       LogWindow()
       {
          setTitle("SSNES || Log window");
+         label.setText("SSNES output:");
+         layout.append(label, 0, 30);
          layout.append(box, 0, 0);
          box.setEditable(false);
          onClose = [this]() { hide(); };
@@ -31,6 +33,7 @@ class LogWindow : public Window
    private:
       VerticalLayout layout;
       TextEdit box;
+      Label label;
       string log;
 };
 
