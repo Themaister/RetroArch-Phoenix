@@ -10,7 +10,51 @@
 using namespace nall;
 using namespace phoenix;
 
-class LogWindow : public Window
+struct ToggleWindow : public Window
+{
+   ToggleWindow() { onClose = [this]() { this->hide(); }; }
+   void show() { setVisible(); }
+   void hide() { setVisible(false); }
+};
+
+class General : public ToggleWindow
+{
+   public:
+      General()
+      {
+         setTitle("SSNES || General settings");
+      }
+
+};
+
+class Video : public ToggleWindow
+{
+   public:
+      Video()
+      {
+      }
+
+};
+
+class Audio : public ToggleWindow
+{
+   public:
+      Audio()
+      {
+      }
+
+};
+
+class Input : public ToggleWindow
+{
+   public:
+      Input()
+      {
+      }
+
+};
+
+class LogWindow : public ToggleWindow
 {
    public:
       LogWindow()
@@ -20,16 +64,12 @@ class LogWindow : public Window
          layout.append(label, 0, 30);
          layout.append(box, 0, 0);
          box.setEditable(false);
-         onClose = [this]() { hide(); };
          layout.setMargin(5);
          append(layout);
       }
 
       void push(const char *text) { log.append(text); box.setText(log); while(OS::pending()) OS::process(); }
       void clear() { log = ""; box.setText(log); }
-
-      void show() { setVisible(); }
-      void hide() { setVisible(false); }
 
    private:
       VerticalLayout layout;
@@ -58,19 +98,8 @@ class MainWindow : public Window
          setStatusVisible();
 
          init_config();
-      }
-
-      void show()
-      {
          setVisible();
       }
-
-      void hide()
-      {
-         setVisible(false);
-      }
-
-
 
    private:
       VerticalLayout vbox;
@@ -286,7 +315,7 @@ class MainWindow : public Window
          while (OS::pending())
             OS::process();
 
-         hide();
+         setVisible(false);
 
          // Gotta love Unix :)
          int fds[2];
@@ -324,7 +353,7 @@ class MainWindow : public Window
          close(fds[0]);
          close(fds[1]);
 
-         show();
+         setVisible();
       }
 #else
       // This will be hell on Earth :v
@@ -392,6 +421,5 @@ class MainWindow : public Window
 int main()
 {
    MainWindow win;
-   win.show();
    OS::main();
 }
