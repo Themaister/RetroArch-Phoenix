@@ -84,7 +84,8 @@ class MainWindow : public Window
          {
             port.setText("55435");
             frames.setText("0");
-            enable_label.setText("Enable netplay:");
+            enable_label.setText("Netplay:");
+            enable.setText("Enable");
             server.setText("Server");
             client.setText("Client");
             host_label.setText("Host IP:");
@@ -94,7 +95,7 @@ class MainWindow : public Window
             RadioBox::group(server, client);
 
             hlayout[0].append(enable_label, 100, WIDGET_HEIGHT);
-            hlayout[0].append(enable, 20, WIDGET_HEIGHT, 30);
+            hlayout[0].append(enable, 80, WIDGET_HEIGHT, 0);
             hlayout[0].append(server, 70, 20);
             hlayout[0].append(client, 70, 20);
 
@@ -156,8 +157,8 @@ class MainWindow : public Window
                   edit.setText(file);
 
                if (conf)
-                  conf->set(config_key, getPath());
-               cb(getPath());
+                  conf->set(config_key, this->getPath());
+               cb(this->getPath());
             };
          }
 
@@ -310,7 +311,7 @@ class MainWindow : public Window
          vbox.append(net.hlayout[1], 0, 0, 0);
          vbox.append(net.hlayout[2], 0, 0, 20);
 
-         start_btn.onTick = [this]() { start_ssnes(); };
+         start_btn.onTick = [this]() { this->start_ssnes(); };
       }
 
       void show_error(const string& err)
@@ -357,10 +358,12 @@ class MainWindow : public Window
 
             vec_cmd.append("--port");
             string port = net.port.text();
+            print(string({"Port:", port}));
             vec_cmd.append(port);
 
             vec_cmd.append("-F");
             string frames = net.frames.text();
+            print(string({"Frames:", frames}));
             vec_cmd.append(frames);
          }
 
@@ -487,7 +490,6 @@ class MainWindow : public Window
             DWORD dwRead;
             while (ReadFile(reader, buf, sizeof(buf) - 1, &dwRead, NULL) == TRUE && dwRead > 0)
             {
-               print("Read some data from SSNES!\n");
                buf[dwRead] = '\0';
                log_win.push(buf);
             }
@@ -563,6 +565,7 @@ class MainWindow : public Window
       void init_menu_callbacks()
       {
          file.log.onTick = [this]() { if (file.log.checked()) log_win.show(); else log_win.hide(); };
+         log_win.setCloseCallback([this]() { file.log.setChecked(false); });
          file.quit.onTick = []() { OS::quit(); };
          help.about.onTick = []() { MessageWindow::information(Window::None, "SSNES/Phoenix\nHans-Kristian Arntzen (Themaister) (C) - 2011\nThis is free software released under GNU GPLv3\nPhoenix (C) byuu - 2011"); };
 

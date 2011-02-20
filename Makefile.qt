@@ -13,13 +13,13 @@ INCLUDES = -Iphoenix
 all: $(TARGET)
 
 %.o: %.cpp $(HEADERS)
-	$(CXX) $(CXXFLAGS) $(INCLUDES) -std=gnu++0x -c -o $@ $<
+	$(CXX) $(CXXFLAGS) $(INCLUDES) -O3 -std=gnu++0x -c -o $@ $<
 
 %.o: %.c $(HEADERS)
-	$(CC) $(CFLAGS) -std=gnu99 -c -o $@ $<
+	$(CC) $(CFLAGS) -O3 -std=gnu99 -c -o $@ $<
 
 phoenix/phoenix.o: phoenix/phoenix.cpp phoenix/qt/qt.moc
-	$(CXX) $(CXXFLAGS) $(INCLUDES) -std=gnu++0x -DPHOENIX_QT $(QT_CFLAGS) -c -o $@ $<
+	$(CXX) $(CXXFLAGS) $(INCLUDES) -s -std=gnu++0x -DPHOENIX_QT $(QT_CFLAGS) -c -o $@ $<
 
 %.moc: %.moc.hpp
 	moc -i -o $@ $<

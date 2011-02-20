@@ -20,11 +20,14 @@ struct ToggleWindow : public Window
    ToggleWindow(const string& title) 
    { 
       setTitle(title); 
-      onClose = [this]() { this->hide(); }; 
+      onClose = [this]() { this->hide(); if (cb) cb(); }; 
       setGeometry({256, 256, 400, 240});
    }
    void show() { setVisible(); }
    void hide() { setVisible(false); }
+
+   function<void ()> cb;
+   void setCloseCallback(const function<void ()>& _cb) { cb = _cb; }
 };
 
 class SettingLayout : public util::SharedAbstract<SettingLayout>
@@ -110,8 +113,8 @@ class BoolSetting : public SettingLayout, public util::Shared<BoolSetting>
    public:
       BoolSetting(ConfigFile &_conf, const string& _key, const string& label, bool _default) : SettingLayout(_conf, _key, label), m_default(_default)
       {
-         check.onTick = [this]() { conf.set(key, check.checked()); };
-         hlayout.append(check, 20, WIDGET_HEIGHT);
+         check.onTick = [this]() { conf.set(key, check.checked()); check.setText(check.checked() ? "Enabled" : "Disabled"); };
+         hlayout.append(check, 120, WIDGET_HEIGHT);
       }
 
       void update()
@@ -119,6 +122,7 @@ class BoolSetting : public SettingLayout, public util::Shared<BoolSetting>
          bool tmp = m_default;
          conf.get(key, tmp);
          check.setChecked(tmp);
+         check.setText(tmp ? "Enabled" : "Disabled");
       }
 
    private:
