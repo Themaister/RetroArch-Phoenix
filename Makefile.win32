@@ -1,0 +1,35 @@
+TARGET = ssnes-phoenix.exe
+
+CXXFILES = $(wildcard *.cpp)
+CFILES = $(wildcard *.c)
+OBJ = phoenix/phoenix.o $(CXXFILES:.cpp=.o) $(CFILES:.c=.o) phoenix/phoenix-resource.o
+HEADERS = $(wildcard *.h) $(wildcard *.hpp)
+
+WIN32_LIBS = -lkernel32 -luser32 -lgdi32 -ladvapi32 -lcomctl32 -lcomdlg32 -lshell32 -lole32 -static-libgcc -static-libstdc++
+
+INCLUDES = -Iphoenix
+
+all: $(TARGET)
+
+%.o: %.cpp $(HEADERS)
+	$(CXX) $(CXXFLAGS) $(INCLUDES) -std=gnu++0x -c -o $@ $<
+
+%.o: %.c $(HEADERS)
+	$(CC) $(CFLAGS) -std=gnu99 -c -o $@ $<
+
+phoenix/phoenix.o: phoenix/phoenix.cpp
+	$(CXX) $(CXXFLAGS) $(INCLUDES) -std=gnu++0x -DPHOENIX_WINDOWS $(QT_CFLAGS) -c -o $@ $<
+
+phoenix/phoenix-resource.o: phoenix/windows/phoenix.rc
+	$(WINDRES) $< $@
+
+
+$(TARGET): $(OBJ)
+	$(CXX) -o $@ $(OBJ) $(WIN32_LIBS)
+
+clean:
+	rm -f *.o
+	rm -f $(TARGET)
+	rm -f phoenix/*.o
+
+.PHONY: clean
