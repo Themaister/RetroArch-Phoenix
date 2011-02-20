@@ -20,13 +20,14 @@ using namespace nall;
 using namespace phoenix;
 
 
+
 class LogWindow : public ToggleWindow
 {
    public:
       LogWindow() : ToggleWindow("SSNES || Log window")
       {
          label.setText("SSNES output:");
-         layout.append(label, 0, 30);
+         layout.append(label, 0, WIDGET_HEIGHT);
          layout.append(box, 0, 0);
          box.setEditable(false);
          layout.setMargin(5);
@@ -92,17 +93,17 @@ class MainWindow : public Window
             server.setChecked();
             RadioBox::group(server, client);
 
-            hlayout[0].append(enable_label, 100, 30);
-            hlayout[0].append(enable, 20, 30, 30);
+            hlayout[0].append(enable_label, 100, WIDGET_HEIGHT);
+            hlayout[0].append(enable, 20, WIDGET_HEIGHT, 30);
             hlayout[0].append(server, 70, 20);
             hlayout[0].append(client, 70, 20);
 
-            hlayout[1].append(host_label, 80, 30, 20);
-            hlayout[1].append(host, 200, 30, 20);
-            hlayout[1].append(port_label, 80, 30, 20);
-            hlayout[1].append(port, 100, 30);
-            hlayout[2].append(frames_label, 80, 30, 20);
-            hlayout[2].append(frames, 60, 30);
+            hlayout[1].append(host_label, 80, WIDGET_HEIGHT, 20);
+            hlayout[1].append(host, 200, WIDGET_HEIGHT, 20);
+            hlayout[1].append(port_label, 80, WIDGET_HEIGHT, 20);
+            hlayout[1].append(port, 100, WIDGET_HEIGHT);
+            hlayout[2].append(frames_label, 80, WIDGET_HEIGHT, 20);
+            hlayout[2].append(frames, 60, WIDGET_HEIGHT);
          }
 
          HorizontalLayout hlayout[3];
@@ -140,9 +141,9 @@ class MainWindow : public Window
          {
             button.setText("Open ...");
 
-            hlayout.append(label, 100, 30);
-            hlayout.append(edit, 0, 30);
-            hlayout.append(button, 60, 30);
+            hlayout.append(label, 100, WIDGET_HEIGHT);
+            hlayout.append(edit, 0, WIDGET_HEIGHT);
+            hlayout.append(button, 60, WIDGET_HEIGHT);
 
             button.onTick = [this]() {
                string start_path;
@@ -446,10 +447,11 @@ class MainWindow : public Window
          CreatePipe(&reader, &writer, &saAttr, 0);
          SetHandleInformation(reader, HANDLE_FLAG_INHERIT, 0);
 
-         string cmdline = {path, " "};
+         string cmdline = {"\"", path, "\" "};
          cmd++;
-         while (*cmd) cmdline.append({*cmd, " "});
-         print({cmdline, "\n"});
+         while (*cmd) { cmdline.append("\""); cmdline.append(*cmd++); cmdline.append("\" "); }
+         print(cmdline);
+         print("\n");
 
          PROCESS_INFORMATION piProcInfo;
          STARTUPINFO siStartInfo;
@@ -463,8 +465,11 @@ class MainWindow : public Window
          siStartInfo.hStdInput = NULL;
          siStartInfo.dwFlags |= STARTF_USESTDHANDLES;
 
-         bSuccess = CreateProcess(NULL,
-               cmdline,
+         WCHAR wcmdline[1024] = {0};
+         MultiByteToWideChar(CP_UTF8, 0, cmdline, cmdline.length(), wcmdline, 1023);
+
+         bSuccess = CreateProcessW(NULL,
+               wcmdline,
                NULL,
                NULL,
                TRUE,
@@ -476,23 +481,28 @@ class MainWindow : public Window
 
          if (bSuccess)
          {
+            CloseHandle(writer);
+            writer = NULL;
             log_win.clear();
             char buf[1024];
             DWORD dwRead;
-            while (ReadFile(reader, buf, sizeof(buf) - 1, &dwRead, NULL))
+            while (ReadFile(reader, buf, sizeof(buf) - 1, &dwRead, NULL) == TRUE && dwRead > 0)
             {
+               print("Read some data from SSNES!\n");
                buf[dwRead] = '\0';
                log_win.push(buf);
             }
-
+            setStatusText("SSNES returned successfully!");
          }
          else
          {
             setStatusText("Failed to start SSNES");
          }
 
-         CloseHandle(reader);
-         CloseHandle(writer);
+         if (reader)
+            CloseHandle(reader);
+         if (writer)
+            CloseHandle(writer);
 
          setVisible();
       }

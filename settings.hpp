@@ -6,6 +6,12 @@
 #include <utility>
 #include "util.hpp"
 
+#ifdef _WIN32
+#define WIDGET_HEIGHT 24
+#else
+#define WIDGET_HEIGHT 25
+#endif
+
 using namespace phoenix;
 using namespace nall;
 
@@ -27,7 +33,7 @@ class SettingLayout : public util::SharedAbstract<SettingLayout>
       SettingLayout(ConfigFile &_conf, const string& _key, const string& _label) : conf(_conf), key(_key) 
       {
          label.setText(_label);
-         hlayout.append(label, 225, 30);
+         hlayout.append(label, 225, WIDGET_HEIGHT);
       }
       HorizontalLayout& layout() { return hlayout; }
 
@@ -46,7 +52,7 @@ class StringSetting : public SettingLayout, public util::Shared<StringSetting>
       StringSetting(ConfigFile &_conf, const string& _key, const string& label, const string& _default) : SettingLayout(_conf, _key, label), m_default(_default)
       {
          edit.onChange = [this]() { conf.set(key, edit.text()); };
-         hlayout.append(edit, 0, 30); 
+         hlayout.append(edit, 0, WIDGET_HEIGHT); 
       }
       
       void update()
@@ -68,8 +74,8 @@ class PathSetting : public SettingLayout, public util::Shared<PathSetting>
       {
          button.setText("Open ...");
          edit.onChange = [this]() { conf.set(key, edit.text()); };
-         hlayout.append(edit, 0, 30); 
-         hlayout.append(button, 60, 30);
+         hlayout.append(edit, 0, WIDGET_HEIGHT); 
+         hlayout.append(button, 60, WIDGET_HEIGHT);
 
          button.onTick = [this]() {
             string start_path;
@@ -105,7 +111,7 @@ class BoolSetting : public SettingLayout, public util::Shared<BoolSetting>
       BoolSetting(ConfigFile &_conf, const string& _key, const string& label, bool _default) : SettingLayout(_conf, _key, label), m_default(_default)
       {
          check.onTick = [this]() { conf.set(key, check.checked()); };
-         hlayout.append(check, 20, 30);
+         hlayout.append(check, 20, WIDGET_HEIGHT);
       }
 
       void update()
@@ -126,7 +132,7 @@ class IntSetting : public SettingLayout, public util::Shared<IntSetting>
       IntSetting(ConfigFile &_conf, const string& _key, const string& label, int _default) : SettingLayout(_conf, _key, label), m_default(_default)
       {
          edit.onChange = [this]() { conf.set(key, (int)decimal(edit.text())); };
-         hlayout.append(edit, 0, 30);
+         hlayout.append(edit, 0, WIDGET_HEIGHT);
       }
 
       void update()
@@ -148,7 +154,7 @@ class DoubleSetting : public SettingLayout, public util::Shared<DoubleSetting>
          : SettingLayout(_conf, _key, label), m_default(_default)
       {
          edit.onChange = [this]() { conf.set(key, (double)fp(edit.text())); };
-         hlayout.append(edit, 0, 30);
+         hlayout.append(edit, 0, WIDGET_HEIGHT);
       }
 
       void update()
@@ -185,7 +191,7 @@ class ComboSetting : public SettingLayout, public util::Shared<ComboSetting>
             conf.set(key, list[box.selection()].internal_name);
          };
 
-         hlayout.append(box, 200, 30);
+         hlayout.append(box, 200, WIDGET_HEIGHT);
       }
 
       void update()
