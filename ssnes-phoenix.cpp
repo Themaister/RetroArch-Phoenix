@@ -322,8 +322,8 @@ class MainWindow : public Window
 
          vec_cmd.append(NULL);
 
-         foreach(i, vec_cmd) if (i) print(i, "\n");
-         print("\n");
+         //foreach(i, vec_cmd) if (i) print(i, "\n");
+         //print("\n");
 
          configs.gui.write();
          configs.cli.write();
