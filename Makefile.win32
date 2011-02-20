@@ -2,7 +2,7 @@ TARGET = ssnes-phoenix.exe
 
 CXXFILES = $(wildcard *.cpp)
 CFILES = $(wildcard *.c)
-OBJ = phoenix/phoenix.o $(CXXFILES:.cpp=.o) $(CFILES:.c=.o) phoenix/phoenix-resource.o
+OBJ = phoenix/phoenix.o $(CXXFILES:.cpp=.o) $(CFILES:.c=.o) ssnes-resource.o
 HEADERS = $(wildcard *.h) $(wildcard *.hpp)
 
 CC = gcc
@@ -24,7 +24,7 @@ all: $(TARGET)
 phoenix/phoenix.o: phoenix/phoenix.cpp
 	$(CXX) $(CXXFLAGS) $(INCLUDES) -s -std=gnu++0x -DPHOENIX_WINDOWS $(QT_CFLAGS) -c -o $@ $<
 
-phoenix/phoenix-resource.o: phoenix/windows/phoenix.rc
+%.o: %.rc
 	$(WINDRES) $< $@
 
 
