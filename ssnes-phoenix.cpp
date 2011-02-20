@@ -395,6 +395,7 @@ class MainWindow : public Window
 
          if (fork())
          {
+            close(fds[1]);
             log_win.clear();
             char line[1024] = {0};
             ssize_t ret;
@@ -413,15 +414,13 @@ class MainWindow : public Window
                setStatusText({"Failed to open ROM!"});
             else
                setStatusText("SSNES exited successfully.");
+            close(fds[0]);
          }
          else
          {
             if (execvp(path, const_cast<char**>(cmd)) < 0)
                exit(255);
          }
-
-         close(fds[0]);
-         close(fds[1]);
 
          setVisible();
       }
