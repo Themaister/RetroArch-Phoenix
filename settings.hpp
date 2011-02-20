@@ -234,35 +234,56 @@ class ComboSetting : public SettingLayout, public util::Shared<ComboSetting>
 class InputSetting : public SettingLayout, public util::Shared<InputSetting>
 {
    public:
-      InputSetting(ConfigFile &_conf, const linear_vector<linear_vector<Internal::input_selection>>& _list)
-         : SettingLayout(_conf, "", "Binds:", false), list(_list)
+      InputSetting(ConfigFile &_conf, const linear_vector<linear_vector<Internal::input_selection>>& _list, const function<void (const string&)> _msg_cb)
+         : SettingLayout(_conf, "", "Binds:", false), list(_list), msg_cb(_msg_cb)
       {
          clear.setText("Clear");
          player.append("Player 1");
          player.append("Player 2");
          player.append("Misc");
-         hbox.append(player, 80, WIDGET_HEIGHT);
+         hbox.append(player, 80, WIDGET_HEIGHT, 10);
          hbox.append(clear, 60, WIDGET_HEIGHT);
 
+         player.onChange = [this]() { update(); };
+
+         list_view.onActivate = [this]() { update_bind(); };
+
+         press_label.setText(" ... ");
+         vbox.append(label, 120, WIDGET_HEIGHT, 10);
          vbox.append(hbox, 0, 0);
          vbox.append(list_view, 0, 0);
-         hlayout.append(vbox, 0, 200);
+         hlayout.append(vbox, 0, 400);
       }
 
       void update()
       {
+         list_view.setHeaderText("Bind", "Current");
+         list_view.setHeaderVisible();
+
+         list_view.reset();
+         foreach(i, list[player.selection()])
+         {
+            list_view.append(i.base, i.display);
+         }
       }
 
    private:
+      function<void (const string&)> msg_cb;
       HorizontalLayout hbox;
       VerticalLayout vbox;
+      Label press_label;
       ListView list_view;
       ComboBox player;
       Button clear;
-      const linear_vector<linear_vector<Internal::input_selection>>& list;
+      linear_vector<linear_vector<Internal::input_selection>> list;
 
       void update_bind()
       {
+         const string& opt = list[player.selection()][list_view.selection()()].config_base;
+         msg_cb(opt);
+         while (OS::pending()) OS::process();
+         poll();
+         msg_cb("");
       }
 
       unsigned poll()
@@ -363,7 +384,9 @@ namespace Internal
    };
 
    static const linear_vector<linear_vector<input_selection>> binds = {
-      { { "input_rewind" } }
+      { { "input_player1_start", "Start", ":D" } },
+      { { "input_player2_select", "Select", ":v" } },
+      { { "input_rewind", "Rewind", ":p" } }
    };
 }
 
@@ -402,16 +425,19 @@ class Input : public ToggleWindow
    public:
       Input(ConfigFile &_conf) : ToggleWindow("SSNES || Input settings")
       {
-         setGeometry({256, 256, 400, 400});
+         setGeometry({256, 256, 400, 500});
          widgets.append(DoubleSetting::shared(_conf, "input_axis_threshold", "Input axis threshold (0.0 to 1.0)", 0.5));
          widgets.append(BoolSetting::shared(_conf, "netplay_client_swap_input", "Use Player 1 binds as client", false));
-         widgets.append(InputSetting::shared(_conf, Internal::binds));
+         widgets.append(InputSetting::shared(_conf, Internal::binds, 
+                  [this](const string& msg) { this->setStatusText(msg); }));
 
          foreach(i, widgets) { vbox.append(i->layout(), 0, 0, 3); }
          vbox.setMargin(5);
          append(vbox);
 
          init_input();
+
+         setStatusVisible();
       }
 
       void update() { foreach(i, widgets) i->update(); }
