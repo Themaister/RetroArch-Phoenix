@@ -318,8 +318,15 @@ class Audio : public ToggleWindow
 class Input : public ToggleWindow
 {
    public:
-      Input() : ToggleWindow("SSNES || Input settings")
+      Input(ConfigFile &_conf) : ToggleWindow("SSNES || Input settings")
       {
+         setGeometry({256, 256, 300, 200});
+         widgets.append(DoubleSetting::shared(_conf, "input_axis_threshold", "Input axis threshold (0.0 to 1.0)", 0.5));
+         widgets.append(BoolSetting::shared(_conf, "netplay_client_swap_input", "Use Player 1 binds as client", false));
+
+         foreach(i, widgets) { vbox.append(i->layout(), 0, 0, 3); }
+         vbox.setMargin(5);
+         append(vbox);
       }
 
       void update() { foreach(i, widgets) i->update(); }

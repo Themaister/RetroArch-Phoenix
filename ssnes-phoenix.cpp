@@ -38,7 +38,7 @@ class LogWindow : public ToggleWindow
 class MainWindow : public Window
 {
    public:
-      MainWindow() : general(configs.cli), video(configs.cli), audio(configs.cli)
+      MainWindow() : general(configs.cli), video(configs.cli), audio(configs.cli), input(configs.cli)
       {
          setTitle("SSNES || Phoenix");
          //setBackgroundColor(64, 64, 64);
@@ -74,11 +74,13 @@ class MainWindow : public Window
          netplay() 
          {
             port.setText("55435");
+            frames.setText("0");
             enable_label.setText("Enable netplay:");
             server.setText("Server");
             client.setText("Client");
             host_label.setText("Host IP:");
             port_label.setText("TCP/UDP Port:");
+            frames_label.setText("Delay frames:");
             server.setChecked();
             RadioBox::group(server, client);
 
@@ -91,14 +93,17 @@ class MainWindow : public Window
             hlayout[1].append(host, 200, 30, 20);
             hlayout[1].append(port_label, 80, 30, 20);
             hlayout[1].append(port, 100, 30);
+            hlayout[2].append(frames_label, 80, 30, 20);
+            hlayout[2].append(frames, 60, 30);
          }
 
-         HorizontalLayout hlayout[2];
+         HorizontalLayout hlayout[3];
          RadioBox server, client;
 
-         Label port_label, host_label;
+         Label port_label, host_label, frames_label;
          TextEdit port;
          TextEdit host;
+         TextEdit frames;
          CheckBox enable;
          Label enable_label;
       } net;
@@ -108,22 +113,7 @@ class MainWindow : public Window
          ConfigFile gui, cli;
       } configs;
 
-      struct logger : public LogWindow
-      {
-         logger()
-         {
-            label.setText("Show log window:");
-            box.append(label, 100, 30);
-            box.append(check, 20, 30);
-            check.onTick = [this]() { if (check.checked()) this->show(); else this->hide(); };
-         }
-
-         HorizontalLayout box;
-         Label label;
-         CheckBox check;
-
-         HorizontalLayout& layout() { return box; }
-      } log_win;
+      LogWindow log_win;
 
       struct entry
       {
@@ -267,8 +257,8 @@ class MainWindow : public Window
          vbox.append(libsnes.layout(), 0, 0, 3);
          vbox.append(start_btn, 0, 0, 15);
          vbox.append(net.hlayout[0], 0, 0);
-         vbox.append(net.hlayout[1], 0, 0, 20);
-         vbox.append(log_win.layout(), 0, 0);
+         vbox.append(net.hlayout[1], 0, 0, 0);
+         vbox.append(net.hlayout[2], 0, 0, 20);
 
          start_btn.onTick = [this]() { start_ssnes(); };
       }
@@ -318,6 +308,10 @@ class MainWindow : public Window
             vec_cmd.append("--port");
             string port = net.port.text();
             vec_cmd.append(port);
+
+            vec_cmd.append("-F");
+            string frames = net.frames.text();
+            vec_cmd.append(frames);
          }
 
          vec_cmd.append(NULL);
@@ -391,6 +385,8 @@ class MainWindow : public Window
 
       struct
       {
+         MenuCheckItem log;
+         MenuSeparator sep;
          MenuItem quit;
       } file;
 
@@ -417,6 +413,7 @@ class MainWindow : public Window
          append(settings_menu);
          append(help_menu);
 
+         file.log.setText("Show log");
          file.quit.setText("Quit");
 
          settings.general.setText("General");
@@ -426,6 +423,8 @@ class MainWindow : public Window
 
          help.about.setText("About");
 
+         file_menu.append(file.log);
+         file_menu.append(file.sep);
          file_menu.append(file.quit);
          settings_menu.append(settings.general);
          settings_menu.append(settings.sep);
@@ -439,6 +438,7 @@ class MainWindow : public Window
 
       void init_menu_callbacks()
       {
+         file.log.onTick = [this]() { if (file.log.checked()) log_win.show(); else log_win.hide(); };
          file.quit.onTick = []() { OS::quit(); };
          help.about.onTick = []() { MessageWindow::information(Window::None, "SSNES/Phoenix\nHans-Kristian Arntzen (Themaister) (C) - 2011\nThis is free software released under GNU GPLv3\nPhoenix (C) byuu - 2011"); };
 
