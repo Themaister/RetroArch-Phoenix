@@ -1,0 +1,2 @@
+void pMenuSeparator::constructor() {
+}
