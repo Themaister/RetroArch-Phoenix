@@ -1,3 +1,4 @@
 *.o
 /ssnes-phoenix
 *.moc
+*.exe

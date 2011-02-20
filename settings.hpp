@@ -280,6 +280,7 @@ class Video : public ToggleWindow
 namespace Internal
 {
    static const linear_vector<combo_selection> audio_drivers = {
+#ifndef _WIN32
       {"alsa", "ALSA"},
       {"pulse", "PulseAudio"},
       {"oss", "Open Sound System"},
@@ -288,7 +289,10 @@ namespace Internal
       {"roar", "RoarAudio"},
       {"openal", "OpenAL"},
       {"sdl", "SDL"},
+#else
+      {"sdl", "SDL"},
       {"xaudio", "XAudio2"}
+#endif
    };
 }
 
