@@ -326,6 +326,9 @@ class MainWindow : public Window
          if (ssnes_path.length() == 0) ssnes_path = "ssnes";
          string rom_path = rom.getPath();
          string config_path = config.getPath();
+         string host;
+         string port;
+         string frames;
 
          vec_cmd.append("ssnes");
 
@@ -352,18 +355,18 @@ class MainWindow : public Window
             else
             {
                vec_cmd.append("-C");
-               string host = net.host.text();
+               host = net.host.text();
                vec_cmd.append(host);
             }
 
             vec_cmd.append("--port");
-            string port = net.port.text();
-            print(string({"Port:", port}));
+            port = net.port.text();
+            //print(string({"Port:", port}));
             vec_cmd.append(port);
 
             vec_cmd.append("-F");
-            string frames = net.frames.text();
-            print(string({"Frames:", frames}));
+            frames = net.frames.text();
+            //print(string({"Frames:", frames}));
             vec_cmd.append(frames);
          }
 
@@ -451,9 +454,16 @@ class MainWindow : public Window
 
          string cmdline = {"\"", path, "\" "};
          cmd++;
-         while (*cmd) { cmdline.append("\""); cmdline.append(*cmd++); cmdline.append("\" "); }
-         print(cmdline);
-         print("\n");
+         while (*cmd) 
+         { 
+            cmdline.append("\""); 
+            //print("Appending: ", *cmd, "\n"); 
+            cmdline.append(*cmd++); 
+            cmdline.append("\" "); 
+         }
+
+         //print(cmdline);
+         //print("\n");
 
          PROCESS_INFORMATION piProcInfo;
          STARTUPINFO siStartInfo;
