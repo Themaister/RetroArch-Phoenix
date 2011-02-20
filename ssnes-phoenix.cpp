@@ -3,6 +3,7 @@
 #include <unistd.h>
 #include <sys/types.h>
 #include <sys/wait.h>
+#include <sys/stat.h>
 #include "config_file.hpp"
 #include <utility>
 #include <functional>
@@ -170,29 +171,37 @@ class MainWindow : public Window
             static void dummy(const string&) {}
       } rom, config, ssnes, libsnes;
 
-      void init_config()
+#ifndef _WIN32
+      static string gui_config_path()
       {
-         string gui_path, cli_path;
-         string tmp;
+         string gui_path;
          const char *path = std::getenv("XDG_CONFIG_HOME");
          if (path)
          {
+            string dir = {path, "/ssnes"};
+            mkdir(dir, 0644);
+
             gui_path = path;
             gui_path.append("/ssnes/phoenix.cfg");
          }
          else
             gui_path = "/etc/ssnes_phoenix.cfg";
 
-         configs.gui = gui_path;
+         return gui_path;
+      }
+#else
+      static string gui_config_path()
+      {
+         return "lolol";
+      }
+#endif
 
-         if (configs.gui.get("ssnes_path", tmp)) ssnes.setPath(tmp);
-         ssnes.setConfig(configs.gui, "ssnes_path");
-         if (configs.gui.get("last_rom", tmp)) rom.setPath(tmp);
-         rom.setConfig(configs.gui, "last_rom");
-         if (configs.gui.get("config_path", tmp)) config.setPath(tmp);
-         config.setConfig(configs.gui, "config_path", {&MainWindow::reload_cli_config, this});
-         libsnes.setConfig(configs.cli, "libsnes_path");
-
+#ifndef _WIN32
+      string cli_config_path()
+      {
+         const char *path = std::getenv("XDG_CONFIG_HOME");
+         string cli_path;
+         string tmp;
          if (configs.gui.get("config_path", tmp))
          {
             cli_path = tmp;
@@ -207,6 +216,33 @@ class MainWindow : public Window
             else
                cli_path = "/etc/ssnes.cfg";
          }
+
+         return cli_path;
+      }
+#else
+      string cli_config_path()
+      {
+         return ":D:D:D";
+      }
+#endif
+
+      void init_config()
+      {
+         string cli_path;
+         string tmp;
+         string gui_path = gui_config_path();
+
+         configs.gui = ConfigFile(gui_path);
+
+         if (configs.gui.get("ssnes_path", tmp)) ssnes.setPath(tmp);
+         ssnes.setConfig(configs.gui, "ssnes_path");
+         if (configs.gui.get("last_rom", tmp)) rom.setPath(tmp);
+         rom.setConfig(configs.gui, "last_rom");
+         if (configs.gui.get("config_path", tmp)) config.setPath(tmp);
+         config.setConfig(configs.gui, "config_path", {&MainWindow::reload_cli_config, this});
+         libsnes.setConfig(configs.cli, "libsnes_path");
+
+         cli_path = cli_config_path();
          configs.cli = ConfigFile(cli_path);
 
          init_cli_config();
