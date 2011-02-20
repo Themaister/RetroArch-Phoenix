@@ -1,9 +1,16 @@
 #include <phoenix.hpp>
 #include <cstdlib>
+
+#ifndef _WIN32
 #include <unistd.h>
 #include <sys/types.h>
 #include <sys/wait.h>
 #include <sys/stat.h>
+#else
+#define WIN32_LEAN_AND_MEAN
+#include <windows.h>
+#endif
+
 #include "config_file.hpp"
 #include <utility>
 #include <functional>
@@ -192,7 +199,11 @@ class MainWindow : public Window
 #else
       static string gui_config_path()
       {
-         return "lolol";
+         const char *path = std::getenv("APPDATA");
+         if (path)
+            return {path, "/phoenix.cfg"};
+         else
+            return "WTFDOWEDOTHERE?!";
       }
 #endif
 
@@ -222,7 +233,9 @@ class MainWindow : public Window
 #else
       string cli_config_path()
       {
-         return ":D:D:D";
+         string tmp;
+         configs.gui.get("config_path", tmp);
+         return tmp;
       }
 #endif
 
@@ -413,9 +426,75 @@ class MainWindow : public Window
       }
 #else
       // This will be hell on Earth :v
-      void fork_ssnes(const string& cmd)
+      void fork_ssnes(const string& path, const char **cmd)
       {
-         setStatusText("This isn't implemented yet. :(");
+         while (OS::pending())
+            OS::process();
+
+         setVisible(false);
+         general.hide();
+         video.hide();
+         audio.hide();
+         input.hide();
+
+         HANDLE reader, writer;
+         SECURITY_ATTRIBUTES saAttr;
+         ZeroMemory(&saAttr, sizeof(saAttr));
+         saAttr.nLength = sizeof(saAttr);
+         saAttr.bInheritHandle = TRUE;
+         saAttr.lpSecurityDescriptor = NULL;
+         CreatePipe(&reader, &writer, &saAttr, 0);
+         SetHandleInformation(reader, HANDLE_FLAG_INHERIT, 0);
+
+         string cmdline = {path, " "};
+         cmd++;
+         while (*cmd) cmdline.append({*cmd, " "});
+         print({cmdline, "\n"});
+
+         PROCESS_INFORMATION piProcInfo;
+         STARTUPINFO siStartInfo;
+         BOOL bSuccess = FALSE;
+         ZeroMemory(&piProcInfo, sizeof(piProcInfo));
+
+         ZeroMemory(&siStartInfo, sizeof(siStartInfo));
+         siStartInfo.cb = sizeof(siStartInfo);
+         siStartInfo.hStdError = writer;
+         siStartInfo.hStdOutput = NULL;
+         siStartInfo.hStdInput = NULL;
+         siStartInfo.dwFlags |= STARTF_USESTDHANDLES;
+
+         bSuccess = CreateProcess(NULL,
+               cmdline,
+               NULL,
+               NULL,
+               TRUE,
+               0,
+               NULL,
+               NULL,
+               &siStartInfo,
+               &piProcInfo);
+
+         if (bSuccess)
+         {
+            log_win.clear();
+            char buf[1024];
+            DWORD dwRead;
+            while (ReadFile(reader, buf, sizeof(buf) - 1, &dwRead, NULL))
+            {
+               buf[dwRead] = '\0';
+               log_win.push(buf);
+            }
+
+         }
+         else
+         {
+            setStatusText("Failed to start SSNES");
+         }
+
+         CloseHandle(reader);
+         CloseHandle(writer);
+
+         setVisible();
       }
 #endif
 
