@@ -18,7 +18,7 @@ all: $(TARGET)
 %.o: %.c $(HEADERS)
 	$(CC) $(CFLAGS) -std=gnu99 -c -o $@ $<
 
-phoenix/phoenix.o: phoenix/phoenix.cpp phoenix/qt/qt.moc $(HEADERS)
+phoenix/phoenix.o: phoenix/phoenix.cpp phoenix/qt/qt.moc
 	$(CXX) $(CXXFLAGS) $(INCLUDES) -std=gnu++0x -DPHOENIX_QT $(QT_CFLAGS) -c -o $@ $<
 
 %.moc: %.moc.hpp

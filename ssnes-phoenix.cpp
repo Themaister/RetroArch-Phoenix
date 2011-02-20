@@ -6,60 +6,17 @@
 #include "config_file.hpp"
 #include <utility>
 #include <functional>
+#include "settings.hpp"
 
 using namespace nall;
 using namespace phoenix;
 
-struct ToggleWindow : public Window
-{
-   ToggleWindow() { onClose = [this]() { this->hide(); }; }
-   void show() { setVisible(); }
-   void hide() { setVisible(false); }
-};
-
-class General : public ToggleWindow
-{
-   public:
-      General()
-      {
-         setTitle("SSNES || General settings");
-      }
-
-};
-
-class Video : public ToggleWindow
-{
-   public:
-      Video()
-      {
-      }
-
-};
-
-class Audio : public ToggleWindow
-{
-   public:
-      Audio()
-      {
-      }
-
-};
-
-class Input : public ToggleWindow
-{
-   public:
-      Input()
-      {
-      }
-
-};
 
 class LogWindow : public ToggleWindow
 {
    public:
-      LogWindow()
+      LogWindow() : ToggleWindow("SSNES || Log window")
       {
-         setTitle("SSNES || Log window");
          label.setText("SSNES output:");
          layout.append(label, 0, 30);
          layout.append(box, 0, 0);
@@ -81,7 +38,7 @@ class LogWindow : public ToggleWindow
 class MainWindow : public Window
 {
    public:
-      MainWindow()
+      MainWindow() : general(configs.cli), video(configs.cli)
       {
          setTitle("SSNES || Phoenix");
          //setBackgroundColor(64, 64, 64);
@@ -106,6 +63,12 @@ class MainWindow : public Window
       Menu file_menu, settings_menu, help_menu;
 
       Button start_btn;
+
+      General general;
+      Video video;
+      Audio audio;
+      Input input;
+
 
       struct
       {
@@ -236,6 +199,11 @@ class MainWindow : public Window
       {
          string tmp;
          if (configs.cli.get("libsnes_path", tmp)) libsnes.setPath(tmp); else libsnes.setPath("");
+
+         general.update();
+         video.update();
+         audio.update();
+         input.update();
       }
 
       void init_main_frame()
@@ -316,6 +284,10 @@ class MainWindow : public Window
             OS::process();
 
          setVisible(false);
+         general.hide();
+         video.hide();
+         audio.hide();
+         input.hide();
 
          // Gotta love Unix :)
          int fds[2];
@@ -415,6 +387,11 @@ class MainWindow : public Window
       {
          file.quit.onTick = []() { OS::quit(); };
          help.about.onTick = []() { MessageWindow::information(Window::None, "SSNES/Phoenix\nHans-Kristian Arntzen (Themaister) (C) - 2011\nThis is free software released under GNU GPLv3\nPhoenix (C) byuu - 2011"); };
+
+         settings.general.onTick = [this]() { general.show(); };
+         settings.video.onTick = [this]() { video.show(); };
+         settings.audio.onTick = [this]() { audio.show(); };
+         settings.input.onTick = [this]() { input.show(); };
       }
 };
 
