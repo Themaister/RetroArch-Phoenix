@@ -144,7 +144,8 @@ class IntSetting : public SettingLayout, public util::Shared<IntSetting>
 class DoubleSetting : public SettingLayout, public util::Shared<DoubleSetting>
 {
    public:
-      DoubleSetting(ConfigFile &_conf, const string& _key, const string& label, double _default) : SettingLayout(_conf, _key, label), m_default(_default)
+      DoubleSetting(ConfigFile &_conf, const string& _key, const string& label, double _default) 
+         : SettingLayout(_conf, _key, label), m_default(_default)
       {
          edit.onChange = [this]() { conf.set(key, (double)fp(edit.text())); };
          hlayout.append(edit, 0, 30);
@@ -160,6 +161,55 @@ class DoubleSetting : public SettingLayout, public util::Shared<DoubleSetting>
    private:
       TextEdit edit;
       double m_default;
+};
+
+namespace Internal
+{
+   struct combo_selection
+   {
+      string internal_name;
+      string external_name;
+   };
+}
+
+class ComboSetting : public SettingLayout, public util::Shared<ComboSetting>
+{
+   public:
+      ComboSetting(ConfigFile &_conf, const string& _key, const string& label, const linear_vector<Internal::combo_selection>& _list, unsigned _default) 
+         : SettingLayout(_conf, _key, label), m_default(_default), list(_list)
+      {
+         foreach(i, list) box.append(i.external_name);
+         box.setSelection(m_default);
+
+         box.onChange = [this]() {
+            conf.set(key, list[box.selection()].internal_name);
+         };
+
+         hlayout.append(box, 120, 30);
+      }
+
+      void update()
+      {
+         string tmp;
+         conf.get(key, tmp);
+         unsigned index = m_default;
+         for (unsigned i = 0; i < list.size(); i++)
+         {
+            if (list[i].internal_name == tmp)
+            {
+               index = i;
+               break;
+            }
+         }
+
+         box.setSelection(index);
+         conf.set(key, list[box.selection()].internal_name);
+      }
+
+   private:
+      ComboBox box;
+      unsigned m_default;   
+      const linear_vector<Internal::combo_selection>& list;
 };
 
 class General : public ToggleWindow
@@ -220,11 +270,41 @@ class Video : public ToggleWindow
 
 };
 
+
+namespace Internal
+{
+   static const linear_vector<combo_selection> audio_drivers = {
+      {"alsa", "ALSA"},
+      {"pulse", "PulseAudio"},
+      {"oss", "Open Sound System"},
+      {"jack", "JACK Audio"},
+      {"rsound", "RSound"},
+      {"roar", "RoarAudio"},
+      {"openal", "OpenAL"},
+      {"sdl", "SDL"},
+      {"xaudio", "XAudio2"}
+   };
+}
+
 class Audio : public ToggleWindow
 {
    public:
-      Audio() : ToggleWindow("SSNES || Audio settings")
+      Audio(ConfigFile &_conf) : ToggleWindow("SSNES || Audio settings")
       {
+         setGeometry({256, 256, 400, 300});
+         widgets.append(BoolSetting::shared(_conf, "audio_enable", "Enable audio", true));
+         widgets.append(IntSetting::shared(_conf, "audio_out_rate", "Audio sample rate", 48000));
+         widgets.append(DoubleSetting::shared(_conf, "audio_in_rate", "Audio input rate", 31980.0));
+         widgets.append(DoubleSetting::shared(_conf, "audio_rate_step", "Audio rate step", 0.25));
+         widgets.append(ComboSetting::shared(_conf, "audio_driver", "Audio driver", Internal::audio_drivers, 0));
+         widgets.append(StringSetting::shared(_conf, "audio_device", "Audio device", ""));
+         widgets.append(BoolSetting::shared(_conf, "audio_sync", "Audio sync", true));
+         widgets.append(IntSetting::shared(_conf, "audio_latency", "Audio latency (ms)", 64));
+         //widgets.append(IntSetting::shared(_conf, "audio_src_quality", "libsamplerate quality (1 - worst, 5 - best)", 2));
+
+         foreach(i, widgets) { vbox.append(i->layout(), 0, 0, 3); }
+         vbox.setMargin(5);
+         append(vbox);
       }
 
       void update() { foreach(i, widgets) i->update(); }

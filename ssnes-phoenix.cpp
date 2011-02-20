@@ -38,7 +38,7 @@ class LogWindow : public ToggleWindow
 class MainWindow : public Window
 {
    public:
-      MainWindow() : general(configs.cli), video(configs.cli)
+      MainWindow() : general(configs.cli), video(configs.cli), audio(configs.cli)
       {
          setTitle("SSNES || Phoenix");
          //setBackgroundColor(64, 64, 64);
