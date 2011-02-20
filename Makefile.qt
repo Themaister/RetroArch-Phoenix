@@ -1,14 +1,18 @@
 TARGET = ssnes-phoenix
 
+RUBYOBJ = ruby/ruby.o
+RUBYDEFINES = -DINPUT_SDL
+RUBYLIBS = -lSDL -lX11
+
 CXXFILES = $(wildcard *.cpp)
 CFILES = $(wildcard *.c)
-OBJ = phoenix/phoenix.o $(CXXFILES:.cpp=.o) $(CFILES:.c=.o)
+OBJ = phoenix/phoenix.o $(CXXFILES:.cpp=.o) $(CFILES:.c=.o) $(RUBYOBJ)
 HEADERS = $(wildcard *.h) $(wildcard *.hpp)
 
 QT_CFLAGS = $(shell pkg-config --cflags QtCore QtGui)
 QT_LIBS = $(shell pkg-config --libs QtCore QtGui)
 
-INCLUDES = -Iphoenix
+INCLUDES = -Iphoenix -I.
 
 all: $(TARGET)
 
@@ -18,19 +22,23 @@ all: $(TARGET)
 %.o: %.c $(HEADERS)
 	$(CC) $(CFLAGS) -O3 -std=gnu99 -c -o $@ $<
 
-phoenix/phoenix.o: phoenix/phoenix.cpp phoenix/qt/qt.moc
-	$(CXX) $(CXXFLAGS) $(INCLUDES) -s -std=gnu++0x -DPHOENIX_QT $(QT_CFLAGS) -c -o $@ $<
+phoenix/phoenix.o: $(wildcard phoenix/**/*.cpp) $(wildcard phoenix/**/*.hpp)
+	$(CXX) $(CXXFLAGS) $(INCLUDES) -s -std=gnu++0x -DPHOENIX_QT $(QT_CFLAGS) -c -o $@ phoenix/phoenix.cpp
+
+ruby/ruby.o: $(wildcard ruby/**/*.hpp) $(wildcard ruby/**/*.cpp)
+	$(CXX) $(CXXFLAGS) $(INCLUDES) $(RUBYDEFINES) -O3 -std=gnu++0x -c -o $@ ruby/ruby.cpp
 
 %.moc: %.moc.hpp
 	moc -i -o $@ $<
 
 
 $(TARGET): $(OBJ)
-	$(CXX) -o $@ $(OBJ) $(QT_LIBS)
+	$(CXX) -o $@ $(OBJ) $(QT_LIBS) $(RUBYLIBS)
 
 clean:
 	rm -f *.o
 	rm -f $(TARGET)
 	rm -f phoenix/*.o
+	rm -f ruby/*.o
 
 .PHONY: clean

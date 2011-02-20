@@ -5,6 +5,7 @@
 #include <phoenix.hpp>
 #include <utility>
 #include "util.hpp"
+#include "ruby/ruby.hpp"
 
 #ifdef _WIN32
 #define WIDGET_HEIGHT 24
@@ -33,10 +34,11 @@ struct ToggleWindow : public Window
 class SettingLayout : public util::SharedAbstract<SettingLayout>
 {
    public:
-      SettingLayout(ConfigFile &_conf, const string& _key, const string& _label) : conf(_conf), key(_key) 
+      SettingLayout(ConfigFile &_conf, const string& _key, const string& _label, bool use_label = true) : conf(_conf), key(_key) 
       {
          label.setText(_label);
-         hlayout.append(label, 225, WIDGET_HEIGHT);
+         if (use_label)
+            hlayout.append(label, 225, WIDGET_HEIGHT);
       }
       HorizontalLayout& layout() { return hlayout; }
 
@@ -180,6 +182,13 @@ namespace Internal
       string internal_name;
       string external_name;
    };
+
+   struct input_selection
+   {
+      string config_base;
+      string base;
+      string display;
+   };
 }
 
 class ComboSetting : public SettingLayout, public util::Shared<ComboSetting>
@@ -220,6 +229,60 @@ class ComboSetting : public SettingLayout, public util::Shared<ComboSetting>
       ComboBox box;
       unsigned m_default;   
       const linear_vector<Internal::combo_selection>& list;
+};
+
+class InputSetting : public SettingLayout, public util::Shared<InputSetting>
+{
+   public:
+      InputSetting(ConfigFile &_conf, const linear_vector<linear_vector<Internal::input_selection>>& _list)
+         : SettingLayout(_conf, "", "Binds:", false), list(_list)
+      {
+         clear.setText("Clear");
+         player.append("Player 1");
+         player.append("Player 2");
+         player.append("Misc");
+         hbox.append(player, 80, WIDGET_HEIGHT);
+         hbox.append(clear, 60, WIDGET_HEIGHT);
+
+         vbox.append(hbox, 0, 0);
+         vbox.append(list_view, 0, 0);
+         hlayout.append(vbox, 0, 200);
+      }
+
+      void update()
+      {
+      }
+
+   private:
+      HorizontalLayout hbox;
+      VerticalLayout vbox;
+      ListView list_view;
+      ComboBox player;
+      Button clear;
+      const linear_vector<linear_vector<Internal::input_selection>>& list;
+
+      void update_bind()
+      {
+      }
+
+      unsigned poll()
+      {
+         int16_t old_data[Scancode::Limit] = {0};
+         int16_t new_data[Scancode::Limit] = {0};
+
+         ruby::input.poll(old_data);
+
+         for (;;)
+         {
+            usleep(10000);
+
+            ruby::input.poll(new_data);
+            for (int i = 0; i < Scancode::Limit; i++)
+               if (old_data[i] != new_data[i])
+                  return i;
+         }
+         //print("Diff in... ", diff, "\n");
+      }
 };
 
 class General : public ToggleWindow
@@ -298,6 +361,10 @@ namespace Internal
       {"xaudio", "XAudio2"}
 #endif
    };
+
+   static const linear_vector<linear_vector<input_selection>> binds = {
+      { { "input_rewind" } }
+   };
 }
 
 class Audio : public ToggleWindow
@@ -329,18 +396,22 @@ class Audio : public ToggleWindow
 
 };
 
+
 class Input : public ToggleWindow
 {
    public:
       Input(ConfigFile &_conf) : ToggleWindow("SSNES || Input settings")
       {
-         setGeometry({256, 256, 300, 200});
+         setGeometry({256, 256, 400, 400});
          widgets.append(DoubleSetting::shared(_conf, "input_axis_threshold", "Input axis threshold (0.0 to 1.0)", 0.5));
          widgets.append(BoolSetting::shared(_conf, "netplay_client_swap_input", "Use Player 1 binds as client", false));
+         widgets.append(InputSetting::shared(_conf, Internal::binds));
 
          foreach(i, widgets) { vbox.append(i->layout(), 0, 0, 3); }
          vbox.setMargin(5);
          append(vbox);
+
+         init_input();
       }
 
       void update() { foreach(i, widgets) i->update(); }
@@ -348,6 +419,12 @@ class Input : public ToggleWindow
    private:
       linear_vector<SettingLayout::APtr> widgets;
       VerticalLayout vbox;
+
+      void init_input()
+      {
+         ruby::input.driver("SDL");
+         ruby::input.init();
+      }
 };
 
 
