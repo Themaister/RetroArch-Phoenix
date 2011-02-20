@@ -42,7 +42,7 @@ class MainWindow : public Window
       {
          setTitle("SSNES || Phoenix");
          //setBackgroundColor(64, 64, 64);
-         setGeometry({128, 128, 600, 240});
+         setGeometry({128, 128, 600, 300});
 
          init_menu();
          onClose = []() { OS::quit(); };
@@ -69,6 +69,39 @@ class MainWindow : public Window
       Audio audio;
       Input input;
 
+      struct netplay
+      {
+         netplay() 
+         {
+            port.setText("55435");
+            enable_label.setText("Enable netplay:");
+            server.setText("Server");
+            client.setText("Client");
+            host_label.setText("Host IP:");
+            port_label.setText("TCP/UDP Port:");
+            server.setChecked();
+            RadioBox::group(server, client);
+
+            hlayout[0].append(enable_label, 100, 30);
+            hlayout[0].append(enable, 20, 30, 30);
+            hlayout[0].append(server, 70, 20);
+            hlayout[0].append(client, 70, 20);
+
+            hlayout[1].append(host_label, 80, 30, 20);
+            hlayout[1].append(host, 200, 30, 20);
+            hlayout[1].append(port_label, 80, 30, 20);
+            hlayout[1].append(port, 100, 30);
+         }
+
+         HorizontalLayout hlayout[2];
+         RadioBox server, client;
+
+         Label port_label, host_label;
+         TextEdit port;
+         TextEdit host;
+         CheckBox enable;
+         Label enable_label;
+      } net;
 
       struct
       {
@@ -233,6 +266,8 @@ class MainWindow : public Window
          vbox.append(ssnes.layout(), 0, 0, 3);
          vbox.append(libsnes.layout(), 0, 0, 3);
          vbox.append(start_btn, 0, 0, 15);
+         vbox.append(net.hlayout[0], 0, 0);
+         vbox.append(net.hlayout[1], 0, 0, 20);
          vbox.append(log_win.layout(), 0, 0);
 
          start_btn.onTick = [this]() { start_ssnes(); };
@@ -269,7 +304,26 @@ class MainWindow : public Window
 
          vec_cmd.append("-v");
 
+         if (net.enable.checked())
+         {
+            if (net.server.checked())
+               vec_cmd.append("-H");
+            else
+            {
+               vec_cmd.append("-C");
+               string host = net.host.text();
+               vec_cmd.append(host);
+            }
+
+            vec_cmd.append("--port");
+            string port = net.port.text();
+            vec_cmd.append(port);
+         }
+
          vec_cmd.append(NULL);
+
+         foreach(i, vec_cmd) if (i) print(i, "\n");
+         print("\n");
 
          configs.gui.write();
          configs.cli.write();

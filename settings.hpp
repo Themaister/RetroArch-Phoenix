@@ -185,7 +185,7 @@ class ComboSetting : public SettingLayout, public util::Shared<ComboSetting>
             conf.set(key, list[box.selection()].internal_name);
          };
 
-         hlayout.append(box, 120, 30);
+         hlayout.append(box, 200, 30);
       }
 
       void update()
@@ -291,7 +291,7 @@ class Audio : public ToggleWindow
    public:
       Audio(ConfigFile &_conf) : ToggleWindow("SSNES || Audio settings")
       {
-         setGeometry({256, 256, 400, 300});
+         setGeometry({256, 256, 450, 300});
          widgets.append(BoolSetting::shared(_conf, "audio_enable", "Enable audio", true));
          widgets.append(IntSetting::shared(_conf, "audio_out_rate", "Audio sample rate", 48000));
          widgets.append(DoubleSetting::shared(_conf, "audio_in_rate", "Audio input rate", 31980.0));
