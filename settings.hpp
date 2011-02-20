@@ -245,7 +245,18 @@ class InputSetting : public SettingLayout, public util::Shared<InputSetting>
          hbox.append(clear, 60, WIDGET_HEIGHT);
 
          player.onChange = [this]() { update(); };
+         clear.onTick = [this]() {
+            auto j = list_view.selection();
+            unsigned i = player.selection();
+            if (j)
+            {
+               list[i][j()].display = "None";
+               update_list();
+            }
+         };
 
+         list_view.setHeaderText("Bind", "Current");
+         list_view.setHeaderVisible();
          list_view.onActivate = [this]() { update_bind(); };
 
          press_label.setText(" ... ");
@@ -257,16 +268,11 @@ class InputSetting : public SettingLayout, public util::Shared<InputSetting>
 
       void update()
       {
-         list_view.setHeaderText("Bind", "Current");
-         list_view.setHeaderVisible();
-
-         list_view.reset();
-         foreach(i, list[player.selection()])
-         {
-            list_view.append(i.base, i.display);
-         }
+         update_from_config();
+         update_list();
       }
 
+      
    private:
       function<void (const string&)> msg_cb;
       HorizontalLayout hbox;
@@ -277,13 +283,29 @@ class InputSetting : public SettingLayout, public util::Shared<InputSetting>
       Button clear;
       linear_vector<linear_vector<Internal::input_selection>> list;
 
+      
+      void update_list()
+      {
+         list_view.reset();
+
+         foreach(i, list[player.selection()])
+         {
+            list_view.append(i.base, i.display);
+         }
+      }
+
       void update_bind()
       {
          const string& opt = list[player.selection()][list_view.selection()()].config_base;
-         msg_cb(opt);
+         msg_cb("Press something! :D");
+
          while (OS::pending()) OS::process();
-         poll();
+
+         unsigned i = poll();
          msg_cb("");
+
+         list[player.selection()][list_view.selection()()].display = Scancode::encode(i);
+         update_list();
       }
 
       unsigned poll()
@@ -303,6 +325,21 @@ class InputSetting : public SettingLayout, public util::Shared<InputSetting>
                   return i;
          }
          //print("Diff in... ", diff, "\n");
+      }
+
+      void update_from_config()
+      {
+         foreach(i, list)
+         {
+            foreach(j, i)
+            {
+               string tmp;
+               if (conf.get(j.config_base, tmp))
+                  j.display = tmp;
+               else
+                  j.display = "None";
+            }
+         }
       }
 };
 
