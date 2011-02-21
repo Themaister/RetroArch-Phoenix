@@ -264,7 +264,7 @@ class InputSetting : public SettingLayout, public util::Shared<InputSetting>
          hbox.append(player, 80, WIDGET_HEIGHT, 10);
          hbox.append(clear, 60, WIDGET_HEIGHT);
 
-         player.onChange = [this]() { update_list(); };
+         player.onChange = [this]() { this->update_list(); };
          clear.onTick = [this]() {
             auto j = list_view.selection();
             unsigned i = player.selection();
@@ -274,14 +274,13 @@ class InputSetting : public SettingLayout, public util::Shared<InputSetting>
                conf.set(list[i][j()].config_base, string(""));
                conf.set({list[i][j()].config_base, "_btn"}, string(""));
                conf.set({list[i][j()].config_base, "_axis"}, string(""));
-               update_list();
+               this->update_list();
             }
          };
 
-         // Hurr durr, funny hack
          list_view.setHeaderText("SSNES Bind", "Bind");
          list_view.setHeaderVisible();
-         list_view.onActivate = [this]() { update_bind(); };
+         list_view.onActivate = [this]() { this->update_bind(); };
 
          //vbox.append(label, 120, WIDGET_HEIGHT, 0);
          vbox.append(hbox, 0, 0);
@@ -551,48 +550,50 @@ namespace Internal
 #endif
    };
 
-   static const linear_vector<linear_vector<input_selection>> binds = {
-      { 
-         { "input_player1_a", "A (right)" },
-         { "input_player1_b", "B (down)" },
-         { "input_player1_y", "Y (left)" },
-         { "input_player1_x", "X (up)" },
-         { "input_player1_start", "Start" },
-         { "input_player1_select", "Select" },
-         { "input_player1_l", "L" },
-         { "input_player1_r", "R" },
-         { "input_player1_left", "D-pad Left" },
-         { "input_player1_right", "D-pad Right" },
-         { "input_player1_up", "D-pad Up" },
-         { "input_player1_down", "D-pad Down" },
-      },
-      { 
-         { "input_player2_a", "A (right)" },
-         { "input_player2_b", "B (down)" },
-         { "input_player2_y", "Y (left)" },
-         { "input_player2_x", "X (up)" },
-         { "input_player2_start", "Start" },
-         { "input_player2_select", "Select" },
-         { "input_player2_l", "L" },
-         { "input_player2_r", "R" },
-         { "input_player2_left", "D-pad Left" },
-         { "input_player2_right", "D-pad Right" },
-         { "input_player2_up", "D-pad Up" },
-         { "input_player2_down", "D-pad Down" },
-      },
-      { 
-         { "input_toggle_fullscreen", "Toggle fullscreen" },
-         { "input_state_slot_increase", "Increase state slot" },
-         { "input_state_slot_decrease", "Decrease state slot" },
-         { "input_toggle_fast_forward", "Toggle fast forward" },
-         { "input_exit_emulator", "Exit emulator" },
-         { "input_pause_toggle", "Pause toggle" },
-         { "input_movie_record_toggle", "Movie record toggle" },
-         { "input_rate_step_up", "Audio input rate step up" },
-         { "input_rate_step_down", "Audio input rate step down" },
-         { "input_rewind", "Rewind", ":p" } 
-      }
+   static const linear_vector<input_selection> player1 = {
+      { "input_player1_a", "A (right)", "" },
+      { "input_player1_b", "B (down)", "" },
+      { "input_player1_y", "Y (left)", "" },
+      { "input_player1_x", "X (up)", "" },
+      { "input_player1_start", "Start", "" },
+      { "input_player1_select", "Select", "" },
+      { "input_player1_l", "L", "" },
+      { "input_player1_r", "R", "" },
+      { "input_player1_left", "D-pad Left", "" },
+      { "input_player1_right", "D-pad Right", "" },
+      { "input_player1_up", "D-pad Up", "" },
+      { "input_player1_down", "D-pad Down", "" },
    };
+
+   static const linear_vector<input_selection> player2 = {
+      { "input_player2_a", "A (right)", "" },
+      { "input_player2_b", "B (down)", "" },
+      { "input_player2_y", "Y (left)", "" },
+      { "input_player2_x", "X (up)", "" },
+      { "input_player2_start", "Start", "" },
+      { "input_player2_select", "Select", "" },
+      { "input_player2_l", "L", "" },
+      { "input_player2_r", "R", "" },
+      { "input_player2_left", "D-pad Left", "" },
+      { "input_player2_right", "D-pad Right", "" },
+      { "input_player2_up", "D-pad Up", "" },
+      { "input_player2_down", "D-pad Down", "" },
+   };
+
+   static const linear_vector<input_selection> misc = {
+      { "input_toggle_fullscreen", "Toggle fullscreen", "" },
+      { "input_state_slot_increase", "Increase state slot", "" },
+      { "input_state_slot_decrease", "Decrease state slot", "" },
+      { "input_toggle_fast_forward", "Toggle fast forward", "" },
+      { "input_exit_emulator", "Exit emulator", "" },
+      { "input_pause_toggle", "Pause toggle", "" },
+      { "input_movie_record_toggle", "Movie record toggle", "" },
+      { "input_rate_step_up", "Audio input rate step up", "" },
+      { "input_rate_step_down", "Audio input rate step down", "" },
+      { "input_rewind", "Rewind", "" },
+   };
+
+   static const linear_vector<linear_vector<input_selection>> binds = { player1, player2, misc };
 }
 
 class Audio : public ToggleWindow

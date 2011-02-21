@@ -320,7 +320,7 @@ struct ListView : private nall::base_from_member<pListView&>, Widget {
   nall::optional<unsigned> selection();
   void setCheckable(bool checkable = true);
   void setChecked(unsigned row, bool checked = true);
-  template<typename... Args> void setHeaderText(const Args&... args) { setHeaderText_({ args... }); }
+  template<typename... Args> void setHeaderText(const Args&... args) { setHeaderText_(nall::lstring({args...})); }
   void setHeaderVisible(bool visible = true);
   void setSelection(unsigned row);
 
