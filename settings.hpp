@@ -264,7 +264,7 @@ class InputSetting : public SettingLayout, public util::Shared<InputSetting>
          hbox.append(player, 80, WIDGET_HEIGHT, 10);
          hbox.append(clear, 60, WIDGET_HEIGHT);
 
-         player.onChange = [this]() { update(); };
+         player.onChange = [this]() { update_list(); };
          clear.onTick = [this]() {
             auto j = list_view.selection();
             unsigned i = player.selection();
