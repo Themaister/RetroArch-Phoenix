@@ -309,6 +309,7 @@ class InputSetting : public SettingLayout, public util::Shared<InputSetting>
          Keyboard,
          JoyButton,
          JoyAxis,
+         JoyHat,
          None
       };
       
@@ -349,6 +350,13 @@ class InputSetting : public SettingLayout, public util::Shared<InputSetting>
                ext = " (button)";
                break;
 
+            case Type::JoyHat:
+               conf.set({elem.config_base, "_axis"}, string(""));
+               conf.set({elem.config_base, "_btn"}, option);
+               conf.set({elem.config_base, ""}, string(""));
+               ext = " (hat)";
+               break;
+
             case Type::Keyboard:
                conf.set({elem.config_base, "_axis"}, string(""));
                conf.set({elem.config_base, "_btn"}, string(""));
@@ -378,6 +386,7 @@ class InputSetting : public SettingLayout, public util::Shared<InputSetting>
 
          for (;;)
          {
+            // TODO: Find some better way to block ... xD
             usleep(10000);
 
             ruby::input.poll(new_data);
@@ -395,8 +404,10 @@ class InputSetting : public SettingLayout, public util::Shared<InputSetting>
 
                      type = Type::JoyAxis;
                   }
-                  else if (Joypad::isAnyButton(i) || Joypad::isAnyHat(i))
+                  else if (Joypad::isAnyButton(i))
                      type = Type::JoyButton;
+                  else if (Joypad::isAnyHat(i))
+                     type = Type::JoyHat;
                   else
                      type = Type::Keyboard;
 
@@ -420,7 +431,7 @@ class InputSetting : public SettingLayout, public util::Shared<InputSetting>
                   }
                   else if ((code = Joypad::hatDecode(i)) >= 0)
                   {
-                     string opt {"h", (unsigned)code};
+                     opt = {"h", (unsigned)code};
                      int16_t j = new_data[i];
                      if (j & Joypad::HatUp)
                         opt.append("up");
@@ -463,13 +474,11 @@ class InputSetting : public SettingLayout, public util::Shared<InputSetting>
 
       static string encode(unsigned i)
       {
-         string res;
-
          auto j = Keyboard::keyDecode(i);
          if (j >= 0)
-            res.append(Internal::keymap[j]);
-
-         return res;
+            return Internal::keymap[j];
+         else
+            return ":v";
       }
 };
 
@@ -581,11 +590,13 @@ namespace Internal
    };
 
    static const linear_vector<input_selection> misc = {
-      { "input_toggle_fullscreen", "Toggle fullscreen", "" },
+      { "input_save_state", "Save state", "" },
+      { "input_load_state", "Load state", "" },
       { "input_state_slot_increase", "Increase state slot", "" },
       { "input_state_slot_decrease", "Decrease state slot", "" },
       { "input_toggle_fast_forward", "Toggle fast forward", "" },
       { "input_exit_emulator", "Exit emulator", "" },
+      { "input_toggle_fullscreen", "Toggle fullscreen", "" },
       { "input_pause_toggle", "Pause toggle", "" },
       { "input_movie_record_toggle", "Movie record toggle", "" },
       { "input_rate_step_up", "Audio input rate step up", "" },

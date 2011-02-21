@@ -148,9 +148,29 @@ class MainWindow : public Window
 
             button.onTick = [this]() {
                string start_path;
-               const char *path = std::getenv("HOME");
-               if (path)
-                  start_path = path;
+               string path;
+               path = this->getPath();
+               
+               if (path.length() > 0)
+               {
+                  char buf[1024];
+                  nall::strlcpy(buf, path, sizeof(buf));
+                  char *delim = strrchr(buf, '/');
+                  if (!delim)
+                     delim = strrchr(buf, '\\');
+
+                  if (delim)
+                  {
+                     *delim = '\0';
+                     start_path = buf;
+                  }
+               }
+               else
+               {
+                  const char *path = std::getenv("HOME");
+                  if (path)
+                     start_path = path;
+               }
 
                string file = OS::fileLoad(Window::None, start_path, filter);
                if (file.length() > 0)
