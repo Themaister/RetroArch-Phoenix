@@ -1,8 +1,12 @@
 TARGET = ssnes-phoenix.exe
 
+RUBYOBJ = ruby/ruby.o
+RUBYDEFINES = -DINPUT_DIRECTINPUT
+RUBYLIBS = -ldinput8 -ldxguid
+
 CXXFILES = $(wildcard *.cpp)
 CFILES = $(wildcard *.c)
-OBJ = phoenix/phoenix.o $(CXXFILES:.cpp=.o) $(CFILES:.c=.o) ssnes-resource.o
+OBJ = phoenix/phoenix.o $(CXXFILES:.cpp=.o) $(CFILES:.c=.o) $(RUBYOBJ) ssnes-resource.o
 HEADERS = $(wildcard *.h) $(wildcard *.hpp)
 
 CC = gcc
@@ -11,7 +15,7 @@ WINDRES = windres
 
 WIN32_LIBS = -lkernel32 -luser32 -lgdi32 -ladvapi32 -lcomctl32 -lcomdlg32 -lshell32 -lole32 -static-libgcc -static-libstdc++ -mwindows
 
-INCLUDES = -Iphoenix
+INCLUDES = -Iphoenix -I.
 
 all: $(TARGET)
 
@@ -21,19 +25,23 @@ all: $(TARGET)
 %.o: %.c $(HEADERS)
 	$(CC) $(CFLAGS) -O3 -std=gnu99 -c -o $@ $<
 
-phoenix/phoenix.o: phoenix/phoenix.cpp
-	$(CXX) $(CXXFLAGS) $(INCLUDES) -s -std=gnu++0x -DPHOENIX_WINDOWS $(QT_CFLAGS) -c -o $@ $<
+phoenix/phoenix.o: $(wildcard phoenix/**/*.cpp) $(wildcard phoenix/**/*.hpp)
+	$(CXX) $(CXXFLAGS) $(INCLUDES) -s -std=gnu++0x -DPHOENIX_WINDOWS $(QT_CFLAGS) -c -o $@ phoenix/phoenix.cpp
+
+ruby/ruby.o: $(wildcard ruby/**/*.hpp) $(wildcard ruby/**/*.cpp)
+	$(CXX) $(CXXFLAGS) $(INCLUDES) $(RUBYDEFINES) -O3 -std=gnu++0x -c -o $@ ruby/ruby.cpp
 
 %.o: %.rc
 	$(WINDRES) $< $@
 
 
 $(TARGET): $(OBJ)
-	$(CXX) -o $@ $(OBJ) $(WIN32_LIBS)
+	$(CXX) -o $@ $(OBJ) $(WIN32_LIBS) $(RUBYLIBS)
 
 clean:
 	rm -f *.o
 	rm -f $(TARGET)
 	rm -f phoenix/*.o
+	rm -f ruby/*.o
 
 .PHONY: clean

@@ -653,7 +653,11 @@ class Input : public ToggleWindow
 
       void init_input()
       {
+#ifdef _WIN32
+         ruby::input.driver("DirectInput");
+#else
          ruby::input.driver("SDL");
+#endif
          ruby::input.init();
       }
 };
