@@ -9,6 +9,8 @@
 
 #ifdef _WIN32
 #define WIDGET_HEIGHT 24
+#elif defined(__APPLE__)
+#define WIDGET_HEIGHT 28
 #else
 #define WIDGET_HEIGHT 25
 #endif
@@ -80,7 +82,7 @@ class PathSetting : public SettingLayout, public util::Shared<PathSetting>
          button.setText("Open ...");
          edit.onChange = [this]() { conf.set(key, edit.text()); };
          hlayout.append(edit, 0, WIDGET_HEIGHT); 
-         hlayout.append(button, 60, WIDGET_HEIGHT);
+         hlayout.append(button, 100, WIDGET_HEIGHT);
 
          button.onTick = [this]() {
             string start_path;
@@ -137,7 +139,7 @@ class IntSetting : public SettingLayout, public util::Shared<IntSetting>
    public:
       IntSetting(ConfigFile &_conf, const string& _key, const string& label, int _default) : SettingLayout(_conf, _key, label), m_default(_default)
       {
-         edit.onChange = [this]() { conf.set(key, (int)decimal(edit.text())); };
+         edit.onChange = [this]() { conf.set(key, (int)nall::decimal(edit.text())); };
          hlayout.append(edit, 0, WIDGET_HEIGHT);
       }
 
@@ -261,7 +263,7 @@ class InputSetting : public SettingLayout, public util::Shared<InputSetting>
          player.append("Player 1");
          player.append("Player 2");
          player.append("Misc");
-         hbox.append(player, 80, WIDGET_HEIGHT, 10);
+         hbox.append(player, 120, WIDGET_HEIGHT, 10);
          hbox.append(clear, 60, WIDGET_HEIGHT);
 
          player.onChange = [this]() { this->update_list(); };

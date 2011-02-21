@@ -101,7 +101,7 @@ class MainWindow : public Window
 
             hlayout[1].append(host_label, 80, WIDGET_HEIGHT, 20);
             hlayout[1].append(host, 200, WIDGET_HEIGHT, 20);
-            hlayout[1].append(port_label, 80, WIDGET_HEIGHT, 20);
+            hlayout[1].append(port_label, 120, WIDGET_HEIGHT, 20);
             hlayout[1].append(port, 100, WIDGET_HEIGHT);
             hlayout[2].append(frames_label, 80, WIDGET_HEIGHT, 20);
             hlayout[2].append(frames, 60, WIDGET_HEIGHT);
@@ -142,9 +142,9 @@ class MainWindow : public Window
          {
             button.setText("Open ...");
 
-            hlayout.append(label, 100, WIDGET_HEIGHT);
+            hlayout.append(label, 150, WIDGET_HEIGHT);
             hlayout.append(edit, 0, WIDGET_HEIGHT);
-            hlayout.append(button, 60, WIDGET_HEIGHT);
+            hlayout.append(button, 100, WIDGET_HEIGHT);
 
             button.onTick = [this]() {
                string start_path;
@@ -334,7 +334,7 @@ class MainWindow : public Window
          vbox.append(config.layout(), 0, 0, 3);
          vbox.append(ssnes.layout(), 0, 0, 3);
          vbox.append(libsnes.layout(), 0, 0, 3);
-         vbox.append(start_btn, 0, 0, 15);
+         vbox.append(start_btn, 0, WIDGET_HEIGHT, 15);
          vbox.append(net.hlayout[0], 0, 0);
          vbox.append(net.hlayout[1], 0, 0, 0);
          vbox.append(net.hlayout[2], 0, 0, 20);

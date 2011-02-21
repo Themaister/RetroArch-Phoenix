@@ -13,6 +13,9 @@
 #elif defined(PHOENIX_QT)
   #include <QApplication>
   #include <QtGui>
+#elif defined(PHOENIX_QT_OSX)
+  #include <QtGui/QApplication>
+  #include <QtGui/QtGui>
 #elif defined(PHOENIX_REFERENCE)
 #else
   #error "phoenix: unrecognized target"

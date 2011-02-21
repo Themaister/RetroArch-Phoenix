@@ -1,3 +1,4 @@
+using namespace nall;
 namespace ruby {
 
 class pInputCarbon {

@@ -5,7 +5,7 @@
 
 #if defined(PHOENIX_WINDOWS)
   #include "../windows/windows.cpp"
-#elif defined(PHOENIX_QT)
+#elif defined(PHOENIX_QT) || defined(PHOENIX_QT_OSX)
   #include "../qt/qt.cpp"
 #elif defined(PHOENIX_REFERENCE)
   #include "../reference/reference.cpp"
