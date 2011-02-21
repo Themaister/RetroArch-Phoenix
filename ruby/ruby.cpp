@@ -1,9 +1,17 @@
 #include <ruby/ruby.hpp>
 
+// Need to work around some stupid stuff with OSX headers.
+#ifndef __APPLE__
+using namespace nall;
+#endif
+
 #undef mkdir
 #undef usleep
 #include <ruby/ruby_impl.cpp>
+
+#ifdef __APPLE__
 using namespace nall;
+#endif
 
 namespace ruby {
 
