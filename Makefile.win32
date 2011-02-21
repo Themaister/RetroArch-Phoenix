@@ -26,7 +26,7 @@ all: $(TARGET)
 	$(CC) $(CFLAGS) -O3 -std=gnu99 -c -o $@ $<
 
 phoenix/phoenix.o: $(wildcard phoenix/**/*.cpp) $(wildcard phoenix/**/*.hpp)
-	$(CXX) $(CXXFLAGS) $(INCLUDES) -s -std=gnu++0x -DPHOENIX_WINDOWS $(QT_CFLAGS) -c -o $@ phoenix/phoenix.cpp
+	$(CXX) $(CXXFLAGS) $(INCLUDES) -O3 -std=gnu++0x -DPHOENIX_WINDOWS $(QT_CFLAGS) -c -o $@ phoenix/phoenix.cpp
 
 ruby/ruby.o: $(wildcard ruby/**/*.hpp) $(wildcard ruby/**/*.cpp)
 	$(CXX) $(CXXFLAGS) $(INCLUDES) $(RUBYDEFINES) -O3 -std=gnu++0x -c -o $@ ruby/ruby.cpp
@@ -36,7 +36,7 @@ ruby/ruby.o: $(wildcard ruby/**/*.hpp) $(wildcard ruby/**/*.cpp)
 
 
 $(TARGET): $(OBJ)
-	$(CXX) -o $@ $(OBJ) $(WIN32_LIBS) $(RUBYLIBS)
+	$(CXX) -o $@ $(OBJ) $(WIN32_LIBS) $(RUBYLIBS) -s
 
 clean:
 	rm -f *.o

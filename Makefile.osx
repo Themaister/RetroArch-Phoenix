@@ -13,6 +13,9 @@ QT_LIBS = -framework QtCore -framework QtGui
 
 INCLUDES = -Iphoenix -I.
 
+CC = gcc-mp-4.5
+CXX = g++-mp-4.5
+
 all: $(TARGET)
 
 %.o: %.cpp $(HEADERS)
