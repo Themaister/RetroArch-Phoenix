@@ -251,6 +251,9 @@ class InputSetting : public SettingLayout, public util::Shared<InputSetting>
             if (j)
             {
                list[i][j()].display = "None";
+               conf.set(list[i][j()].config_base, string(""));
+               conf.set({list[i][j()].config_base, "_btn"}, string(""));
+               conf.set({list[i][j()].config_base, "_axis"}, string(""));
                update_list();
             }
          };
@@ -283,6 +286,13 @@ class InputSetting : public SettingLayout, public util::Shared<InputSetting>
       Button clear;
       linear_vector<linear_vector<Internal::input_selection>> list;
 
+      enum class Type
+      {
+         Keyboard,
+         JoyButton,
+         JoyAxis,
+         None
+      };
       
       void update_list()
       {
@@ -297,21 +307,53 @@ class InputSetting : public SettingLayout, public util::Shared<InputSetting>
       void update_bind()
       {
          const string& opt = list[player.selection()][list_view.selection()()].config_base;
-         msg_cb("Press something! :D");
+         msg_cb({"Activate for bind: ", opt});
 
          while (OS::pending()) OS::process();
 
-         unsigned i = poll();
-         msg_cb("");
+         auto& elem = list[player.selection()][list_view.selection()()];
+         string option, ext;
+         auto type = poll(option);
+         switch (type)
+         {
+            case Type::JoyAxis:
+               conf.set({elem.config_base, "_axis"}, option);
+               conf.set({elem.config_base, "_btn"}, string(""));
+               conf.set({elem.config_base, ""}, string(""));
+               ext = " (axis)";
+               break;
 
-         list[player.selection()][list_view.selection()()].display = Scancode::encode(i);
+            case Type::JoyButton:
+               conf.set({elem.config_base, "_axis"}, string(""));
+               conf.set({elem.config_base, "_btn"}, option);
+               conf.set({elem.config_base, ""}, string(""));
+               ext = " (button)";
+               break;
+
+            case Type::Keyboard:
+               conf.set({elem.config_base, "_axis"}, string(""));
+               conf.set({elem.config_base, "_btn"}, string(""));
+               conf.set({elem.config_base, ""}, option);
+               break;
+
+            default:
+               break;
+         }
+
+         elem.display = option;
+         if (ext.length() > 0)
+            elem.display.append(ext);
+
          update_list();
+         msg_cb("");
       }
 
-      unsigned poll()
+      Type poll(string& opt)
       {
+         auto type = Type::None;
          int16_t old_data[Scancode::Limit] = {0};
          int16_t new_data[Scancode::Limit] = {0};
+         opt = "";
 
          ruby::input.poll(old_data);
 
@@ -321,10 +363,64 @@ class InputSetting : public SettingLayout, public util::Shared<InputSetting>
 
             ruby::input.poll(new_data);
             for (int i = 0; i < Scancode::Limit; i++)
+            {
                if (old_data[i] != new_data[i])
-                  return i;
+               {
+                  if (Mouse::isAnyButton(i) || Mouse::isAnyAxis(i))
+                     continue;
+
+                  if (Joypad::isAnyAxis(i))
+                  {
+                     if (std::abs((int)old_data[i] - (int)new_data[i]) < 20000)
+                        continue;
+
+                     type = Type::JoyAxis;
+                  }
+                  else if (Joypad::isAnyButton(i) || Joypad::isAnyHat(i))
+                     type = Type::JoyButton;
+                  else
+                     type = Type::Keyboard;
+
+                  if ((Joypad::isAnyAxis(i) || Joypad::isAnyButton(i) || Joypad::isAnyHat(i)) 
+                        && player.selection() <= 1)
+                  {
+                     conf.set(string("input_player", 
+                           (unsigned)(player.selection() + 1), "_joypad_index"), 
+                           Joypad::numberDecode(i));
+                  }
+
+                  signed code = 0;
+                  if ((code = Joypad::buttonDecode(i)) >= 0)
+                     opt = string((unsigned)code);
+                  else if ((code = Joypad::axisDecode(i)) >= 0)
+                  {
+                     if (old_data[i] < new_data[i])
+                        opt = string("+", (unsigned)code);
+                     else
+                        opt = string("-", (unsigned)code);
+                  }
+                  else if ((code = Joypad::hatDecode(i)) >= 0)
+                  {
+                     string opt {"h", (unsigned)code};
+                     int16_t j = new_data[i];
+                     if (j & Joypad::HatUp)
+                        opt.append("up");
+                     else if (j & Joypad::HatDown)
+                        opt.append("down");
+                     else if (j & Joypad::HatRight)
+                        opt.append("right");
+                     else if (j & Joypad::HatLeft)
+                        opt.append("left");
+                  }
+                  else
+                  {
+                     opt = (unsigned)i;
+                  }
+
+                  return type;
+               }
+            }
          }
-         //print("Diff in... ", diff, "\n");
       }
 
       void update_from_config()
@@ -336,6 +432,10 @@ class InputSetting : public SettingLayout, public util::Shared<InputSetting>
                string tmp;
                if (conf.get(j.config_base, tmp))
                   j.display = tmp;
+               else if (conf.get({j.config_base, "_btn"}, tmp))
+                  j.display = {tmp, " (button)"};
+               else if (conf.get({j.config_base, "_axis"}, tmp))
+                  j.display = {tmp, " (axis)"};
                else
                   j.display = "None";
             }
