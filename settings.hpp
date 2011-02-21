@@ -159,7 +159,7 @@ class DoubleSetting : public SettingLayout, public util::Shared<DoubleSetting>
       DoubleSetting(ConfigFile &_conf, const string& _key, const string& label, double _default) 
          : SettingLayout(_conf, _key, label), m_default(_default)
       {
-         edit.onChange = [this]() { conf.set(key, (double)fp(edit.text())); };
+         edit.onChange = [this]() { conf.set(key, edit.text()); };
          hlayout.append(edit, 0, WIDGET_HEIGHT);
       }
 
