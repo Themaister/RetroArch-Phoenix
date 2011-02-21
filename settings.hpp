@@ -278,13 +278,14 @@ class InputSetting : public SettingLayout, public util::Shared<InputSetting>
             }
          };
 
-         list_view.setHeaderText("Bind", "Current");
+         // Hurr durr, funny hack
+         list_view.setHeaderText("SSNES Bind", "Bind");
          list_view.setHeaderVisible();
          list_view.onActivate = [this]() { update_bind(); };
 
          //vbox.append(label, 120, WIDGET_HEIGHT, 0);
          vbox.append(hbox, 0, 0);
-         vbox.append(list_view, 0, 0);
+         vbox.append(list_view, 0, 300);
          hlayout.append(vbox, 0, 400);
       }
 
@@ -320,6 +321,7 @@ class InputSetting : public SettingLayout, public util::Shared<InputSetting>
          {
             list_view.append(i.base, i.display);
          }
+         list_view.autosizeColumns();
       }
 
       void update_bind()
@@ -628,7 +630,7 @@ class Input : public ToggleWindow
    public:
       Input(ConfigFile &_conf) : ToggleWindow("SSNES || Input settings")
       {
-         setGeometry({256, 256, 400, 500});
+         setGeometry({256, 256, 400, 400});
          widgets.append(DoubleSetting::shared(_conf, "input_axis_threshold", "Input axis threshold (0.0 to 1.0)", 0.5));
          widgets.append(BoolSetting::shared(_conf, "netplay_client_swap_input", "Use Player 1 binds as client", false));
          widgets.append(InputSetting::shared(_conf, Internal::binds, 
