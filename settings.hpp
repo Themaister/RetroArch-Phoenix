@@ -231,6 +231,26 @@ class ComboSetting : public SettingLayout, public util::Shared<ComboSetting>
       const linear_vector<Internal::combo_selection>& list;
 };
 
+namespace Internal
+{
+   static const char keymap[][64] = {
+      "escape", "f1", "f2", "f3", "f4", "f5", "f6", "f7", "f8", "f9", "f10", "f11", "f12",
+      "print_screen", "scroll_lock", "pause", "tilde",
+      "num1", "num2", "num3", "num4", "num5", "num6", "num7", "num8", "num9", "num0",
+      "dash", "equal", "backspace",
+      "insert", "del", "home", "end", "pageup", "pagedown",
+      "a", "b", "c", "d", "e", "f", "g", "h", "i", "j", "k", "l", "m",
+      "n", "o", "p", "q", "r", "s", "t", "u", "v", "w", "x", "y", "z",
+      "leftbracket", "rightbracket", "backslash", "semicolon", "apostrophe", "comma", "period", "slash",
+      "keypad1", "keypad2", "keypad3", "keypad4", "keypad5", "keypad6", "keypad7", "keypad8", "keypad9", "keypad0",
+      "point", "enter", "add", "subtract", "multiply", "divide",
+      "numlock", "capslock",
+      "up", "down", "left", "right",
+      "tab", "enter", "space", "menu",
+      "shift", "ctrl", "alt", "super",
+   };
+}
+
 class InputSetting : public SettingLayout, public util::Shared<InputSetting>
 {
    public:
@@ -262,8 +282,7 @@ class InputSetting : public SettingLayout, public util::Shared<InputSetting>
          list_view.setHeaderVisible();
          list_view.onActivate = [this]() { update_bind(); };
 
-         press_label.setText(" ... ");
-         vbox.append(label, 120, WIDGET_HEIGHT, 10);
+         //vbox.append(label, 120, WIDGET_HEIGHT, 0);
          vbox.append(hbox, 0, 0);
          vbox.append(list_view, 0, 0);
          hlayout.append(vbox, 0, 400);
@@ -280,7 +299,6 @@ class InputSetting : public SettingLayout, public util::Shared<InputSetting>
       function<void (const string&)> msg_cb;
       HorizontalLayout hbox;
       VerticalLayout vbox;
-      Label press_label;
       ListView list_view;
       ComboBox player;
       Button clear;
@@ -414,7 +432,7 @@ class InputSetting : public SettingLayout, public util::Shared<InputSetting>
                   }
                   else
                   {
-                     opt = (unsigned)i;
+                     opt = encode(i);
                   }
 
                   return type;
@@ -440,6 +458,17 @@ class InputSetting : public SettingLayout, public util::Shared<InputSetting>
                   j.display = "None";
             }
          }
+      }
+
+      static string encode(unsigned i)
+      {
+         string res;
+
+         auto j = Keyboard::keyDecode(i);
+         if (j >= 0)
+            res.append(Internal::keymap[j]);
+
+         return res;
       }
 };
 
@@ -521,9 +550,46 @@ namespace Internal
    };
 
    static const linear_vector<linear_vector<input_selection>> binds = {
-      { { "input_player1_start", "Start", ":D" } },
-      { { "input_player2_select", "Select", ":v" } },
-      { { "input_rewind", "Rewind", ":p" } }
+      { 
+         { "input_player1_a", "A (right)" },
+         { "input_player1_b", "B (down)" },
+         { "input_player1_y", "Y (left)" },
+         { "input_player1_x", "X (up)" },
+         { "input_player1_start", "Start" },
+         { "input_player1_select", "Select" },
+         { "input_player1_l", "L" },
+         { "input_player1_r", "R" },
+         { "input_player1_left", "D-pad Left" },
+         { "input_player1_right", "D-pad Right" },
+         { "input_player1_up", "D-pad Up" },
+         { "input_player1_down", "D-pad Down" },
+      },
+      { 
+         { "input_player2_a", "A (right)" },
+         { "input_player2_b", "B (down)" },
+         { "input_player2_y", "Y (left)" },
+         { "input_player2_x", "X (up)" },
+         { "input_player2_start", "Start" },
+         { "input_player2_select", "Select" },
+         { "input_player2_l", "L" },
+         { "input_player2_r", "R" },
+         { "input_player2_left", "D-pad Left" },
+         { "input_player2_right", "D-pad Right" },
+         { "input_player2_up", "D-pad Up" },
+         { "input_player2_down", "D-pad Down" },
+      },
+      { 
+         { "input_toggle_fullscreen", "Toggle fullscreen" },
+         { "input_state_slot_increase", "Increase state slot" },
+         { "input_state_slot_decrease", "Decrease state slot" },
+         { "input_toggle_fast_forward", "Toggle fast forward" },
+         { "input_exit_emulator", "Exit emulator" },
+         { "input_pause_toggle", "Pause toggle" },
+         { "input_movie_record_toggle", "Movie record toggle" },
+         { "input_rate_step_up", "Audio input rate step up" },
+         { "input_rate_step_down", "Audio input rate step down" },
+         { "input_rewind", "Rewind", ":p" } 
+      }
    };
 }
 
