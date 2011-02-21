@@ -236,8 +236,16 @@ class MainWindow : public Window
       string cli_config_path()
       {
          string tmp;
-         configs.gui.get("config_path", tmp);
-         return tmp;
+         if (configs.gui.get("config_path", tmp))
+            return tmp;
+         else
+         {
+            const char *path = std::getenv("APPDATA");
+            if (path)
+               return {path, "/ssnes.cfg"};
+            else
+               return "OMGWTFDOWEDO?!";
+         }
       }
 #endif
 
