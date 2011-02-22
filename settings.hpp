@@ -549,6 +549,7 @@ namespace Internal
 #ifdef _WIN32
       {"sdl", "SDL"},
       {"xaudio", "XAudio2"},
+      {"rsound", "RSound"},
 #elif defined(__APPLE__)
       {"openal", "OpenAL"},
       {"sdl", "SDL"},
@@ -561,7 +562,6 @@ namespace Internal
       {"roar", "RoarAudio"},
       {"openal", "OpenAL"},
       {"sdl", "SDL"},
-
 #endif
    };
 
