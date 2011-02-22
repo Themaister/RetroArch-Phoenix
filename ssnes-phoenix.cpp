@@ -200,25 +200,8 @@ class MainWindow : public Window
             static void dummy(const string&) {}
       } rom, config, ssnes, libsnes;
 
-#ifndef _WIN32
-      static string gui_config_path()
-      {
-         string gui_path;
-         const char *path = std::getenv("XDG_CONFIG_HOME");
-         if (path)
-         {
-            string dir = {path, "/ssnes"};
-            mkdir(dir, 0644);
 
-            gui_path = path;
-            gui_path.append("/ssnes/phoenix.cfg");
-         }
-         else
-            gui_path = "/etc/ssnes_phoenix.cfg";
-
-         return gui_path;
-      }
-#else
+#ifdef _WIN32
       static string gui_config_path()
       {
          const char *path = std::getenv("APPDATA");
@@ -227,9 +210,81 @@ class MainWindow : public Window
          else
             return "WTFDOWEDOTHERE?!";
       }
-#endif
 
-#ifndef _WIN32
+      string cli_config_path()
+      {
+         string tmp;
+         if (configs.gui.get("config_path", tmp))
+            return tmp;
+         else
+         {
+            const char *path = std::getenv("APPDATA");
+            if (path)
+               return {path, "/ssnes.cfg"};
+            else
+               return "OMGWTFDOWEDO?!";
+         }
+      }
+#elif defined(__APPLE__)
+      static string gui_config_path()
+      {
+         string gui_path;
+         const char *home = std::getenv("HOME");
+         if (home)
+         {
+            gui_path = home;
+            gui_path.append("/.ssnes_phoenix.cfg");
+         }
+         else
+            gui_path = "/etc/ssnes_phoenix.cfg";
+
+         return gui_path;
+      }
+
+      string cli_config_path()
+      {
+         const char *path = std::getenv("HOME");
+         string cli_path;
+         string tmp;
+         if (configs.gui.get("config_path", tmp))
+            cli_path = tmp;
+         else
+         {
+            if (path)
+            {
+               cli_path = path;
+               cli_path.append("/.ssnes.cfg");
+            }
+            else
+               cli_path = "/etc/ssnes.cfg";
+         }
+         return cli_path;
+      }
+#else
+      static string gui_config_path()
+      {
+         string gui_path;
+         const char *path = std::getenv("XDG_CONFIG_HOME");
+         const char *home_path = std::getenv("HOME");
+         if (path)
+         {
+            string dir = {path, "/ssnes"};
+            mkdir(dir, 0644);
+
+            gui_path = path;
+            gui_path.append("/ssnes/phoenix.cfg");
+         }
+         else if (home_path)
+         {
+            gui_path = home_path;
+            gui_path.append("/.ssnes_phoenix.cfg");
+         }
+         else
+            gui_path = "/etc/ssnes_phoenix.cfg";
+
+         return gui_path;
+      }
+
       string cli_config_path()
       {
          const char *path = std::getenv("XDG_CONFIG_HOME");
@@ -251,21 +306,6 @@ class MainWindow : public Window
          }
 
          return cli_path;
-      }
-#else
-      string cli_config_path()
-      {
-         string tmp;
-         if (configs.gui.get("config_path", tmp))
-            return tmp;
-         else
-         {
-            const char *path = std::getenv("APPDATA");
-            if (path)
-               return {path, "/ssnes.cfg"};
-            else
-               return "OMGWTFDOWEDO?!";
-         }
       }
 #endif
 
