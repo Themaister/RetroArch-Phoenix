@@ -12,7 +12,7 @@
 #elif defined(__APPLE__)
 #define WIDGET_HEIGHT 28
 #else
-#define WIDGET_HEIGHT 25
+#define WIDGET_HEIGHT 28
 #endif
 
 using namespace phoenix;
