@@ -136,16 +136,22 @@ double fp(const char *str) {
   }
 
   intmax_t result_fractional = 0;
+  int extra_divide = 0;
   while(*str) {
     uint8_t x = *str++;
     if(x >= '0' && x <= '9') x -= '0';
     else break;  //stop at first invalid character
-    result_fractional = result_fractional * 10 + x;
+    if (x == 0 && result_fractional == 0) {
+      extra_divide++;
+    } else {
+      result_fractional = result_fractional * 10 + x;
+    }
   }
 
   //calculate fractional portion
   double result = (double)result_fractional;
   while((uintmax_t)result > 0) result /= 10.0;
+  while(extra_divide-- > 0) result /= 10.0;
   result += (double)result_integral;
 
   return !negate ? result : -result;
