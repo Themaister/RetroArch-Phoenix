@@ -51,7 +51,7 @@ class MainWindow : public Window
       {
          setTitle("SSNES || Phoenix");
          //setBackgroundColor(64, 64, 64);
-         setGeometry({128, 128, 600, 300});
+         setGeometry({128, 128, 600, 350});
 
          init_menu();
          onClose = []() { OS::quit(); };
@@ -138,13 +138,12 @@ class MainWindow : public Window
 
          function<void (const string&)> cb;
 
-         entry() : conf(NULL), cb(&entry::dummy)
+         entry(bool preapply = true) : conf(NULL), cb(&entry::dummy)
          {
             button.setText("Open ...");
 
-            hlayout.append(label, 150, WIDGET_HEIGHT);
-            hlayout.append(edit, 0, WIDGET_HEIGHT);
-            hlayout.append(button, 100, WIDGET_HEIGHT);
+            if (preapply)
+               apply_layout();
 
             button.onTick = [this]() {
                string start_path;
@@ -198,7 +197,30 @@ class MainWindow : public Window
 
          private:
             static void dummy(const string&) {}
+
+            void apply_layout()
+            {
+               hlayout.append(label, 150, WIDGET_HEIGHT);
+               hlayout.append(edit, 0, WIDGET_HEIGHT);
+               hlayout.append(button, 100, WIDGET_HEIGHT);
+            }
       } rom, config, ssnes, libsnes;
+
+      struct enable_entry : entry
+      {
+         enable_entry() : entry(false)
+         {
+            enable_tick.setText("Enable");
+            hlayout.append(label, 150, WIDGET_HEIGHT);
+            hlayout.append(edit, 0, WIDGET_HEIGHT);
+            hlayout.append(enable_tick, 80, WIDGET_HEIGHT);
+            hlayout.append(button, 100, WIDGET_HEIGHT);
+         }
+
+         bool is_enabled() { return enable_tick.checked(); }
+
+         CheckBox enable_tick;
+      } movie_play;
 
 
 #ifdef _WIN32
@@ -321,6 +343,8 @@ class MainWindow : public Window
          ssnes.setConfig(configs.gui, "ssnes_path");
          if (configs.gui.get("last_rom", tmp)) rom.setPath(tmp);
          rom.setConfig(configs.gui, "last_rom");
+         if (configs.gui.get("last_movie", tmp)) movie_play.setPath(tmp);
+         movie_play.setConfig(configs.gui, "last_movie");
          if (configs.gui.get("config_path", tmp)) config.setPath(tmp);
          config.setConfig(configs.gui, "config_path", {&MainWindow::reload_cli_config, this});
          libsnes.setConfig(configs.cli, "libsnes_path");
@@ -351,6 +375,7 @@ class MainWindow : public Window
       void init_main_frame()
       {
          rom.setFilter("Super Magicom, Super Famicom (*.smc,*.sfc)");
+         movie_play.setFilter("BSNES Movie (*.bsv)");
          config.setFilter("Config file (*.cfg)");
 #ifdef _WIN32
 #define DYNAMIC_EXTENSION "dll"
@@ -365,12 +390,14 @@ class MainWindow : public Window
 #endif
 
          rom.setLabel("ROM path:");
+         movie_play.setLabel("BSV movie:");
          config.setLabel("SSNES config file:");
          ssnes.setLabel("SSNES path:");
          libsnes.setLabel("libsnes path:");
 
          start_btn.setText("Start SSNES");
          vbox.append(rom.layout(), 0, 0, 3);
+         vbox.append(movie_play.layout(), 0, 0, 10);
          vbox.append(config.layout(), 0, 0, 3);
          vbox.append(ssnes.layout(), 0, 0, 3);
          vbox.append(libsnes.layout(), 0, 0, 3);
@@ -397,6 +424,7 @@ class MainWindow : public Window
          string host;
          string port;
          string frames;
+         string movie_path;
 
          vec_cmd.append("ssnes");
 
@@ -436,6 +464,13 @@ class MainWindow : public Window
             frames = net.frames.text();
             //print(string({"Frames:", frames}));
             vec_cmd.append(frames);
+         }
+
+         if (movie_play.is_enabled())
+         {
+            vec_cmd.append("-P");
+            movie_path = movie_play.getPath();
+            vec_cmd.append(movie_path);
          }
 
          vec_cmd.append(NULL);
