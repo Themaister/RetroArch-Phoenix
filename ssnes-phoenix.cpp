@@ -34,7 +34,7 @@ class LogWindow : public ToggleWindow
          append(layout);
       }
 
-      void push(const char *text) { log.append(text); box.setText(log); while(OS::pending()) OS::process(); }
+      void push(const char *text) { log.append(text); box.setText(log); if(OS::pendingEvents()) OS::processEvents(); }
       void clear() { log = ""; box.setText(log); }
 
    private:
@@ -452,8 +452,7 @@ class MainWindow : public Window
       void fork_ssnes(const string& path, const char **cmd)
       {
          // I think we had to do this with GTK+ at least :v
-         while (OS::pending())
-            OS::process();
+         if (OS::pendingEvents()) OS::processEvents();
 
          setVisible(false);
          general.hide();
@@ -589,23 +588,23 @@ class MainWindow : public Window
 
       struct
       {
-         MenuCheckItem log;
-         MenuSeparator sep;
-         MenuItem quit;
+         CheckItem log;
+         Separator sep;
+         Item quit;
       } file;
 
       struct
       {
-         MenuItem general;
-         MenuSeparator sep;
-         MenuItem video;
-         MenuItem audio;
-         MenuItem input;
+         Item general;
+         Separator sep;
+         Item video;
+         Item audio;
+         Item input;
       } settings;
 
       struct
       {
-         MenuItem about;
+         Item about;
       } help;
 
       void init_menu()
@@ -645,7 +644,7 @@ class MainWindow : public Window
          file.log.onTick = [this]() { if (file.log.checked()) log_win.show(); else log_win.hide(); };
          log_win.setCloseCallback([this]() { file.log.setChecked(false); });
          file.quit.onTick = []() { OS::quit(); };
-         help.about.onTick = []() { MessageWindow::information(Window::None, "SSNES/Phoenix\nHans-Kristian Arntzen (Themaister) (C) - 2011\nThis is free software released under GNU GPLv3\nPhoenix (C) byuu - 2011"); };
+         help.about.onTick = [this]() { MessageWindow::information(*this, "SSNES/Phoenix\nHans-Kristian Arntzen (Themaister) (C) - 2011\nThis is free software released under GNU GPLv3\nPhoenix (C) byuu - 2011"); };
 
          settings.general.onTick = [this]() { general.show(); };
          settings.video.onTick = [this]() { video.show(); };

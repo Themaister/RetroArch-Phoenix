@@ -270,12 +270,12 @@ class InputSetting : public SettingLayout, public util::Shared<InputSetting>
          clear.onTick = [this]() {
             auto j = list_view.selection();
             unsigned i = player.selection();
-            if (j)
+            if (list_view.selected())
             {
-               list[i][j()].display = "None";
-               conf.set(list[i][j()].config_base, string(""));
-               conf.set({list[i][j()].config_base, "_btn"}, string(""));
-               conf.set({list[i][j()].config_base, "_axis"}, string(""));
+               list[i][j].display = "None";
+               conf.set(list[i][j].config_base, string(""));
+               conf.set({list[i][j].config_base, "_btn"}, string(""));
+               conf.set({list[i][j].config_base, "_axis"}, string(""));
                this->update_list();
             }
          };
@@ -323,17 +323,17 @@ class InputSetting : public SettingLayout, public util::Shared<InputSetting>
          {
             list_view.append(i.base, i.display);
          }
-         list_view.autosizeColumns();
+         list_view.autoSizeColumns();
       }
 
       void update_bind()
       {
-         const string& opt = list[player.selection()][list_view.selection()()].config_base;
+         const string& opt = list[player.selection()][list_view.selection()].config_base;
          msg_cb({"Activate for bind: ", opt});
 
-         while (OS::pending()) OS::process();
+         if (OS::pendingEvents()) OS::processEvents();
 
-         auto& elem = list[player.selection()][list_view.selection()()];
+         auto& elem = list[player.selection()][list_view.selection()];
          string option, ext;
          auto type = poll(option);
          switch (type)

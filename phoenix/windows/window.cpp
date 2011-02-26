@@ -16,14 +16,22 @@ void pWindow::append(Widget &widget) {
   widget.p.setParent(window);
 }
 
-Geometry pWindow::frameGeometry() {
-  RECT rc;
-  GetWindowRect(hwnd, &rc);
-  return { rc.left, rc.top, rc.right - rc.left, rc.bottom - rc.top };
-}
-
 bool pWindow::focused() {
   return (GetForegroundWindow() == hwnd);
+}
+
+Geometry pWindow::frameMargin() {
+  unsigned style = window.state.resizable ? ResizableStyle : FixedStyle;
+  if(window.state.fullScreen) style = 0;
+  RECT rc = { 0, 0, 640, 480 };
+  AdjustWindowRect(&rc, style, window.state.menuVisible);
+  unsigned statusHeight = 0;
+  if(window.state.statusVisible) {
+    RECT src;
+    GetClientRect(hstatus, &src);
+    statusHeight = src.bottom - src.top;
+  }
+  return { abs(rc.left), abs(rc.top), (rc.right - rc.left) - 640, (rc.bottom - rc.top) + statusHeight - 480 };
 }
 
 Geometry pWindow::geometry() {
@@ -45,20 +53,22 @@ void pWindow::setBackgroundColor(uint8_t red, uint8_t green, uint8_t blue) {
   brush = CreateSolidBrush(brushColor);
 }
 
-void pWindow::setFrameGeometry(const Geometry &geometry) {
-  Geometry margin = frameMargin();
-  window.setGeometry({
-    geometry.x + margin.x, geometry.y + margin.y,
-    geometry.width - margin.width, geometry.height - margin.height
-  });
-}
-
 void pWindow::setFocused() {
   if(window.state.visible == false) setVisible(true);
   SetFocus(hwnd);
 }
 
 void pWindow::setFullScreen(bool fullScreen) {
+  locked = true;
+  if(fullScreen == false) {
+    SetWindowLongPtr(hwnd, GWL_STYLE, WS_VISIBLE | (window.state.resizable ? ResizableStyle : FixedStyle));
+    setGeometry(window.state.geometry);
+  } else {
+    SetWindowLongPtr(hwnd, GWL_STYLE, WS_VISIBLE | WS_POPUP);
+    Geometry margin = frameMargin();
+    setGeometry({ margin.x, margin.y, GetSystemMetrics(SM_CXSCREEN) - margin.width, GetSystemMetrics(SM_CYSCREEN) - margin.height });
+  }
+  locked = false;
 }
 
 void pWindow::setGeometry(const Geometry &geometry) {
@@ -95,7 +105,7 @@ void pWindow::setResizable(bool resizable) {
 }
 
 void pWindow::setStatusFont(Font &font) {
-  SendMessage(hwnd, WM_SETFONT, (WPARAM)font.p.hfont, 0);
+  SendMessage(hstatus, WM_SETFONT, (WPARAM)font.p.hfont, 0);
 }
 
 void pWindow::setStatusText(const string &text) {
@@ -135,18 +145,6 @@ void pWindow::constructor() {
 
   SetWindowLongPtr(hwnd, GWLP_USERDATA, (LONG_PTR)&window);
   setGeometry({ 128, 128, 256, 256 });
-}
-
-Geometry pWindow::frameMargin() {
-  RECT rc = { 0, 0, 640, 480 };
-  AdjustWindowRect(&rc, window.state.resizable ? ResizableStyle : FixedStyle, window.state.menuVisible);
-  unsigned statusHeight = 0;
-  if(window.state.statusVisible) {
-    RECT src;
-    GetClientRect(hstatus, &src);
-    statusHeight = src.bottom - src.top;
-  }
-  return { abs(rc.left), abs(rc.top), (rc.right - rc.left) - 640, (rc.bottom - rc.top) + statusHeight - 480 };
 }
 
 void pWindow::updateMenu() {
