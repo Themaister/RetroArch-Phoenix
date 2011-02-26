@@ -25,7 +25,7 @@ all: $(TARGET)
 	$(CC) $(CFLAGS) -O3 -std=gnu99 -c -o $@ $<
 
 phoenix/phoenix.o: $(wildcard phoenix/**/*.cpp) $(wildcard phoenix/**/*.hpp) phoenix/qt/qt.moc
-	$(CXX) $(CXXFLAGS) $(INCLUDES) -O3 -std=gnu++0x -DPHOENIX_QT_OSX $(QT_CFLAGS) -c -o $@ phoenix/phoenix.cpp
+	$(CXX) $(CXXFLAGS) $(INCLUDES) -O3 -std=gnu++0x -DPHOENIX_QT $(QT_CFLAGS) -c -o $@ phoenix/phoenix.cpp
 
 ruby/ruby.o: $(wildcard ruby/**/*.hpp) $(wildcard ruby/**/*.cpp)
 	$(CXX) $(CXXFLAGS) $(INCLUDES) $(RUBYDEFINES) -O3 -std=gnu++0x -c -o $@ ruby/ruby.cpp

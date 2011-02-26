@@ -11,11 +11,13 @@
   #include <io.h>
   #include <shlobj.h>
 #elif defined(PHOENIX_QT)
+#ifndef __APPLE__
   #include <QApplication>
   #include <QtGui>
-#elif defined(PHOENIX_QT_OSX)
+#else
   #include <QtGui/QApplication>
   #include <QtGui/QtGui>
+#endif
 #elif defined(PHOENIX_GTK)
   #define None X11None
   #define Window X11Window
