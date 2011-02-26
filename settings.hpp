@@ -260,11 +260,15 @@ class InputSetting : public SettingLayout, public util::Shared<InputSetting>
          : SettingLayout(_conf, "", "Binds:", false), list(_list), msg_cb(_msg_cb), focus_cb(_focus_cb)
       {
          clear.setText("Clear");
+         def.setText("Default");
+         erase.setText("Clear all");
          player.append("Player 1");
          player.append("Player 2");
          player.append("Misc");
          hbox.append(player, 120, WIDGET_HEIGHT, 10);
-         hbox.append(clear, 60, WIDGET_HEIGHT);
+         hbox.append(clear, 70, WIDGET_HEIGHT);
+         hbox.append(def, 70, WIDGET_HEIGHT);
+         hbox.append(erase, 70, WIDGET_HEIGHT);
 
          player.onChange = [this]() { this->update_list(); };
          clear.onTick = [this]() {
@@ -279,6 +283,9 @@ class InputSetting : public SettingLayout, public util::Shared<InputSetting>
                this->update_list();
             }
          };
+
+         def.onTick = [this]() { this->set_all_list("Default", ""); };
+         erase.onTick = [this]() { this->set_all_list("None", "nul"); };
 
          list_view.setHeaderText("SSNES Bind", "Bind");
          list_view.setHeaderVisible();
@@ -305,7 +312,24 @@ class InputSetting : public SettingLayout, public util::Shared<InputSetting>
       ListView list_view;
       ComboBox player;
       Button clear;
+      Button def;
+      Button erase;
       linear_vector<linear_vector<Internal::input_selection>> list;
+
+      void set_all_list(const string& display, const string& conf_string)
+      {
+         foreach(i, list)
+         {
+            foreach(j, i)
+            {
+               j.display = display;
+               conf.set(j.config_base, conf_string);
+               conf.set({j.config_base, "_btn"}, conf_string);
+               conf.set({j.config_base, "_axis"}, conf_string);
+            }
+         }
+         this->update_list();
+      }
 
       enum class Type
       {
