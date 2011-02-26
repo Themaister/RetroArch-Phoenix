@@ -256,8 +256,8 @@ namespace Internal
 class InputSetting : public SettingLayout, public util::Shared<InputSetting>
 {
    public:
-      InputSetting(ConfigFile &_conf, const linear_vector<linear_vector<Internal::input_selection>>& _list, const function<void (const string&)> _msg_cb)
-         : SettingLayout(_conf, "", "Binds:", false), list(_list), msg_cb(_msg_cb)
+      InputSetting(ConfigFile &_conf, const linear_vector<linear_vector<Internal::input_selection>>& _list, const function<void (const string&)>& _msg_cb, const function<void ()>& _focus_cb)
+         : SettingLayout(_conf, "", "Binds:", false), list(_list), msg_cb(_msg_cb), focus_cb(_focus_cb)
       {
          clear.setText("Clear");
          player.append("Player 1");
@@ -299,6 +299,7 @@ class InputSetting : public SettingLayout, public util::Shared<InputSetting>
       
    private:
       function<void (const string&)> msg_cb;
+      function<void ()> focus_cb;
       HorizontalLayout hbox;
       VerticalLayout vbox;
       ListView list_view;
@@ -330,6 +331,8 @@ class InputSetting : public SettingLayout, public util::Shared<InputSetting>
       {
          const string& opt = list[player.selection()][list_view.selection()].config_base;
          msg_cb({"Activate for bind: ", opt});
+
+         focus_cb();
 
          auto& elem = list[player.selection()][list_view.selection()];
          list_view.setSelected(false);
@@ -656,7 +659,7 @@ class Input : public ToggleWindow
          widgets.append(DoubleSetting::shared(_conf, "input_axis_threshold", "Input axis threshold (0.0 to 1.0)", 0.5));
          widgets.append(BoolSetting::shared(_conf, "netplay_client_swap_input", "Use Player 1 binds as client", false));
          widgets.append(InputSetting::shared(_conf, Internal::binds, 
-                  [this](const string& msg) { this->setStatusText(msg); }));
+                  [this](const string& msg) { this->setStatusText(msg); }, [this]() { this->setFocused(); }));
 
          foreach(i, widgets) { vbox.append(i->layout(), 0, 0, 3); }
          vbox.setMargin(5);
