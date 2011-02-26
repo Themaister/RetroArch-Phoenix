@@ -273,9 +273,9 @@ class InputSetting : public SettingLayout, public util::Shared<InputSetting>
             if (list_view.selected())
             {
                list[i][j].display = "None";
-               conf.set(list[i][j].config_base, string(""));
-               conf.set({list[i][j].config_base, "_btn"}, string(""));
-               conf.set({list[i][j].config_base, "_axis"}, string(""));
+               conf.set(list[i][j].config_base, string("nul"));
+               conf.set({list[i][j].config_base, "_btn"}, string("nul"));
+               conf.set({list[i][j].config_base, "_axis"}, string("nul"));
                this->update_list();
             }
          };
@@ -331,37 +331,38 @@ class InputSetting : public SettingLayout, public util::Shared<InputSetting>
          const string& opt = list[player.selection()][list_view.selection()].config_base;
          msg_cb({"Activate for bind: ", opt});
 
+         auto& elem = list[player.selection()][list_view.selection()];
+         list_view.setSelected(false);
          if (OS::pendingEvents()) OS::processEvents();
 
-         auto& elem = list[player.selection()][list_view.selection()];
          string option, ext;
          auto type = poll(option);
          switch (type)
          {
             case Type::JoyAxis:
                conf.set({elem.config_base, "_axis"}, option);
-               conf.set({elem.config_base, "_btn"}, string(""));
-               conf.set({elem.config_base, ""}, string(""));
+               conf.set({elem.config_base, "_btn"}, string("nul"));
+               conf.set({elem.config_base, ""}, string("nul"));
                ext = " (axis)";
                break;
 
             case Type::JoyButton:
-               conf.set({elem.config_base, "_axis"}, string(""));
+               conf.set({elem.config_base, "_axis"}, string("nul"));
                conf.set({elem.config_base, "_btn"}, option);
-               conf.set({elem.config_base, ""}, string(""));
+               conf.set({elem.config_base, ""}, string("nul"));
                ext = " (button)";
                break;
 
             case Type::JoyHat:
-               conf.set({elem.config_base, "_axis"}, string(""));
+               conf.set({elem.config_base, "_axis"}, string("nul"));
                conf.set({elem.config_base, "_btn"}, option);
-               conf.set({elem.config_base, ""}, string(""));
+               conf.set({elem.config_base, ""}, string("nul"));
                ext = " (hat)";
                break;
 
             case Type::Keyboard:
-               conf.set({elem.config_base, "_axis"}, string(""));
-               conf.set({elem.config_base, "_btn"}, string(""));
+               conf.set({elem.config_base, "_axis"}, string("nul"));
+               conf.set({elem.config_base, "_btn"}, string("nul"));
                conf.set({elem.config_base, ""}, option);
                break;
 
@@ -469,6 +470,9 @@ class InputSetting : public SettingLayout, public util::Shared<InputSetting>
                else if (conf.get({j.config_base, "_axis"}, tmp))
                   j.display = {tmp, " (axis)"};
                else
+                  j.display = "Default";
+
+               if (j.display == "nul")
                   j.display = "None";
             }
          }
