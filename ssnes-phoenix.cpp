@@ -501,8 +501,8 @@ class MainWindow : public Window
       // This will be hell on Earth :v
       void fork_ssnes(const string& path, const char **cmd)
       {
-         while (OS::pending())
-            OS::process();
+         if (OS::pendingEvents())
+            OS::processEvents();
 
          setVisible(false);
          general.hide();
