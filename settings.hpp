@@ -261,30 +261,23 @@ class InputSetting : public SettingLayout, public util::Shared<InputSetting>
       {
          clear.setText("Clear");
          def.setText("Default");
+         def_all.setText("Default all");
          erase.setText("Clear all");
          player.append("Player 1");
          player.append("Player 2");
          player.append("Misc");
          hbox.append(player, 120, WIDGET_HEIGHT, 10);
-         hbox.append(clear, 70, WIDGET_HEIGHT);
-         hbox.append(def, 70, WIDGET_HEIGHT);
-         hbox.append(erase, 70, WIDGET_HEIGHT);
+         hbox.append(def, 80, WIDGET_HEIGHT);
+         hbox.append(def_all, 80, WIDGET_HEIGHT);
+         hbox.append(clear, 80, WIDGET_HEIGHT);
+         hbox.append(erase, 80, WIDGET_HEIGHT);
 
          player.onChange = [this]() { this->update_list(); };
-         clear.onTick = [this]() {
-            auto j = list_view.selection();
-            unsigned i = player.selection();
-            if (list_view.selected())
-            {
-               list[i][j].display = "None";
-               conf.set(list[i][j].config_base, string("nul"));
-               conf.set({list[i][j].config_base, "_btn"}, string("nul"));
-               conf.set({list[i][j].config_base, "_axis"}, string("nul"));
-               this->update_list();
-            }
-         };
 
-         def.onTick = [this]() { this->set_all_list("Default", ""); };
+         clear.onTick = [this]() { this->set_single("None", "nul"); };
+         def.onTick = [this]() { this->set_single("Default", ""); };
+
+         def_all.onTick = [this]() { this->set_all_list("Default", ""); };
          erase.onTick = [this]() { this->set_all_list("None", "nul"); };
 
          list_view.setHeaderText("SSNES Bind", "Bind");
@@ -312,9 +305,24 @@ class InputSetting : public SettingLayout, public util::Shared<InputSetting>
       ListView list_view;
       ComboBox player;
       Button clear;
+      Button def_all;
       Button def;
       Button erase;
       linear_vector<linear_vector<Internal::input_selection>> list;
+
+      void set_single(const string& display, const string& conf_string)
+      {
+         auto j = list_view.selection();
+         unsigned i = player.selection();
+         if (list_view.selected())
+         {
+            list[i][j].display = display;
+            conf.set(list[i][j].config_base, conf_string);
+            conf.set({list[i][j].config_base, "_btn"}, conf_string);
+            conf.set({list[i][j].config_base, "_axis"}, conf_string);
+            this->update_list();
+         }
+      }
 
       void set_all_list(const string& display, const string& conf_string)
       {
@@ -679,7 +687,7 @@ class Input : public ToggleWindow
    public:
       Input(ConfigFile &_conf) : ToggleWindow("SSNES || Input settings")
       {
-         setGeometry({256, 256, 400, 400});
+         setGeometry({256, 256, 500, 400});
          widgets.append(DoubleSetting::shared(_conf, "input_axis_threshold", "Input axis threshold (0.0 to 1.0)", 0.5));
          widgets.append(BoolSetting::shared(_conf, "netplay_client_swap_input", "Use Player 1 binds as client", false));
          widgets.append(InputSetting::shared(_conf, Internal::binds, 
