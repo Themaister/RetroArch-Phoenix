@@ -87,7 +87,17 @@ class PathSetting : public SettingLayout, public util::Shared<PathSetting>
          button.onTick = [this]() {
             string start_path;
             const char *path = std::getenv("HOME");
-            if (path)
+            char base_path[1024];
+            nall::strlcpy(base_path, edit.text(), sizeof(base_path));
+            char *base_ptr = strrchr(base_path, '/');
+            if (!base_ptr)
+               base_ptr = strrchr(base_path, '\\');
+            if (base_ptr)
+               *base_ptr = '\0';
+
+            if (strlen(base_path) > 0)
+               start_path = base_path;
+            else if (path)
                start_path = path;
             string tmp = OS::fileLoad(Window::None, start_path, filter);
             if (tmp.length() > 0)
