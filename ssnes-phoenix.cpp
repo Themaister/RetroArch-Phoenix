@@ -212,7 +212,7 @@ class MainWindow : public Window
          {
             enable_tick.setText("Enable");
             hlayout.append(label, 150, WIDGET_HEIGHT);
-            hlayout.append(edit, 0, WIDGET_HEIGHT);
+            hlayout.append(edit, 0, WIDGET_HEIGHT, 5);
             hlayout.append(enable_tick, 80, WIDGET_HEIGHT);
             hlayout.append(button, 100, WIDGET_HEIGHT);
          }
