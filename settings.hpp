@@ -132,6 +132,79 @@ class PathSetting : public SettingLayout, public util::Shared<PathSetting>
       string filter;
 };
 
+struct myRadioBox : public RadioBox, public util::Shared<myRadioBox>
+{
+   myRadioBox(ConfigFile& _conf, const string& _config_key, const string& _key = "") : conf(_conf), config_key(_config_key), key(_key) 
+   {
+      onTick = [this]() { conf.set(config_key, key); };
+   }
+   ConfigFile& conf;
+   string config_key;
+   string key;
+};
+
+class ShaderSetting : public SettingLayout, public util::Shared<ShaderSetting>
+{
+   public:
+      ShaderSetting(ConfigFile &_conf, const string& _key, const linear_vector<string>& _values, const linear_vector<string>& _keys, linear_vector<PathSetting::Ptr>& _elems)
+         : SettingLayout(_conf, _key, "", false), elems(_elems)
+      {
+         foreach(i, elems)
+            vbox.append(i->layout(), 0, 0);
+
+         assert(_keys.size() == _values.size());
+
+         label.setText("Shader:");
+         hbox.append(label, 120, WIDGET_HEIGHT);
+         for (unsigned i = 0; i < _keys.size(); i++)
+         {
+            auto box = myRadioBox::shared(conf, key, _keys[i]);
+            box->setText(_values[i]);
+            boxes.append(box);
+            hbox.append(*box, 120, WIDGET_HEIGHT);
+         }
+
+         reference_array<RadioBox&> list;
+         foreach(i, boxes)
+         {
+            list.append(*i);
+         }
+         RadioBox::group(list);
+         boxes[0]->setChecked();
+
+         vbox.append(hbox, 0, 0);
+         hlayout.append(vbox, 0, 0);
+      }
+
+      void update()
+      {
+         foreach(i, elems)
+            i->update();
+
+         string tmp;
+         if (conf.get(key, tmp))
+         {
+            foreach(i, boxes)
+            {
+               if (i->key == tmp)
+               {
+                  i->setChecked();
+                  break;
+               }
+            }
+         }
+         else
+            boxes[0]->setChecked();
+      }
+
+   private:
+      HorizontalLayout hbox;
+      VerticalLayout vbox;
+      linear_vector<myRadioBox::Ptr> boxes;
+      linear_vector<PathSetting::Ptr>& elems;
+      Label label;
+};
+
 class BoolSetting : public SettingLayout, public util::Shared<BoolSetting>
 {
    public:
@@ -581,8 +654,13 @@ class Video : public ToggleWindow
          widgets.append(BoolSetting::shared(_conf, "video_smooth", "Bilinear filtering:", true));
          widgets.append(BoolSetting::shared(_conf, "video_force_aspect", "Lock aspect ratio:", true));
          widgets.append(DoubleSetting::shared(_conf, "video_aspect_ratio", "Aspect ratio:", 1.333));
-         widgets.append(PathSetting::shared(_conf, "video_cg_shader", "Cg pixel shader:", "", "Cg shader (*.cg)"));
-         widgets.append(PathSetting::shared(_conf, "video_bsnes_shader", "bSNES XML shader:", "", "XML shader (*.shader)"));
+
+         paths.append(PathSetting::shared(_conf, "video_cg_shader", "Cg pixel shader:", "", "Cg shader (*.cg)"));
+         paths.append(PathSetting::shared(_conf, "video_bsnes_shader", "bSNES XML shader:", "", "XML shader (*.shader)"));
+         widgets.append(ShaderSetting::shared(_conf, "video_shader_type", 
+                  linear_vector<string>({"Automatic", "Cg", "bSNES XML", "None"}), 
+                  linear_vector<string>({"auto", "cg", "bsnes", "none"}), paths));
+
          widgets.append(PathSetting::shared(_conf, "video_font_path", "Path to on-screen font:", "", "TTF font (*.ttf)"));
          widgets.append(IntSetting::shared(_conf, "video_font_size", "On-screen font size:", 48));
          widgets.append(DoubleSetting::shared(_conf, "video_message_pos_x", "On-screen message pos X:", 0.05));
@@ -598,6 +676,8 @@ class Video : public ToggleWindow
    private:
       linear_vector<SettingLayout::APtr> widgets;
       VerticalLayout vbox;
+
+      linear_vector<PathSetting::Ptr> paths;
 
 };
 
