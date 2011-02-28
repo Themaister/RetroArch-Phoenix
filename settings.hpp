@@ -172,7 +172,7 @@ class ShaderSetting : public SettingLayout, public util::Shared<ShaderSetting>
          RadioBox::group(list);
          boxes[0]->setChecked();
 
-         vbox.append(hbox, 0, 0);
+         vbox.append(hbox, 0, 120);
          hlayout.append(vbox, 0, 0);
       }
 
@@ -645,7 +645,7 @@ class Video : public ToggleWindow
    public:
       Video(ConfigFile &_conf) : ToggleWindow("SSNES || Video settings")
       {
-         setGeometry({256, 256, 600, 500});
+         setGeometry({256, 256, 600, 550});
          widgets.append(DoubleSetting::shared(_conf, "video_xscale", "Windowed X scale:", 3.0));
          widgets.append(DoubleSetting::shared(_conf, "video_xscale", "Windowed Y scale:", 3.0));
          widgets.append(IntSetting::shared(_conf, "video_fullscreen_x", "Fullscreen X resolution:", 0));
@@ -655,16 +655,17 @@ class Video : public ToggleWindow
          widgets.append(BoolSetting::shared(_conf, "video_force_aspect", "Lock aspect ratio:", true));
          widgets.append(DoubleSetting::shared(_conf, "video_aspect_ratio", "Aspect ratio:", 1.333));
 
-         paths.append(PathSetting::shared(_conf, "video_cg_shader", "Cg pixel shader:", "", "Cg shader (*.cg)"));
-         paths.append(PathSetting::shared(_conf, "video_bsnes_shader", "bSNES XML shader:", "", "XML shader (*.shader)"));
-         widgets.append(ShaderSetting::shared(_conf, "video_shader_type", 
-                  linear_vector<string>({"Automatic", "Cg", "bSNES XML", "None"}), 
-                  linear_vector<string>({"auto", "cg", "bsnes", "none"}), paths));
 
          widgets.append(PathSetting::shared(_conf, "video_font_path", "Path to on-screen font:", "", "TTF font (*.ttf)"));
          widgets.append(IntSetting::shared(_conf, "video_font_size", "On-screen font size:", 48));
          widgets.append(DoubleSetting::shared(_conf, "video_message_pos_x", "On-screen message pos X:", 0.05));
          widgets.append(DoubleSetting::shared(_conf, "video_message_pos_y", "On-screen message pos Y:", 0.05));
+
+         paths.append(PathSetting::shared(_conf, "video_cg_shader", "Cg pixel shader:", "", "Cg shader (*.cg)"));
+         paths.append(PathSetting::shared(_conf, "video_bsnes_shader", "bSNES XML shader:", "", "XML shader (*.shader)"));
+         widgets.append(ShaderSetting::shared(_conf, "video_shader_type", 
+                  linear_vector<string>({"Automatic", "Cg", "bSNES XML", "None"}), 
+                  linear_vector<string>({"auto", "cg", "bsnes", "none"}), paths));
 
          foreach(i, widgets) { vbox.append(i->layout(), 0, 0, 3); }
          vbox.setMargin(5);
