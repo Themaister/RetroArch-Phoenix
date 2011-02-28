@@ -80,9 +80,13 @@ class PathSetting : public SettingLayout, public util::Shared<PathSetting>
       PathSetting(ConfigFile &_conf, const string& _key, const string& label, const string& _default, const string& _filter) : SettingLayout(_conf, _key, label), m_default(_default), filter(_filter)
       {
          button.setText("Open ...");
+         clear.setText("Clear");
          edit.onChange = [this]() { conf.set(key, edit.text()); };
          hlayout.append(edit, 0, WIDGET_HEIGHT); 
+         hlayout.append(clear, 80, WIDGET_HEIGHT);
          hlayout.append(button, 100, WIDGET_HEIGHT);
+
+         edit.setEditable(false);
 
          button.onTick = [this]() {
             string start_path;
@@ -106,6 +110,11 @@ class PathSetting : public SettingLayout, public util::Shared<PathSetting>
                conf.set(key, tmp);
             }
          };
+
+         clear.onTick = [this]() {
+            conf.set(key, string(""));
+            edit.setText(string(""));
+         };
       }
       
       void update()
@@ -118,6 +127,7 @@ class PathSetting : public SettingLayout, public util::Shared<PathSetting>
    private:
       TextEdit edit;
       Button button;
+      Button clear;
       string m_default;
       string filter;
 };
@@ -538,11 +548,11 @@ class General : public ToggleWindow
    public:
       General(ConfigFile &_conf) : ToggleWindow("SSNES || General settings")
       {
-         widgets.append(BoolSetting::shared(_conf, "rewind_enable", "Enable rewind", false));
-         widgets.append(IntSetting::shared(_conf, "rewind_buffer_size", "Rewind buffer size (MB)", 20));
-         widgets.append(IntSetting::shared(_conf, "rewind_granularity", "Rewind frames granularity", 1));
-         widgets.append(BoolSetting::shared(_conf, "pause_nonactive", "Pause when window loses focus", true));
-         widgets.append(IntSetting::shared(_conf, "autosave_interval", "Autosave interval (seconds)", 0));
+         widgets.append(BoolSetting::shared(_conf, "rewind_enable", "Enable rewind:", false));
+         widgets.append(IntSetting::shared(_conf, "rewind_buffer_size", "Rewind buffer size (MB):", 20));
+         widgets.append(IntSetting::shared(_conf, "rewind_granularity", "Rewind frames granularity:", 1));
+         widgets.append(BoolSetting::shared(_conf, "pause_nonactive", "Pause when window loses focus:", true));
+         widgets.append(IntSetting::shared(_conf, "autosave_interval", "Autosave interval (seconds):", 0));
          foreach(i, widgets) { vbox.append(i->layout(), 0, 0, 3); }
 
          vbox.setMargin(5);
@@ -563,20 +573,20 @@ class Video : public ToggleWindow
       Video(ConfigFile &_conf) : ToggleWindow("SSNES || Video settings")
       {
          setGeometry({256, 256, 600, 500});
-         widgets.append(DoubleSetting::shared(_conf, "video_xscale", "Windowed X scale", 3.0));
-         widgets.append(DoubleSetting::shared(_conf, "video_xscale", "Windowed Y scale", 3.0));
-         widgets.append(IntSetting::shared(_conf, "video_fullscreen_x", "Fullscreen X resolution", 1280));
-         widgets.append(IntSetting::shared(_conf, "video_fullscreen_y", "Fullscreen Y resolution", 720));
-         widgets.append(BoolSetting::shared(_conf, "video_fullscreen", "Start in fullscreen", false));
-         widgets.append(BoolSetting::shared(_conf, "video_smooth", "Bilinear filtering", true));
-         widgets.append(BoolSetting::shared(_conf, "video_force_aspect", "Lock aspect ratio", true));
-         widgets.append(DoubleSetting::shared(_conf, "video_aspect_ratio", "Aspect ratio", 1.333));
-         widgets.append(PathSetting::shared(_conf, "video_cg_shader", "Cg pixel shader", "", "Cg shader (*.cg)"));
-         widgets.append(PathSetting::shared(_conf, "video_bsnes_shader", "bSNES XML shader", "", "XML shader (*.shader)"));
-         widgets.append(PathSetting::shared(_conf, "video_font_path", "Path to on-screen font", "", "TTF font (*.ttf)"));
-         widgets.append(IntSetting::shared(_conf, "video_font_size", "On-screen font size", 48));
-         widgets.append(DoubleSetting::shared(_conf, "video_message_pos_x", "On-screen message pos X", 0.05));
-         widgets.append(DoubleSetting::shared(_conf, "video_message_pos_y", "On-screen message pos Y", 0.05));
+         widgets.append(DoubleSetting::shared(_conf, "video_xscale", "Windowed X scale:", 3.0));
+         widgets.append(DoubleSetting::shared(_conf, "video_xscale", "Windowed Y scale:", 3.0));
+         widgets.append(IntSetting::shared(_conf, "video_fullscreen_x", "Fullscreen X resolution:", 0));
+         widgets.append(IntSetting::shared(_conf, "video_fullscreen_y", "Fullscreen Y resolution:", 0));
+         widgets.append(BoolSetting::shared(_conf, "video_fullscreen", "Start in fullscreen:", false));
+         widgets.append(BoolSetting::shared(_conf, "video_smooth", "Bilinear filtering:", true));
+         widgets.append(BoolSetting::shared(_conf, "video_force_aspect", "Lock aspect ratio:", true));
+         widgets.append(DoubleSetting::shared(_conf, "video_aspect_ratio", "Aspect ratio:", 1.333));
+         widgets.append(PathSetting::shared(_conf, "video_cg_shader", "Cg pixel shader:", "", "Cg shader (*.cg)"));
+         widgets.append(PathSetting::shared(_conf, "video_bsnes_shader", "bSNES XML shader:", "", "XML shader (*.shader)"));
+         widgets.append(PathSetting::shared(_conf, "video_font_path", "Path to on-screen font:", "", "TTF font (*.ttf)"));
+         widgets.append(IntSetting::shared(_conf, "video_font_size", "On-screen font size:", 48));
+         widgets.append(DoubleSetting::shared(_conf, "video_message_pos_x", "On-screen message pos X:", 0.05));
+         widgets.append(DoubleSetting::shared(_conf, "video_message_pos_y", "On-screen message pos Y:", 0.05));
 
          foreach(i, widgets) { vbox.append(i->layout(), 0, 0, 3); }
          vbox.setMargin(5);
@@ -668,14 +678,14 @@ class Audio : public ToggleWindow
       Audio(ConfigFile &_conf) : ToggleWindow("SSNES || Audio settings")
       {
          setGeometry({256, 256, 450, 300});
-         widgets.append(BoolSetting::shared(_conf, "audio_enable", "Enable audio", true));
-         widgets.append(IntSetting::shared(_conf, "audio_out_rate", "Audio sample rate", 48000));
-         widgets.append(DoubleSetting::shared(_conf, "audio_in_rate", "Audio input rate", 31980.0));
-         widgets.append(DoubleSetting::shared(_conf, "audio_rate_step", "Audio rate step", 0.25));
-         widgets.append(ComboSetting::shared(_conf, "audio_driver", "Audio driver", Internal::audio_drivers, 0));
-         widgets.append(StringSetting::shared(_conf, "audio_device", "Audio device", ""));
-         widgets.append(BoolSetting::shared(_conf, "audio_sync", "Audio sync", true));
-         widgets.append(IntSetting::shared(_conf, "audio_latency", "Audio latency (ms)", 64));
+         widgets.append(BoolSetting::shared(_conf, "audio_enable", "Enable audio:", true));
+         widgets.append(IntSetting::shared(_conf, "audio_out_rate", "Audio sample rate:", 48000));
+         widgets.append(DoubleSetting::shared(_conf, "audio_in_rate", "Audio input rate:", 31980.0));
+         widgets.append(DoubleSetting::shared(_conf, "audio_rate_step", "Audio rate step:", 0.25));
+         widgets.append(ComboSetting::shared(_conf, "audio_driver", "Audio driver:", Internal::audio_drivers, 0));
+         widgets.append(StringSetting::shared(_conf, "audio_device", "Audio device:", ""));
+         widgets.append(BoolSetting::shared(_conf, "audio_sync", "Audio sync:", true));
+         widgets.append(IntSetting::shared(_conf, "audio_latency", "Audio latency (ms):", 64));
          //widgets.append(IntSetting::shared(_conf, "audio_src_quality", "libsamplerate quality (1 - worst, 5 - best)", 2));
 
          foreach(i, widgets) { vbox.append(i->layout(), 0, 0, 3); }
@@ -698,8 +708,8 @@ class Input : public ToggleWindow
       Input(ConfigFile &_conf) : ToggleWindow("SSNES || Input settings")
       {
          setGeometry({256, 256, 500, 400});
-         widgets.append(DoubleSetting::shared(_conf, "input_axis_threshold", "Input axis threshold (0.0 to 1.0)", 0.5));
-         widgets.append(BoolSetting::shared(_conf, "netplay_client_swap_input", "Use Player 1 binds as client", false));
+         widgets.append(DoubleSetting::shared(_conf, "input_axis_threshold", "Input axis threshold (0.0 to 1.0):", 0.5));
+         widgets.append(BoolSetting::shared(_conf, "netplay_client_swap_input", "Use Player 1 binds as client:", false));
          widgets.append(InputSetting::shared(_conf, Internal::binds, 
                   [this](const string& msg) { this->setStatusText(msg); }, [this]() { this->setFocused(); }));
 
@@ -722,6 +732,8 @@ class Input : public ToggleWindow
       {
 #ifdef _WIN32
          ruby::input.driver("DirectInput");
+#elif defined(__APPLE__)
+         ruby::input.driver("Carbon");
 #else
          ruby::input.driver("SDL");
 #endif

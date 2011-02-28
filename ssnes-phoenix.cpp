@@ -51,7 +51,7 @@ class MainWindow : public Window
       {
          setTitle("SSNES || Phoenix");
          //setBackgroundColor(64, 64, 64);
-         setGeometry({128, 128, 600, 350});
+         setGeometry({128, 128, 680, 350});
 
          init_menu();
          onClose = []() { OS::quit(); };
@@ -131,6 +131,7 @@ class MainWindow : public Window
          Label label;
          TextEdit edit;
          Button button;
+         Button clear;
          string filter;
 
          ConfigFile *conf;
@@ -141,6 +142,7 @@ class MainWindow : public Window
          entry(bool preapply = true) : conf(NULL), cb(&entry::dummy)
          {
             button.setText("Open ...");
+            clear.setText("Clear");
 
             if (preapply)
                apply_layout();
@@ -179,12 +181,21 @@ class MainWindow : public Window
                   conf->set(config_key, this->getPath());
                cb(this->getPath());
             };
+
+            clear.onTick = [this]() {
+               edit.setText("");
+               if (conf)
+                  conf->set(config_key, string(""));
+               cb(this->getPath());
+            };
+
+            edit.setEditable(false);
          }
 
 
          void setFilter(const string& _filter) { filter = _filter; }
          void setLabel(const string& name) { label.setText(name); }
-         void setPath(const string& name) { edit.setText(name); }
+         void setPath(const string& name) { edit.setText(name.length() > 0 ? name : " "); } // Really weird bug... :v Empty strings will simply be bool and evaluate to true for some reason...
          void setConfig(ConfigFile& file, const string& key, const function<void (const string&)>& _cb = &entry::dummy) 
          { 
             conf = &file;
@@ -202,6 +213,7 @@ class MainWindow : public Window
             {
                hlayout.append(label, 150, WIDGET_HEIGHT);
                hlayout.append(edit, 0, WIDGET_HEIGHT);
+               hlayout.append(clear, 80, WIDGET_HEIGHT);
                hlayout.append(button, 100, WIDGET_HEIGHT);
             }
       } rom, config, ssnes, libsnes;
@@ -214,6 +226,7 @@ class MainWindow : public Window
             hlayout.append(label, 150, WIDGET_HEIGHT);
             hlayout.append(edit, 0, WIDGET_HEIGHT, 5);
             hlayout.append(enable_tick, 80, WIDGET_HEIGHT);
+            hlayout.append(clear, 80, WIDGET_HEIGHT);
             hlayout.append(button, 100, WIDGET_HEIGHT);
          }
 
