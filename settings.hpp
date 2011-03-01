@@ -373,7 +373,7 @@ class InputSetting : public SettingLayout, public util::Shared<InputSetting>
          def_all.onTick = [this]() { this->set_all_list("Default", ""); };
          erase.onTick = [this]() { this->set_all_list("None", "nul"); };
 
-         list_view.setHeaderText("SSNES Bind", "Bind");
+         list_view.setHeaderText(string("SSNES Bind"), string("Bind"));
          list_view.setHeaderVisible();
          list_view.onActivate = [this]() { this->update_bind(); };
 
@@ -590,18 +590,32 @@ class InputSetting : public SettingLayout, public util::Shared<InputSetting>
          {
             foreach(j, i)
             {
-               string tmp;
-               if (conf.get(j.config_base, tmp))
-                  j.display = tmp;
-               else if (conf.get({j.config_base, "_btn"}, tmp))
-                  j.display = {tmp, " (button)"};
-               else if (conf.get({j.config_base, "_axis"}, tmp))
-                  j.display = {tmp, " (axis)"};
+               string tmp[3];
+               bool is_nul[3] = {false};
+               bool is_valid[3] = {false};
+               linear_vector<string> appends = {"", "_btn", "_axis"};
+
+               foreach(i, appends, count)
+               {
+                  if (conf.get({j.config_base, i}, tmp[count]))
+                  {
+                     if (tmp[count] == "nul")
+                        is_nul[count] = true;
+                     else
+                        is_valid[count] = true;
+                  }
+               }
+
+               if (is_nul[0] && is_nul[1] && is_nul[2])
+                  j.display = "None";
+               else if (is_valid[0])
+                  j.display = tmp[0];
+               else if (is_valid[1])
+                  j.display = {tmp[1], " (button)"};
+               else if (is_valid[2])
+                  j.display = {tmp[2], " (axis)"};
                else
                   j.display = "Default";
-
-               if (j.display == "nul")
-                  j.display = "None";
             }
          }
       }
