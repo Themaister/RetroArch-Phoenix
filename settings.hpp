@@ -173,7 +173,7 @@ class ShaderSetting : public SettingLayout, public util::Shared<ShaderSetting>
          boxes[0]->setChecked();
 
          vbox.append(hbox, 0, 120);
-         hlayout.append(vbox, 0, 0);
+         hlayout.append(vbox, 0, 3 * WIDGET_HEIGHT);
       }
 
       void update()
@@ -659,7 +659,7 @@ class Video : public ToggleWindow
    public:
       Video(ConfigFile &_conf) : ToggleWindow("SSNES || Video settings")
       {
-         setGeometry({256, 256, 600, 550});
+         setGeometry({256, 256, 600, 650});
          widgets.append(DoubleSetting::shared(_conf, "video_xscale", "Windowed X scale:", 3.0));
          widgets.append(DoubleSetting::shared(_conf, "video_xscale", "Windowed Y scale:", 3.0));
          widgets.append(IntSetting::shared(_conf, "video_fullscreen_x", "Fullscreen X resolution:", 0));
@@ -680,6 +680,11 @@ class Video : public ToggleWindow
          widgets.append(ShaderSetting::shared(_conf, "video_shader_type", 
                   linear_vector<string>({"Automatic", "Cg", "bSNES XML", "None"}), 
                   linear_vector<string>({"auto", "cg", "bsnes", "none"}), paths));
+         widgets.append(BoolSetting::shared(_conf, "video_render_to_texture", "Render-to-texture (2-pass rendering):", false));
+         widgets.append(DoubleSetting::shared(_conf, "video_fbo_scale_x", "FBO Scale X:", 2.0));
+         widgets.append(DoubleSetting::shared(_conf, "video_fbo_scale_y", "FBO Scale Y:", 2.0));
+         widgets.append(BoolSetting::shared(_conf, "video_second_pass_smooth", "Bilinear filtering (2. pass):", true));
+         widgets.append(PathSetting::shared(_conf, "video_second_pass_shader", "Shader (2. pass):", "", "Cg shader, XML shader (*.cg *.shader)"));
 
          foreach(i, widgets) { vbox.append(i->layout(), 0, 0, 3); }
          vbox.setMargin(5);
