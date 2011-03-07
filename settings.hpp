@@ -659,7 +659,7 @@ class Video : public ToggleWindow
    public:
       Video(ConfigFile &_conf) : ToggleWindow("SSNES || Video settings")
       {
-         setGeometry({256, 256, 600, 650});
+         setGeometry({256, 256, 600, 670});
          widgets.append(DoubleSetting::shared(_conf, "video_xscale", "Windowed X scale:", 3.0));
          widgets.append(DoubleSetting::shared(_conf, "video_xscale", "Windowed Y scale:", 3.0));
          widgets.append(IntSetting::shared(_conf, "video_fullscreen_x", "Fullscreen X resolution:", 0));
@@ -674,6 +674,7 @@ class Video : public ToggleWindow
          widgets.append(IntSetting::shared(_conf, "video_font_size", "On-screen font size:", 48));
          widgets.append(DoubleSetting::shared(_conf, "video_message_pos_x", "On-screen message pos X:", 0.05));
          widgets.append(DoubleSetting::shared(_conf, "video_message_pos_y", "On-screen message pos Y:", 0.05));
+         widgets.append(PathSetting::shared(_conf, "video_filter", "bSNES video filter:", "", "bSNES filter (*.filter)"));
 
          paths.append(PathSetting::shared(_conf, "video_cg_shader", "Cg pixel shader:", "", "Cg shader (*.cg)"));
          paths.append(PathSetting::shared(_conf, "video_bsnes_shader", "bSNES XML shader:", "", "XML shader (*.shader)"));
