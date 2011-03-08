@@ -358,6 +358,9 @@ class InputSetting : public SettingLayout, public util::Shared<InputSetting>
          erase.setText("Clear all");
          player.append("Player 1");
          player.append("Player 2");
+         player.append("Player 3");
+         player.append("Player 4");
+         player.append("Player 5");
          player.append("Misc");
          hbox.append(player, 120, WIDGET_HEIGHT, 10);
          hbox.append(def, 80, WIDGET_HEIGHT);
@@ -543,7 +546,7 @@ class InputSetting : public SettingLayout, public util::Shared<InputSetting>
                      type = Type::Keyboard;
 
                   if ((Joypad::isAnyAxis(i) || Joypad::isAnyButton(i) || Joypad::isAnyHat(i)) 
-                        && player.selection() <= 1)
+                        && player.selection() < max_players)
                   {
                      conf.set(string("input_player", 
                            (unsigned)(player.selection() + 1), "_joypad_index"), 
@@ -628,6 +631,8 @@ class InputSetting : public SettingLayout, public util::Shared<InputSetting>
          else
             return ":v";
       }
+
+      static const unsigned max_players = 5;
 };
 
 class General : public ToggleWindow
@@ -725,34 +730,39 @@ namespace Internal
 #endif
    };
 
+#define DEFINE_BINDS(n_player) \
+      { "input_player" #n_player "_a", "A (right)", "" }, \
+      { "input_player" #n_player "_b", "B (down)", "" }, \
+      { "input_player" #n_player "_y", "Y (left)", "" }, \
+      { "input_player" #n_player "_x", "X (up)", "" }, \
+      { "input_player" #n_player "_start", "Start", "" }, \
+      { "input_player" #n_player "_select", "Select", "" }, \
+      { "input_player" #n_player "_l", "L", "" }, \
+      { "input_player" #n_player "_r", "R", "" }, \
+      { "input_player" #n_player "_left", "D-pad Left", "" }, \
+      { "input_player" #n_player "_right", "D-pad Right", "" }, \
+      { "input_player" #n_player "_up", "D-pad Up", "" }, \
+      { "input_player" #n_player "_down", "D-pad Down", "" },
+ 
+
    static const linear_vector<input_selection> player1 = {
-      { "input_player1_a", "A (right)", "" },
-      { "input_player1_b", "B (down)", "" },
-      { "input_player1_y", "Y (left)", "" },
-      { "input_player1_x", "X (up)", "" },
-      { "input_player1_start", "Start", "" },
-      { "input_player1_select", "Select", "" },
-      { "input_player1_l", "L", "" },
-      { "input_player1_r", "R", "" },
-      { "input_player1_left", "D-pad Left", "" },
-      { "input_player1_right", "D-pad Right", "" },
-      { "input_player1_up", "D-pad Up", "" },
-      { "input_player1_down", "D-pad Down", "" },
+      DEFINE_BINDS(1)
    };
 
    static const linear_vector<input_selection> player2 = {
-      { "input_player2_a", "A (right)", "" },
-      { "input_player2_b", "B (down)", "" },
-      { "input_player2_y", "Y (left)", "" },
-      { "input_player2_x", "X (up)", "" },
-      { "input_player2_start", "Start", "" },
-      { "input_player2_select", "Select", "" },
-      { "input_player2_l", "L", "" },
-      { "input_player2_r", "R", "" },
-      { "input_player2_left", "D-pad Left", "" },
-      { "input_player2_right", "D-pad Right", "" },
-      { "input_player2_up", "D-pad Up", "" },
-      { "input_player2_down", "D-pad Down", "" },
+      DEFINE_BINDS(2)
+   };
+
+   static const linear_vector<input_selection> player3 = {
+      DEFINE_BINDS(3)
+   };
+
+   static const linear_vector<input_selection> player4 = {
+      DEFINE_BINDS(4)
+   };
+
+   static const linear_vector<input_selection> player5 = {
+      DEFINE_BINDS(5)
    };
 
    static const linear_vector<input_selection> misc = {
@@ -770,7 +780,9 @@ namespace Internal
       { "input_rewind", "Rewind", "" },
    };
 
-   static const linear_vector<linear_vector<input_selection>> binds = { player1, player2, misc };
+   static const linear_vector<linear_vector<input_selection>> binds = { 
+      player1, player2, player3, player4, player5, misc 
+   };
 }
 
 class Audio : public ToggleWindow

@@ -486,6 +486,26 @@ class MainWindow : public Window
             vec_cmd.append(movie_path);
          }
 
+         if (settings.mouse_1.checked())
+         {
+            vec_cmd.append("-m");
+            vec_cmd.append("1");
+         }
+
+         if (settings.multitap_2.checked())
+            vec_cmd.append("--multitap");
+         else if (settings.mouse_2.checked())
+         {
+            vec_cmd.append("-m");
+            vec_cmd.append("2");
+         }
+         else if (settings.scope_2.checked())
+            vec_cmd.append("-p");
+         else if (settings.justifier_2.checked())
+            vec_cmd.append("-j");
+         else if (settings.justifiers_2.checked())
+            vec_cmd.append("-J");
+
          vec_cmd.append(NULL);
 
          //foreach(i, vec_cmd) if (i) print(i, "\n");
@@ -648,6 +668,22 @@ class MainWindow : public Window
          Item video;
          Item audio;
          Item input;
+
+         Separator sep2;
+
+         Menu controllers;
+         Menu port_1;
+         Menu port_2;
+
+         RadioItem gamepad_1;
+         RadioItem mouse_1;
+
+         RadioItem gamepad_2;
+         RadioItem multitap_2;
+         RadioItem mouse_2;
+         RadioItem scope_2;
+         RadioItem justifier_2;
+         RadioItem justifiers_2;
       } settings;
 
       struct
@@ -682,8 +718,39 @@ class MainWindow : public Window
          settings_menu.append(settings.video);
          settings_menu.append(settings.audio);
          settings_menu.append(settings.input);
-         help_menu.append(help.about);
+         settings_menu.append(settings.sep2);
 
+         settings.controllers.setText("Controllers");
+         settings.port_1.setText("Port 1");
+         settings.port_2.setText("Port 2");
+
+         settings.gamepad_1.setText("Gamepad");
+         settings.mouse_1.setText("Mouse");
+
+         settings.gamepad_2.setText("Gamepad");
+         settings.multitap_2.setText("Multitap");
+         settings.mouse_2.setText("Mouse");
+         settings.scope_2.setText("SuperScope");
+         settings.justifier_2.setText("Justifier");
+         settings.justifiers_2.setText("Two Justifiers");
+
+         settings_menu.append(settings.controllers);
+         settings.controllers.append(settings.port_1);
+         settings.controllers.append(settings.port_2);
+         settings.port_1.append(settings.gamepad_1);
+         settings.port_1.append(settings.mouse_1);
+
+         settings.port_2.append(settings.gamepad_2);
+         settings.port_2.append(settings.multitap_2);
+         settings.port_2.append(settings.mouse_2);
+         settings.port_2.append(settings.scope_2);
+         settings.port_2.append(settings.justifier_2);
+         settings.port_2.append(settings.justifiers_2);
+
+         RadioItem::group(settings.gamepad_1, settings.mouse_1);
+         RadioItem::group(settings.gamepad_2, settings.multitap_2, settings.mouse_2, settings.scope_2, settings.justifier_2, settings.justifiers_2);
+
+         help_menu.append(help.about);
          init_menu_callbacks();
       }
 
