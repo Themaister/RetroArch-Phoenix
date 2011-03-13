@@ -659,12 +659,25 @@ class General : public ToggleWindow
 
 };
 
+namespace Internal
+{
+   static const linear_vector<combo_selection> video_drivers = {
+#if defined(_WIN32) || defined(__APPLE__)
+      { "gl", "OpenGL" },
+#else
+      { "gl", "OpenGL" },
+      { "xvideo", "XVideo" },
+#endif
+   };
+}
+
 class Video : public ToggleWindow
 {
    public:
       Video(ConfigFile &_conf) : ToggleWindow("SSNES || Video settings")
       {
-         setGeometry({256, 256, 600, 670});
+         setGeometry({256, 256, 600, 700});
+         widgets.append(ComboSetting::shared(_conf, "video_driver", "Video driver:", Internal::video_drivers, 0));
          widgets.append(DoubleSetting::shared(_conf, "video_xscale", "Windowed X scale:", 3.0));
          widgets.append(DoubleSetting::shared(_conf, "video_xscale", "Windowed Y scale:", 3.0));
          widgets.append(IntSetting::shared(_conf, "video_fullscreen_x", "Fullscreen X resolution:", 0));
