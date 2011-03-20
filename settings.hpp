@@ -76,7 +76,7 @@ class StringSetting : public SettingLayout, public util::Shared<StringSetting>
 
 class PathSetting : public SettingLayout, public util::Shared<PathSetting>
 {
-  public:
+   public:
       PathSetting(ConfigFile &_conf, const string& _key, const string& label, const string& _default, const string& _filter) : SettingLayout(_conf, _key, label), m_default(_default), filter(_filter)
       {
          button.setText("Open ...");
@@ -116,7 +116,7 @@ class PathSetting : public SettingLayout, public util::Shared<PathSetting>
             edit.setText(string(""));
          };
       }
-      
+
       void update()
       {
          string tmp = m_default;
@@ -131,6 +131,65 @@ class PathSetting : public SettingLayout, public util::Shared<PathSetting>
       string m_default;
       string filter;
 };
+
+class DirSetting : public SettingLayout, public util::Shared<DirSetting>
+{
+   public:
+      DirSetting(ConfigFile &_conf, const string& _key, const string& label, const string& _default) : SettingLayout(_conf, _key, label), m_default(_default)
+      {
+         button.setText("Open ...");
+         clear.setText("Clear");
+         edit.onChange = [this]() { conf.set(key, edit.text()); };
+         hlayout.append(edit, 0, WIDGET_HEIGHT); 
+         hlayout.append(clear, 80, WIDGET_HEIGHT);
+         hlayout.append(button, 100, WIDGET_HEIGHT);
+
+         edit.setEditable(false);
+
+         button.onTick = [this]() {
+            string start_path;
+            const char *path = std::getenv("HOME");
+            char base_path[1024];
+            nall::strlcpy(base_path, edit.text(), sizeof(base_path));
+            char *base_ptr = strrchr(base_path, '/');
+            if (!base_ptr)
+               base_ptr = strrchr(base_path, '\\');
+            if (base_ptr)
+               *base_ptr = '\0';
+
+            if (strlen(base_path) > 0)
+               start_path = base_path;
+            else if (path)
+               start_path = path;
+            string tmp = OS::folderSelect(Window::None, start_path);
+            if (tmp.length() > 0)
+            {
+               edit.setText(tmp);
+               conf.set(key, tmp);
+            }
+         };
+
+         clear.onTick = [this]() {
+            conf.set(key, string(""));
+            edit.setText(string(""));
+         };
+      }
+
+      void update()
+      {
+         string tmp = m_default;
+         conf.get(key, tmp);
+         edit.setText(tmp);
+      }
+
+      TextEdit edit;
+   private:
+      Button button;
+      Button clear;
+      string m_default;
+      string filter;
+};
+
 
 struct myRadioBox : public RadioBox, public util::Shared<myRadioBox>
 {
@@ -638,13 +697,20 @@ class InputSetting : public SettingLayout, public util::Shared<InputSetting>
 class General : public ToggleWindow
 {
    public:
-      General(ConfigFile &_conf) : ToggleWindow("SSNES || General settings")
+      General(ConfigFile &_pconf, ConfigFile &_conf) : ToggleWindow("SSNES || General settings")
       {
+         setGeometry({256, 256, 500, 300});
          widgets.append(BoolSetting::shared(_conf, "rewind_enable", "Enable rewind:", false));
          widgets.append(IntSetting::shared(_conf, "rewind_buffer_size", "Rewind buffer size (MB):", 20));
          widgets.append(IntSetting::shared(_conf, "rewind_granularity", "Rewind frames granularity:", 1));
          widgets.append(BoolSetting::shared(_conf, "pause_nonactive", "Pause when window loses focus:", true));
          widgets.append(IntSetting::shared(_conf, "autosave_interval", "Autosave interval (seconds):", 0));
+
+         savefile_dir = DirSetting::shared(_pconf, "savefile_dir", "Savefile directory:", string(""));
+         savestate_dir = DirSetting::shared(_pconf, "savestate_dir", "Savestate directory:", string(""));
+         widgets.append(savefile_dir);
+         widgets.append(savestate_dir);
+
          foreach(i, widgets) { vbox.append(i->layout(), 0, 0, 3); }
 
          vbox.setMargin(5);
@@ -653,9 +719,34 @@ class General : public ToggleWindow
 
       void update() { foreach(i, widgets) i->update(); }
 
+      bool getSavefileDir(string& dir)
+      {
+         string str = savefile_dir->edit.text();
+         if (str.length() > 0)
+         {
+            dir = str;
+            return true;
+         }
+         else
+            return false;
+      }
+
+      bool getSavestateDir(string& dir)
+      {
+         string str = savestate_dir->edit.text();
+         if (str.length() > 0)
+         {
+            dir = str;
+            return true;
+         }
+         else
+            return false;
+      }
+
    private:
       linear_vector<SettingLayout::APtr> widgets;
       VerticalLayout vbox;
+      DirSetting::Ptr savefile_dir, savestate_dir;
 
 };
 

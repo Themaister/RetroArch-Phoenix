@@ -47,7 +47,7 @@ class LogWindow : public ToggleWindow
 class MainWindow : public Window
 {
    public:
-      MainWindow() : general(configs.cli), video(configs.cli), audio(configs.cli), input(configs.cli)
+      MainWindow() : general(configs.gui, configs.cli), video(configs.cli), audio(configs.cli), input(configs.cli)
       {
          setTitle("SSNES || Phoenix");
          //setBackgroundColor(64, 64, 64);
@@ -506,11 +506,56 @@ class MainWindow : public Window
          else if (settings.justifiers_2.checked())
             vec_cmd.append("-J");
 
-         vec_cmd.append(NULL);
+
+         string savefile_dir, savestate_dir;
+         char basename_buf[1024];
+
+         nall::strlcpy(basename_buf, rom_path, sizeof(basename_buf));
+         char *basename_ptr;
+         
+         if ((basename_ptr = strrchr(basename_buf, '.')))
+         {
+            *basename_ptr = '\0';
+            nall::strlcat(basename_buf, ".srm", sizeof(basename_buf));
+         }
+
+         if (!(basename_ptr = strrchr(basename_buf, '/')))
+            basename_ptr = strrchr(basename_buf, '\\');
+         if (basename_ptr)
+            basename_ptr++;
+
+         if (general.getSavefileDir(savefile_dir))
+         {
+            if (basename_ptr)
+               savefile_dir.append(basename_ptr);
+            vec_cmd.append("-s");
+            vec_cmd.append(savefile_dir);
+         }
+
+         nall::strlcpy(basename_buf, rom_path, sizeof(basename_buf));
+         if ((basename_ptr = strrchr(basename_buf, '.')))
+         {
+            *basename_ptr = '\0';
+            nall::strlcat(basename_buf, ".state", sizeof(basename_buf));
+         }
+
+         if (!(basename_ptr = strrchr(basename_buf, '/')))
+            basename_ptr = strrchr(basename_buf, '\\');
+         if (basename_ptr)
+            basename_ptr++;
+
+         if (general.getSavestateDir(savestate_dir))
+         {
+            if (basename_ptr)
+               savestate_dir.append(basename_ptr);
+            vec_cmd.append("-S");
+            vec_cmd.append(savestate_dir);
+         }
 
          //foreach(i, vec_cmd) if (i) print(i, "\n");
          //print("\n");
 
+         vec_cmd.append(NULL);
          configs.gui.write();
          configs.cli.write();
          fork_ssnes(ssnes_path, &vec_cmd[0]);
