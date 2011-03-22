@@ -699,7 +699,7 @@ class General : public ToggleWindow
    public:
       General(ConfigFile &_pconf, ConfigFile &_conf) : ToggleWindow("SSNES || General settings")
       {
-         setGeometry({256, 256, 500, 300});
+         setGeometry({256, 256, 600, 300});
          widgets.append(BoolSetting::shared(_conf, "rewind_enable", "Enable rewind:", false));
          widgets.append(IntSetting::shared(_conf, "rewind_buffer_size", "Rewind buffer size (MB):", 20));
          widgets.append(IntSetting::shared(_conf, "rewind_granularity", "Rewind frames granularity:", 1));
