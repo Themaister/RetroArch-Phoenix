@@ -576,8 +576,6 @@ class MainWindow : public Window
          // Gotta love Unix :)
          int fds[2];
          pipe(fds);
-         close(2);
-         dup(fds[1]);
 
          if (fork())
          {
@@ -604,6 +602,9 @@ class MainWindow : public Window
          }
          else
          {
+            // Redirect stderr to GUI reader.
+            close(2);
+            dup(fds[1]);
             if (execvp(path, const_cast<char**>(cmd)) < 0)
                exit(255);
          }
