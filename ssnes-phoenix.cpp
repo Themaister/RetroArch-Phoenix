@@ -6,6 +6,7 @@
 #include <sys/types.h>
 #include <sys/wait.h>
 #include <sys/stat.h>
+#include <signal.h>
 #else
 #define WIN32_LEAN_AND_MEAN
 #include <windows.h>
@@ -19,6 +20,21 @@
 using namespace nall;
 using namespace phoenix;
 
+#ifndef _WIN32
+namespace Internal
+{
+   extern "C"
+   {
+      static void sigchld_handle(int);
+   }
+
+   static void sigchld_handle(int)
+   {
+      //print("SSNES child died!\n");
+      while (waitpid(-1, NULL, WNOHANG) > 0);
+   }
+}
+#endif
 
 
 class LogWindow : public ToggleWindow
@@ -567,49 +583,65 @@ class MainWindow : public Window
          // I think we had to do this with GTK+ at least :v
          if (OS::pendingEvents()) OS::processEvents();
 
-         setVisible(false);
-         general.hide();
-         video.hide();
-         audio.hide();
-         input.hide();
+         bool can_hide = !general.getAsyncFork();
 
          // Gotta love Unix :)
          int fds[2];
-         pipe(fds);
+
+         if (can_hide)
+         {
+            setVisible(false);
+            general.hide();
+            video.hide();
+            audio.hide();
+            input.hide();
+
+            pipe(fds);
+            signal(SIGCHLD, SIG_DFL);
+         }
+         else
+            signal(SIGCHLD, Internal::sigchld_handle);
 
          if (fork())
          {
-            close(fds[1]);
-            log_win.clear();
-            char line[1024] = {0};
-            ssize_t ret;
-            while((ret = read(fds[0], line, sizeof(line) - 1)) > 0)
+            if (can_hide)
             {
-               line[ret] = '\0';
-               log_win.push(line);
-            }
+               close(fds[1]);
+               log_win.clear();
+               char line[1024] = {0};
+               ssize_t ret;
+               while((ret = read(fds[0], line, sizeof(line) - 1)) > 0)
+               {
+                  line[ret] = '\0';
+                  log_win.push(line);
+               }
 
-            int status = 0;
-            wait(&status);
-            status = WEXITSTATUS(status);
-            if (status == 255)
-               setStatusText({"Could not find SSNES in given path ", path});
-            else if (status != 0)
-               setStatusText({"Failed to open ROM!"});
-            else
-               setStatusText("SSNES exited successfully.");
-            close(fds[0]);
+               int status = 0;
+               wait(&status);
+               status = WEXITSTATUS(status);
+               if (status == 255)
+                  setStatusText({"Could not find SSNES in given path ", path});
+               else if (status != 0)
+                  setStatusText({"Failed to open ROM!"});
+               else
+                  setStatusText("SSNES exited successfully.");
+               close(fds[0]);
+            }
          }
          else
          {
-            // Redirect stderr to GUI reader.
-            close(2);
-            dup(fds[1]);
+            if (can_hide)
+            {
+               // Redirect stderr to GUI reader.
+               close(2);
+               dup(fds[1]);
+            }
             if (execvp(path, const_cast<char**>(cmd)) < 0)
                exit(255);
          }
 
-         setVisible();
+         if (can_hide)
+            setVisible();
       }
 #else
       // This will be hell on Earth :v
@@ -618,11 +650,16 @@ class MainWindow : public Window
          if (OS::pendingEvents())
             OS::processEvents();
 
-         setVisible(false);
-         general.hide();
-         video.hide();
-         audio.hide();
-         input.hide();
+         bool can_hide = !general.getAsyncFork();
+
+         if (can_hide)
+         {
+            setVisible(false);
+            general.hide();
+            video.hide();
+            audio.hide();
+            input.hide();
+         }
 
          HANDLE reader, writer;
          SECURITY_ATTRIBUTES saAttr;
@@ -672,23 +709,26 @@ class MainWindow : public Window
                &siStartInfo,
                &piProcInfo);
 
-         if (bSuccess)
+         if (can_hide)
          {
-            CloseHandle(writer);
-            writer = NULL;
-            log_win.clear();
-            char buf[1024];
-            DWORD dwRead;
-            while (ReadFile(reader, buf, sizeof(buf) - 1, &dwRead, NULL) == TRUE && dwRead > 0)
+            if (bSuccess)
             {
-               buf[dwRead] = '\0';
-               log_win.push(buf);
+               CloseHandle(writer);
+               writer = NULL;
+               log_win.clear();
+               char buf[1024];
+               DWORD dwRead;
+               while (ReadFile(reader, buf, sizeof(buf) - 1, &dwRead, NULL) == TRUE && dwRead > 0)
+               {
+                  buf[dwRead] = '\0';
+                  log_win.push(buf);
+               }
+               setStatusText("SSNES returned successfully!");
             }
-            setStatusText("SSNES returned successfully!");
-         }
-         else
-         {
-            setStatusText("Failed to start SSNES");
+            else
+            {
+               setStatusText("Failed to start SSNES");
+            }
          }
 
          if (reader)
@@ -696,7 +736,8 @@ class MainWindow : public Window
          if (writer)
             CloseHandle(writer);
 
-         setVisible();
+         if (can_hide)
+            setVisible();
       }
 #endif
 

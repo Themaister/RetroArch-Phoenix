@@ -281,8 +281,8 @@ class BoolSetting : public SettingLayout, public util::Shared<BoolSetting>
          check.setText(tmp ? "Enabled" : "Disabled");
       }
 
-   private:
       CheckBox check;
+   private:
       bool m_default;
 };
 
@@ -708,8 +708,10 @@ class General : public ToggleWindow
 
          savefile_dir = DirSetting::shared(_pconf, "savefile_dir", "Savefile directory:", string(""));
          savestate_dir = DirSetting::shared(_pconf, "savestate_dir", "Savestate directory:", string(""));
+         async_fork = BoolSetting::shared(_pconf, "async_fork", "Keep UI visible:", false);
          widgets.append(savefile_dir);
          widgets.append(savestate_dir);
+         widgets.append(async_fork);
 
          foreach(i, widgets) { vbox.append(i->layout(), 0, 0, 3); }
 
@@ -743,10 +745,16 @@ class General : public ToggleWindow
             return false;
       }
 
+      bool getAsyncFork()
+      {
+         return async_fork->check.checked();
+      }
+
    private:
       linear_vector<SettingLayout::APtr> widgets;
       VerticalLayout vbox;
       DirSetting::Ptr savefile_dir, savestate_dir;
+      BoolSetting::Ptr async_fork;
 
 };
 
