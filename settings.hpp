@@ -882,6 +882,7 @@ namespace Internal
       { "input_rate_step_up", "Audio input rate step up", "" },
       { "input_rate_step_down", "Audio input rate step down", "" },
       { "input_rewind", "Rewind", "" },
+      { "input_reset", "Reset", "" },
    };
 
    static const linear_vector<linear_vector<input_selection>> binds = { 
