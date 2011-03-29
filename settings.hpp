@@ -775,7 +775,7 @@ class Video : public ToggleWindow
    public:
       Video(ConfigFile &_conf) : ToggleWindow("SSNES || Video settings")
       {
-         setGeometry({256, 256, 600, 700});
+         setGeometry({256, 256, 600, 740});
          widgets.append(ComboSetting::shared(_conf, "video_driver", "Video driver:", Internal::video_drivers, 0));
          widgets.append(DoubleSetting::shared(_conf, "video_xscale", "Windowed X scale:", 3.0));
          widgets.append(DoubleSetting::shared(_conf, "video_xscale", "Windowed Y scale:", 3.0));
@@ -798,6 +798,7 @@ class Video : public ToggleWindow
          widgets.append(ShaderSetting::shared(_conf, "video_shader_type", 
                   linear_vector<string>({"Automatic", "Cg", "bSNES XML", "None"}), 
                   linear_vector<string>({"auto", "cg", "bsnes", "none"}), paths));
+         widgets.append(DirSetting::shared(_conf, "video_shader_dir", "XML shader directory:", ""));
          widgets.append(BoolSetting::shared(_conf, "video_render_to_texture", "Render-to-texture (2-pass rendering):", false));
          widgets.append(DoubleSetting::shared(_conf, "video_fbo_scale_x", "FBO Scale X:", 2.0));
          widgets.append(DoubleSetting::shared(_conf, "video_fbo_scale_y", "FBO Scale Y:", 2.0));
@@ -891,6 +892,8 @@ namespace Internal
       { "input_rate_step_down", "Audio input rate step down", "" },
       { "input_rewind", "Rewind", "" },
       { "input_reset", "Reset", "" },
+      { "input_shader_next", "Next shader", "" },
+      { "input_shader_prev", "Previous shader", "" },
    };
 
    static const linear_vector<linear_vector<input_selection>> binds = { 
