@@ -439,8 +439,14 @@ class InputSetting : public SettingLayout, public util::Shared<InputSetting>
          list_view.setHeaderVisible();
          list_view.onActivate = [this]() { this->update_bind(); };
 
-         //vbox.append(label, 120, WIDGET_HEIGHT, 0);
          vbox.append(hbox, 0, 0);
+
+         index_label.setText("Joypad #:");
+         hbox_index.append(index_label, 60, WIDGET_HEIGHT);
+         index_show.setEditable(false);
+         hbox_index.append(index_show, 60, WIDGET_HEIGHT);
+         vbox.append(hbox_index, 0, 0);
+
          vbox.append(list_view, 0, 300);
          hlayout.append(vbox, 0, 400);
       }
@@ -463,6 +469,11 @@ class InputSetting : public SettingLayout, public util::Shared<InputSetting>
       Button def_all;
       Button def;
       Button erase;
+
+      Label index_label;
+      LineEdit index_show;
+      HorizontalLayout hbox_index;
+
       linear_vector<linear_vector<Internal::input_selection>> list;
 
       void set_single(const string& display, const string& conf_string)
@@ -491,6 +502,13 @@ class InputSetting : public SettingLayout, public util::Shared<InputSetting>
                conf.set({j.config_base, "_axis"}, conf_string);
             }
          }
+         
+         conf.set("input_player1_joypad_index", (int)0);
+         conf.set("input_player2_joypad_index", (int)1);
+         conf.set("input_player3_joypad_index", (int)2);
+         conf.set("input_player4_joypad_index", (int)3);
+         conf.set("input_player5_joypad_index", (int)4);
+
          this->update_list();
       }
 
@@ -512,6 +530,20 @@ class InputSetting : public SettingLayout, public util::Shared<InputSetting>
             list_view.append(i.base, i.display);
          }
          list_view.autoSizeColumns();
+
+         if (player.selection() == max_players) // Misc, only player 1
+         {
+            index_show.setText("0");
+         }
+         else
+         {
+            string index_conf_str {"input_player", (unsigned)(player.selection() + 1), "_joypad_index"};
+            string tmp;
+            if (conf.get(index_conf_str, tmp))
+               index_show.setText(tmp);
+            else
+               index_show.setText((unsigned)player.selection());
+         }
       }
 
       void update_bind()
@@ -936,7 +968,7 @@ class Input : public ToggleWindow
    public:
       Input(ConfigFile &_conf) : ToggleWindow("SSNES || Input settings")
       {
-         setGeometry({256, 256, 500, 400});
+         setGeometry({256, 256, 500, 450});
          widgets.append(DoubleSetting::shared(_conf, "input_axis_threshold", "Input axis threshold (0.0 to 1.0):", 0.5));
          widgets.append(BoolSetting::shared(_conf, "netplay_client_swap_input", "Use Player 1 binds as client:", false));
          widgets.append(InputSetting::shared(_conf, Internal::binds, 
