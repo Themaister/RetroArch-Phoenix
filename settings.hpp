@@ -738,6 +738,7 @@ class General : public ToggleWindow
          widgets.append(BoolSetting::shared(_conf, "pause_nonactive", "Pause when window loses focus:", true));
          widgets.append(IntSetting::shared(_conf, "autosave_interval", "Autosave interval (seconds):", 0));
 
+         widgets.append(PathSetting::shared(_conf, "cheat_database_path", "XML cheat database:", string(""), "XML files (*.xml)"));
          savefile_dir = DirSetting::shared(_pconf, "savefile_dir", "Savefile directory:", string(""));
          savestate_dir = DirSetting::shared(_pconf, "savestate_dir", "Savestate directory:", string(""));
          async_fork = BoolSetting::shared(_pconf, "async_fork", "Keep UI visible:", false);
@@ -926,6 +927,9 @@ namespace Internal
       { "input_reset", "Reset", "" },
       { "input_shader_next", "Next shader", "" },
       { "input_shader_prev", "Previous shader", "" },
+      { "input_cheat_index_minus", "Previous cheat index", "" },
+      { "input_cheat_index_plus", "Next cheat index", "" },
+      { "input_cheat_toggle", "Toggle cheat ON/OFF", "" },
    };
 
    static const linear_vector<linear_vector<input_selection>> binds = { 
@@ -947,7 +951,6 @@ class Audio : public ToggleWindow
          widgets.append(StringSetting::shared(_conf, "audio_device", "Audio device:", ""));
          widgets.append(BoolSetting::shared(_conf, "audio_sync", "Audio sync:", true));
          widgets.append(IntSetting::shared(_conf, "audio_latency", "Audio latency (ms):", 64));
-         //widgets.append(IntSetting::shared(_conf, "audio_src_quality", "libsamplerate quality (1 - worst, 5 - best)", 2));
 
          foreach(i, widgets) { vbox.append(i->layout(), 0, 0, 3); }
          vbox.setMargin(5);
