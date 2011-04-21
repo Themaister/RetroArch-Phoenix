@@ -796,9 +796,11 @@ namespace Internal
    static const linear_vector<combo_selection> video_drivers = {
 #if defined(_WIN32) || defined(__APPLE__)
       { "gl", "OpenGL" },
+      { "sdl", "SDL" },
 #else
       { "gl", "OpenGL" },
       { "xvideo", "XVideo" },
+      { "sdl", "SDL" },
 #endif
    };
 }
@@ -808,13 +810,14 @@ class Video : public ToggleWindow
    public:
       Video(ConfigFile &_conf) : ToggleWindow("SSNES || Video settings")
       {
-         setGeometry({256, 256, 600, 740});
+         setGeometry({256, 256, 600, 780});
          widgets.append(ComboSetting::shared(_conf, "video_driver", "Video driver:", Internal::video_drivers, 0));
          widgets.append(DoubleSetting::shared(_conf, "video_xscale", "Windowed X scale:", 3.0));
          widgets.append(DoubleSetting::shared(_conf, "video_xscale", "Windowed Y scale:", 3.0));
          widgets.append(IntSetting::shared(_conf, "video_fullscreen_x", "Fullscreen X resolution:", 0));
          widgets.append(IntSetting::shared(_conf, "video_fullscreen_y", "Fullscreen Y resolution:", 0));
          widgets.append(BoolSetting::shared(_conf, "video_fullscreen", "Start in fullscreen:", false));
+         widgets.append(BoolSetting::shared(_conf, "video_force_16bit", "Force 16-bit color:", false));
          widgets.append(BoolSetting::shared(_conf, "video_smooth", "Bilinear filtering:", true));
          widgets.append(BoolSetting::shared(_conf, "video_force_aspect", "Lock aspect ratio:", true));
          widgets.append(DoubleSetting::shared(_conf, "video_aspect_ratio", "Aspect ratio:", 1.333));
