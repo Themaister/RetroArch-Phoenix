@@ -448,6 +448,10 @@ class InputSetting : public SettingLayout, public util::Shared<InputSetting>
          vbox.append(hbox_index, 0, 0);
 
          vbox.append(list_view, 0, 300);
+
+         warn.setText("Note: Even if a key is detected properly here, it might not work in-game.\nIf it doesn't, please file a bug-report and try a different one for now.");
+         vbox.append(warn, 0, 2.5 * WIDGET_HEIGHT);
+
          hlayout.append(vbox, 0, 400);
       }
 
@@ -469,6 +473,7 @@ class InputSetting : public SettingLayout, public util::Shared<InputSetting>
       Button def_all;
       Button def;
       Button erase;
+      Label warn;
 
       Label index_label;
       LineEdit index_show;
@@ -974,7 +979,7 @@ class Input : public ToggleWindow
    public:
       Input(ConfigFile &_conf) : ToggleWindow("SSNES || Input settings")
       {
-         setGeometry({256, 256, 500, 450});
+         setGeometry({256, 256, 500, 500});
          widgets.append(DoubleSetting::shared(_conf, "input_axis_threshold", "Input axis threshold (0.0 to 1.0):", 0.5));
          widgets.append(BoolSetting::shared(_conf, "netplay_client_swap_input", "Use Player 1 binds as client:", false));
          widgets.append(InputSetting::shared(_conf, Internal::binds, 
