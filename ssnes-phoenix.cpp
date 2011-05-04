@@ -63,7 +63,7 @@ class LogWindow : public ToggleWindow
 class MainWindow : public Window
 {
    public:
-      MainWindow() : general(configs.gui, configs.cli), video(configs.cli), audio(configs.cli), input(configs.cli)
+      MainWindow() : general(configs.gui, configs.cli), video(configs.cli), audio(configs.cli), input(configs.cli), ext_rom(configs.gui)
       {
          setTitle("SSNES || Phoenix");
          //setBackgroundColor(64, 64, 64);
@@ -93,6 +93,7 @@ class MainWindow : public Window
       Video video;
       Audio audio;
       Input input;
+      ExtROM ext_rom;
 
       struct netplay
       {
@@ -251,6 +252,45 @@ class MainWindow : public Window
          CheckBox enable_tick;
       } movie_play;
 
+      enum rom_type
+      {
+         Normal,
+         SGB,
+         Sufami,
+         BSX,
+         BSX_Slot
+      };
+
+      struct rom_type_box
+      {
+         
+         rom_type_box()
+         {
+            box.append("Normal ROM");
+            box.append("Super GameBoy");
+            box.append("Sufami Turbo");
+            box.append("BSX");
+            box.append("BSX slotted");
+
+            label.setText("ROM type:");
+            hlayout.append(label, 150, WIDGET_HEIGHT);
+            hlayout.append(box, 200, WIDGET_HEIGHT);
+         }
+
+         enum rom_type type()
+         {
+            static const enum rom_type types[] = {Normal, SGB, Sufami, BSX, BSX_Slot};
+            return types[box.selection()];
+         }
+
+         HorizontalLayout& layout() { return hlayout; }
+
+         private:
+            ComboBox box;
+            Label label;
+            HorizontalLayout hlayout;
+      } rom_type;
+
 
 #ifdef _WIN32
       static string gui_config_path()
@@ -399,6 +439,7 @@ class MainWindow : public Window
          video.update();
          audio.update();
          input.update();
+         ext_rom.update();
       }
 
       void init_main_frame()
@@ -418,7 +459,7 @@ class MainWindow : public Window
          ssnes.setFilter("Executable file (*.exe)");
 #endif
 
-         rom.setLabel("ROM path:");
+         rom.setLabel("Normal ROM path:");
          movie_play.setLabel("BSV movie:");
          config.setLabel("SSNES config file:");
          ssnes.setLabel("SSNES path:");
@@ -426,6 +467,7 @@ class MainWindow : public Window
 
          start_btn.setText("Start SSNES");
          vbox.append(rom.layout(), 0, 0, 3);
+         vbox.append(rom_type.layout(), 0, 0, 5);
          vbox.append(movie_play.layout(), 0, 0, 10);
          vbox.append(config.layout(), 0, 0, 3);
          vbox.append(ssnes.layout(), 0, 0, 3);
@@ -443,12 +485,94 @@ class MainWindow : public Window
          MessageWindow::warning(Window::None, err);
       }
 
+      bool append_rom(string& rom_path, linear_vector<const char*>& vec_cmd)
+      {
+         // Need static since we're referencing a const char*. If destructor hits we're screwed.
+         static string rom_path_slot1;
+         static string rom_path_slot2;
+
+         bool sufami_a = false, sufami_b = false;
+         bool slotted = false;
+
+         switch (rom_type.type())
+         {
+            case Normal:
+               rom_path = rom.getPath();
+               if (rom_path.length() == 0)
+               {
+                  show_error("No ROM selected :(");
+                  return false;
+               }
+               rom_path = rom.getPath();
+               vec_cmd.append(rom_path);
+               return true;
+
+            case SGB:
+               if (!ext_rom.get_sgb_bios(rom_path))
+               {
+                  show_error("No Super GameBoy BIOS selected :(");
+                  return false;
+               }
+               if (!ext_rom.get_sgb_rom(rom_path_slot1))
+               {
+                  show_error("No Super GameBoy BIOS selected :(");
+                  return false;
+               }
+               vec_cmd.append(rom_path);
+               vec_cmd.append("--gameboy");
+               vec_cmd.append(rom_path_slot1);
+               return true;
+
+            case Sufami:
+               if (!ext_rom.get_sufami_bios(rom_path))
+               {
+                  show_error("No Sufami Turbo BIOS selected :(");
+                  return false;
+               }
+               if (ext_rom.get_sufami_slot_a(rom_path_slot1))
+                  sufami_a = true;
+               if (ext_rom.get_sufami_slot_b(rom_path_slot2))
+                  sufami_b = true;
+
+               vec_cmd.append(rom_path);
+
+               if (!sufami_a && !sufami_b)
+               {
+                  show_error("At least pick one Sufami slot :(");
+                  return false;
+               }
+
+               if (sufami_a) { vec_cmd.append("--sufamiA"); vec_cmd.append(rom_path_slot1); }
+               if (sufami_b) { vec_cmd.append("--sufamiB"); vec_cmd.append(rom_path_slot2); }
+
+            case BSX_Slot:
+               slotted = true;
+            case BSX:
+               if (!ext_rom.get_bsx_bios(rom_path))
+               {
+                  show_error("No BSX BIOS selected :(");
+                  return false;
+               }
+               if (!ext_rom.get_bsx_rom(rom_path_slot1))
+               {
+                  show_error("No BSX ROM selected :(");
+                  return false;
+               }
+
+               vec_cmd.append(rom_path);
+               vec_cmd.append(slotted ? "--bsxslot" : "--bsx");
+               vec_cmd.append(rom_path_slot1);
+         }
+
+         return false;
+      }
+
       void start_ssnes()
       {
          linear_vector<const char*> vec_cmd;
          string ssnes_path = ssnes.getPath();
          if (ssnes_path.length() == 0) ssnes_path = "ssnes";
-         string rom_path = rom.getPath();
+         string rom_path;
          string config_path = config.getPath();
          string host;
          string port;
@@ -457,13 +581,9 @@ class MainWindow : public Window
 
          vec_cmd.append("ssnes");
 
-         if (rom_path.length() == 0)
-         {
-            show_error("No ROM selected :(");
+         if (!append_rom(rom_path, vec_cmd))
             return;
-         }
 
-         vec_cmd.append(rom_path);
 
          if (config_path.length() > 0)
          {
@@ -567,6 +687,7 @@ class MainWindow : public Window
             vec_cmd.append("-S");
             vec_cmd.append(savestate_dir);
          }
+
 
          //foreach(i, vec_cmd) if (i) print(i, "\n");
          //print("\n");
@@ -743,6 +864,7 @@ class MainWindow : public Window
 
       struct
       {
+         Item ext_rom;
          CheckItem log;
          Separator sep;
          Item quit;
@@ -787,6 +909,7 @@ class MainWindow : public Window
          append(settings_menu);
          append(help_menu);
 
+         file.ext_rom.setText("Special ROM");
          file.log.setText("Show log");
          file.quit.setText("Quit");
 
@@ -797,6 +920,7 @@ class MainWindow : public Window
 
          help.about.setText("About");
 
+         file_menu.append(file.ext_rom);
          file_menu.append(file.log);
          file_menu.append(file.sep);
          file_menu.append(file.quit);
@@ -852,6 +976,7 @@ class MainWindow : public Window
          settings.video.onTick = [this]() { video.show(); };
          settings.audio.onTick = [this]() { audio.show(); };
          settings.input.onTick = [this]() { input.show(); };
+         file.ext_rom.onTick = [this]() { ext_rom.show(); };
       }
 };
 

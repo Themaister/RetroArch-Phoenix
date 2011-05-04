@@ -124,8 +124,8 @@ class PathSetting : public SettingLayout, public util::Shared<PathSetting>
          edit.setText(tmp);
       }
 
-   private:
       TextEdit edit;
+   private:
       Button button;
       Button clear;
       string m_default;
@@ -1011,6 +1011,63 @@ class Input : public ToggleWindow
 #endif
          ruby::input.init();
       }
+};
+
+class ExtROM : public ToggleWindow
+{
+   public:
+      ExtROM(ConfigFile &_conf) : ToggleWindow("SSNES || Special ROM")
+      {
+         setGeometry({256, 256, 600, 250});
+         sgb_bios = PathSetting::shared(_conf, "sgb_bios_path", "Super Gameboy BIOS:", string(""), "Super Famicom, Super Magicom (*.sfc, *.smc)");
+         sgb_rom = PathSetting::shared(_conf, "gameboy_path", "Gameboy ROM:", string(""), "Gameboy (*.gb)");
+         sufami_bios = PathSetting::shared(_conf, "sufami_bios_path", "Sufami Turbo BIOS:", string(""), "Super Famicom, Super Magicom (*.sfc, *.smc)");
+         sufami_slot_a = PathSetting::shared(_conf, "sufami_slot_a_path", "Sufami ROM (Slot A):", string(""), "Sufami Turbo (*.st)");
+         sufami_slot_b = PathSetting::shared(_conf, "sufami_slot_b_path", "Sufami ROM (Slot B):", string(""), "Sufami Turbo (*.st)");
+         bsx_bios = PathSetting::shared(_conf, "bsx_bios_path", "BSX BIOS:", string(""), "Super Famicom, Super Magicom (*.sfc, *.smc)");
+         bsx_rom = PathSetting::shared(_conf, "bsx_rom_path", "BSX ROM:", string(""), "BSX (*.bs)");
+
+         widgets.append(sgb_bios);
+         widgets.append(sgb_rom);
+         widgets.append(sufami_bios);
+         widgets.append(sufami_slot_a);
+         widgets.append(sufami_slot_b);
+         widgets.append(bsx_bios);
+         widgets.append(bsx_rom);
+
+         foreach(i, widgets) { vbox.append(i->layout(), 0, 0, 3); }
+         vbox.setMargin(5);
+         append(vbox);
+      }
+
+      void update() { foreach(i, widgets) i->update(); }
+
+      bool get_sgb_bios(string& str) { return get_str(sgb_bios, str); }
+      bool get_sgb_rom(string& str) { return get_str(sgb_rom, str); }
+      bool get_sufami_bios(string& str) { return get_str(sufami_bios, str); }
+      bool get_sufami_slot_a(string& str) { return get_str(sufami_slot_a, str); }
+      bool get_sufami_slot_b(string& str) { return get_str(sufami_slot_b, str); }
+      bool get_bsx_bios(string& str) { return get_str(bsx_bios, str); }
+      bool get_bsx_rom(string& str) { return get_str(bsx_rom, str); }
+
+   private:
+      linear_vector<SettingLayout::APtr> widgets;
+      VerticalLayout vbox;
+
+      PathSetting::Ptr sgb_bios, sgb_rom, sufami_bios, sufami_slot_a, sufami_slot_b, bsx_bios, bsx_rom;
+
+      bool get_str(PathSetting::Ptr ptr, string& str)
+      {
+         string _str = ptr->edit.text();
+         if (_str.length() > 0)
+         {
+            str = _str;
+            return true;
+         }
+         else
+            return false;
+      }
+
 };
 
 
