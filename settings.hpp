@@ -397,7 +397,7 @@ namespace Internal
       "n", "o", "p", "q", "r", "s", "t", "u", "v", "w", "x", "y", "z",
       "leftbracket", "rightbracket", "backslash", "semicolon", "apostrophe", "comma", "period", "slash",
       "keypad1", "keypad2", "keypad3", "keypad4", "keypad5", "keypad6", "keypad7", "keypad8", "keypad9", "keypad0",
-      "point", "enter", "add", "subtract", "multiply", "divide",
+      "point", "kp_enter", "add", "subtract", "multiply", "divide",
       "numlock", "capslock",
       "up", "down", "left", "right",
       "tab", "enter", "space", "menu",
@@ -720,7 +720,7 @@ class InputSetting : public SettingLayout, public util::Shared<InputSetting>
          if (j >= 0)
             return Internal::keymap[j];
          else
-            return ":v";
+            return "(unimplemented, pick something else)";
       }
 
       static const unsigned max_players = 5;
