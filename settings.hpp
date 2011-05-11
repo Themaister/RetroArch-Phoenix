@@ -802,10 +802,12 @@ namespace Internal
 #if defined(_WIN32) || defined(__APPLE__)
       { "gl", "OpenGL" },
       { "sdl", "SDL" },
+      { "ext", "External" },
 #else
       { "gl", "OpenGL" },
       { "xvideo", "XVideo" },
       { "sdl", "SDL" },
+      { "ext", "External" },
 #endif
    };
 }
@@ -815,8 +817,15 @@ class Video : public ToggleWindow
    public:
       Video(ConfigFile &_conf) : ToggleWindow("SSNES || Video settings")
       {
-         setGeometry({256, 256, 600, 800});
+         setGeometry({256, 256, 600, 830});
          widgets.append(ComboSetting::shared(_conf, "video_driver", "Video driver:", Internal::video_drivers, 0));
+#ifdef _WIN32
+         widgets.append(PathSetting::shared(_conf, "video_external_driver", "External video driver:", "", "Dynamic library (*.dll)"));
+#elif defined(__APPLE__)
+         widgets.append(PathSetting::shared(_conf, "video_external_driver", "External video driver:", "", "Dynamic library (*.dylib)"));
+#else
+         widgets.append(PathSetting::shared(_conf, "video_external_driver", "External video driver:", "", "Dynamic library (*.so)"));
+#endif
          widgets.append(DoubleSetting::shared(_conf, "video_xscale", "Windowed X scale:", 3.0));
          widgets.append(DoubleSetting::shared(_conf, "video_yscale", "Windowed Y scale:", 3.0));
          widgets.append(IntSetting::shared(_conf, "video_fullscreen_x", "Fullscreen X resolution:", 0));
