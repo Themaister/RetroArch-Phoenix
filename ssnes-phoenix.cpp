@@ -447,14 +447,7 @@ class MainWindow : public Window
          rom.setFilter("Super Magicom, Super Famicom (*.smc,*.sfc)");
          movie_play.setFilter("BSNES Movie (*.bsv)");
          config.setFilter("Config file (*.cfg)");
-#ifdef _WIN32
-#define DYNAMIC_EXTENSION "dll"
-#elif defined(__APPLE__)
-#define DYNAMIC_EXTENSION "dylib"
-#else
-#define DYNAMIC_EXTENSION "so"
-#endif
-         libsnes.setFilter("Dynamic library (*." DYNAMIC_EXTENSION ")");
+         libsnes.setFilter("Dynamic library (" DYNAMIC_EXTENSION ")");
 #ifdef _WIN32
          ssnes.setFilter("Executable file (*.exe)");
 #endif

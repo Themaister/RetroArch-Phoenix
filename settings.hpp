@@ -9,10 +9,13 @@
 
 #ifdef _WIN32
 #define WIDGET_HEIGHT 24
+#define DYNAMIC_EXTENSION "*.dll"
 #elif defined(__APPLE__)
 #define WIDGET_HEIGHT 28
+#define DYNAMIC_EXTENSION "*.dylib"
 #else
 #define WIDGET_HEIGHT 28
+#define DYNAMIC_EXTENSION "*.so"
 #endif
 
 using namespace phoenix;
@@ -819,13 +822,7 @@ class Video : public ToggleWindow
       {
          setGeometry({256, 256, 600, 830});
          widgets.append(ComboSetting::shared(_conf, "video_driver", "Video driver:", Internal::video_drivers, 0));
-#ifdef _WIN32
-         widgets.append(PathSetting::shared(_conf, "video_external_driver", "External video driver:", "", "Dynamic library (*.dll)"));
-#elif defined(__APPLE__)
-         widgets.append(PathSetting::shared(_conf, "video_external_driver", "External video driver:", "", "Dynamic library (*.dylib)"));
-#else
-         widgets.append(PathSetting::shared(_conf, "video_external_driver", "External video driver:", "", "Dynamic library (*.so)"));
-#endif
+         widgets.append(PathSetting::shared(_conf, "video_external_driver", "External video driver:", "", "Dynamic library (" DYNAMIC_EXTENSION ")"));
          widgets.append(DoubleSetting::shared(_conf, "video_xscale", "Windowed X scale:", 3.0));
          widgets.append(DoubleSetting::shared(_conf, "video_yscale", "Windowed Y scale:", 3.0));
          widgets.append(IntSetting::shared(_conf, "video_fullscreen_x", "Fullscreen X resolution:", 0));
@@ -960,8 +957,9 @@ class Audio : public ToggleWindow
    public:
       Audio(ConfigFile &_conf) : ToggleWindow("SSNES || Audio settings")
       {
-         setGeometry({256, 256, 450, 300});
+         setGeometry({256, 256, 550, 300});
          widgets.append(BoolSetting::shared(_conf, "audio_enable", "Enable audio:", true));
+         widgets.append(PathSetting::shared(_conf, "audio_dsp_plugin", "Audio DSP plugin:", string(""), "Dynamic library (" DYNAMIC_EXTENSION ")"));
          widgets.append(IntSetting::shared(_conf, "audio_out_rate", "Audio sample rate:", 48000));
          widgets.append(DoubleSetting::shared(_conf, "audio_in_rate", "Audio input rate:", 31980.0));
          widgets.append(DoubleSetting::shared(_conf, "audio_rate_step", "Audio rate step:", 0.25));
