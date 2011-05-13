@@ -544,6 +544,7 @@ class MainWindow : public Window
 
                if (sufami_a) { vec_cmd.append("--sufamiA"); vec_cmd.append(rom_path_slot1); }
                if (sufami_b) { vec_cmd.append("--sufamiB"); vec_cmd.append(rom_path_slot2); }
+               return true;
 
             case BSX_Slot:
                slotted = true;
@@ -562,6 +563,7 @@ class MainWindow : public Window
                vec_cmd.append(rom_path);
                vec_cmd.append(slotted ? "--bsxslot" : "--bsx");
                vec_cmd.append(rom_path_slot1);
+               return true;
          }
 
          return false;
