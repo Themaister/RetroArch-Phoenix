@@ -876,9 +876,11 @@ namespace Internal
       {"sdl", "SDL"},
       {"xaudio", "XAudio2"},
       {"rsound", "RSound"},
+      {"ext", "External"},
 #elif defined(__APPLE__)
       {"openal", "OpenAL"},
       {"sdl", "SDL"},
+      {"ext", "External"},
 #else
       {"alsa", "ALSA"},
       {"pulse", "PulseAudio"},
@@ -888,6 +890,7 @@ namespace Internal
       {"roar", "RoarAudio"},
       {"openal", "OpenAL"},
       {"sdl", "SDL"},
+      {"ext", "External"},
 #endif
    };
 
@@ -957,13 +960,14 @@ class Audio : public ToggleWindow
    public:
       Audio(ConfigFile &_conf) : ToggleWindow("SSNES || Audio settings")
       {
-         setGeometry({256, 256, 550, 300});
+         setGeometry({256, 256, 600, 330});
          widgets.append(BoolSetting::shared(_conf, "audio_enable", "Enable audio:", true));
+         widgets.append(ComboSetting::shared(_conf, "audio_driver", "Audio driver:", Internal::audio_drivers, 0));
+         widgets.append(PathSetting::shared(_conf, "audio_external_driver", "External audio driver:", string(""), "Dynamic library (" DYNAMIC_EXTENSION ")"));
          widgets.append(PathSetting::shared(_conf, "audio_dsp_plugin", "Audio DSP plugin:", string(""), "Dynamic library (" DYNAMIC_EXTENSION ")"));
          widgets.append(IntSetting::shared(_conf, "audio_out_rate", "Audio sample rate:", 48000));
          widgets.append(DoubleSetting::shared(_conf, "audio_in_rate", "Audio input rate:", 31980.0));
          widgets.append(DoubleSetting::shared(_conf, "audio_rate_step", "Audio rate step:", 0.25));
-         widgets.append(ComboSetting::shared(_conf, "audio_driver", "Audio driver:", Internal::audio_drivers, 0));
          widgets.append(StringSetting::shared(_conf, "audio_device", "Audio device:", ""));
          widgets.append(BoolSetting::shared(_conf, "audio_sync", "Audio sync:", true));
          widgets.append(IntSetting::shared(_conf, "audio_latency", "Audio latency (ms):", 64));
