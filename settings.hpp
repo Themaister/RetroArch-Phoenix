@@ -739,7 +739,7 @@ class General : public ToggleWindow
    public:
       General(ConfigFile &_pconf, ConfigFile &_conf) : ToggleWindow("SSNES || General settings")
       {
-         setGeometry({256, 256, 600, 300});
+         setGeometry({256, 256, 600, 330});
          widgets.append(BoolSetting::shared(_conf, "rewind_enable", "Enable rewind:", false));
          widgets.append(IntSetting::shared(_conf, "rewind_buffer_size", "Rewind buffer size (MB):", 20));
          widgets.append(IntSetting::shared(_conf, "rewind_granularity", "Rewind frames granularity:", 1));
@@ -749,6 +749,7 @@ class General : public ToggleWindow
          widgets.append(PathSetting::shared(_conf, "cheat_database_path", "XML cheat database:", string(""), "XML files (*.xml)"));
          savefile_dir = DirSetting::shared(_pconf, "savefile_dir", "Savefile directory:", string(""));
          savestate_dir = DirSetting::shared(_pconf, "savestate_dir", "Savestate directory:", string(""));
+         widgets.append(DirSetting::shared(_conf, "screenshot_directory", "Screenshot directory:", string("")));
          async_fork = BoolSetting::shared(_pconf, "async_fork", "Keep UI visible:", false);
          widgets.append(savefile_dir);
          widgets.append(savestate_dir);
@@ -948,6 +949,7 @@ namespace Internal
       { "input_cheat_index_minus", "Previous cheat index", "" },
       { "input_cheat_index_plus", "Next cheat index", "" },
       { "input_cheat_toggle", "Toggle cheat ON/OFF", "" },
+      { "input_screenshot", "Take screenshot", "" },
    };
 
    static const linear_vector<linear_vector<input_selection>> binds = { 
