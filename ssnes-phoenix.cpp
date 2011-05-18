@@ -295,6 +295,15 @@ class MainWindow : public Window
 #ifdef _WIN32
       static string gui_config_path()
       {
+         // If we have ssnes-phoenix.cfg in same directory, use that ...
+         WIN32_FIND_DATAW data;
+         HANDLE find_file = FindFirstFileW(L"ssnes-phoenix.cfg", &data);
+         if (find_file != INVALID_HANDLE_VALUE)
+         {
+            FindClose(find_file);
+            return "ssnes-phoenix.cfg";
+         }
+
          const char *path = std::getenv("APPDATA");
          if (path)
             return {path, "/phoenix.cfg"};
