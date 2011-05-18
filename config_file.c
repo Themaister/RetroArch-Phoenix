@@ -343,25 +343,17 @@ bool config_file_write(config_file_t *conf, const char *path)
    {
       file = fopen(path, "w");
       if (!file)
-      {
-         fprintf(stderr, "=== Failed to write config to \"%s\" ===\n", path);
          return false;
-      }
-      else
-         fprintf(stderr, "=== Opened file at least ... ===\n");
    }
    else
       file = stdout;
 
-   fprintf(stderr, "=== Dumping to \"%s\" ===\n", path);
    config_file_dump(conf, file);
 
    if (path)
    {
-      fprintf(stderr, "=== Closing file ===\n");
       fflush(file);
-      int ret = fclose(file);
-      fprintf(stderr, "=== fclose() = %d\n", ret);
+      fclose(file);
    }
 
    return true;
@@ -373,9 +365,7 @@ void config_file_dump(config_file_t *conf, FILE *file)
 
    while (list != NULL)
    {
-      if (fprintf(file, "%s = \"%s\"\n", list->key, list->value) == 0)
-         fprintf(stderr, "=== Failed to write!!! :V ===\n");
-      fprintf(stderr, "=== Config wrote: %s = \"%s\" ===\n", list->key, list->value);
+      fprintf(file, "%s = \"%s\"\n", list->key, list->value);
       list = list->next;
    }
 }
