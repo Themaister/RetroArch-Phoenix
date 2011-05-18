@@ -25,7 +25,8 @@ class ConfigFile
       { 
          if (conf) 
          {
-            config_file_write(conf, path);
+            if (path[0])
+               config_file_write(conf, path);
             config_file_free(conf); 
             conf = _in.conf; 
             _in.conf = NULL;
@@ -120,11 +121,11 @@ class ConfigFile
          if (conf) config_set_bool(conf, key, val);
       }
 
-      void write() { if (conf) config_file_write(conf, path); }
+      void write() { if (conf && path[0]) config_file_write(conf, path); }
 
       ConfigFile(ConfigFile&& _in) { *this = std::move(_in); }
 
-      ~ConfigFile() { if (conf) { config_file_write(conf, path);  config_file_free(conf); } }
+      ~ConfigFile() { if (conf) { if (path[0]) config_file_write(conf, path);  config_file_free(conf); } }
 
 
    private:

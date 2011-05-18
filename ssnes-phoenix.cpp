@@ -297,11 +297,11 @@ class MainWindow : public Window
       {
          // If we have ssnes-phoenix.cfg in same directory, use that ...
          WIN32_FIND_DATAW data;
-         HANDLE find_file = FindFirstFileW(L"ssnes-phoenix.cfg", &data);
+         HANDLE find_file = FindFirstFileW(L"./ssnes-phoenix.cfg", &data);
          if (find_file != INVALID_HANDLE_VALUE)
          {
             FindClose(find_file);
-            return "ssnes-phoenix.cfg";
+            return "./ssnes-phoenix.cfg";
          }
 
          const char *path = std::getenv("APPDATA");
@@ -320,7 +320,7 @@ class MainWindow : public Window
          {
             // If we have ssnes.cfg in same directory, use that ...
             WIN32_FIND_DATAW data;
-            HANDLE find_file = FindFirstFileW(L"ssnes.cfg", &data);
+            HANDLE find_file = FindFirstFileW(L"./ssnes.cfg", &data);
             if (find_file != INVALID_HANDLE_VALUE)
             {
                FindClose(find_file);
@@ -331,7 +331,7 @@ class MainWindow : public Window
             if (path)
                return {path, "/ssnes.cfg"};
             else
-               return "ssnes.cfg"; // Just return something ...
+               return "./ssnes.cfg"; // Just return something ...
          }
       }
 #elif defined(__APPLE__)
