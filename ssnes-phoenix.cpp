@@ -322,7 +322,7 @@ class MainWindow : public Window
             if (path)
                return {path, "/ssnes.cfg"};
             else
-               return "OMGWTFDOWEDO?!";
+               return "ssnes.cfg"; // Just return something ...
          }
       }
 #elif defined(__APPLE__)
