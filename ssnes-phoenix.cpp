@@ -95,6 +95,8 @@ class MainWindow : public Window
       Input input;
       ExtROM ext_rom;
 
+      string m_cli_path;
+
       struct netplay
       {
          netplay() 
@@ -432,7 +434,6 @@ class MainWindow : public Window
 
       void init_config()
       {
-         string cli_path;
          string tmp;
          string gui_path = gui_config_path();
 
@@ -448,8 +449,8 @@ class MainWindow : public Window
          config.setConfig(configs.gui, "config_path", {&MainWindow::reload_cli_config, this});
          libsnes.setConfig(configs.cli, "libsnes_path");
 
-         cli_path = cli_config_path();
-         configs.cli = ConfigFile(cli_path);
+         m_cli_path = cli_config_path();
+         configs.cli = ConfigFile(m_cli_path);
 
          init_cli_config();
       }
@@ -610,11 +611,11 @@ class MainWindow : public Window
             return;
 
 
+         vec_cmd.append("-c");
          if (config_path.length() > 0)
-         {
-            vec_cmd.append("-c");
             vec_cmd.append(config_path);
-         }
+         else
+            vec_cmd.append(m_cli_path);
 
          vec_cmd.append("-v");
 
