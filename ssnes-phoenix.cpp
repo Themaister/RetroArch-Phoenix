@@ -309,6 +309,15 @@ class MainWindow : public Window
             return tmp;
          else
          {
+            // If we have ssnes.cfg in same directory, use that ...
+            WIN32_FIND_DATAW data;
+            HANDLE find_file = FindFirstFileW(L"ssnes.cfg", &data);
+            if (find_file != INVALID_HANDLE_VALUE)
+            {
+               FindClose(find_file);
+               return "ssnes.cfg";
+            }
+
             const char *path = std::getenv("APPDATA");
             if (path)
                return {path, "/ssnes.cfg"};

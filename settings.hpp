@@ -392,7 +392,7 @@ namespace Internal
 {
    static const char keymap[][64] = {
       "escape", "f1", "f2", "f3", "f4", "f5", "f6", "f7", "f8", "f9", "f10", "f11", "f12",
-      "print_screen", "scroll_lock", "pause", "tilde",
+      "print_screen", "scroll_lock", "pause", "(not implemented)",
       "num1", "num2", "num3", "num4", "num5", "num6", "num7", "num8", "num9", "num0",
       "dash", "equal", "backspace",
       "insert", "del", "home", "end", "pageup", "pagedown",
@@ -950,6 +950,7 @@ namespace Internal
       { "input_cheat_index_plus", "Next cheat index", "" },
       { "input_cheat_toggle", "Toggle cheat ON/OFF", "" },
       { "input_screenshot", "Take screenshot", "" },
+      { "input_dsp_config", "Open DSP plugin config", "" },
    };
 
    static const linear_vector<linear_vector<input_selection>> binds = { 
