@@ -297,18 +297,24 @@ class MainWindow : public Window
       {
          // If we have ssnes-phoenix.cfg in same directory, use that ...
          WIN32_FIND_DATAW data;
-         HANDLE find_file = FindFirstFileW(L"./ssnes-phoenix.cfg", &data);
+         HANDLE find_file = FindFirstFileW(L"ssnes-phoenix.cfg", &data);
          if (find_file != INVALID_HANDLE_VALUE)
          {
             FindClose(find_file);
-            return "./ssnes-phoenix.cfg";
+            char dir[256];
+            GetCurrentDirectoryA(sizeof(dir), dir);
+            return {dir, "\\ssnes-phoenix.cfg"};
          }
 
          const char *path = std::getenv("APPDATA");
          if (path)
             return {path, "/phoenix.cfg"};
          else
-            return "WTFDOWEDOTHERE?!";
+         {
+            char dir[256];
+            GetCurrentDirectoryA(sizeof(dir), dir);
+            return {dir, "\\ssnes-phoenix.cfg"};
+         }
       }
 
       string cli_config_path()
@@ -320,18 +326,24 @@ class MainWindow : public Window
          {
             // If we have ssnes.cfg in same directory, use that ...
             WIN32_FIND_DATAW data;
-            HANDLE find_file = FindFirstFileW(L"./ssnes.cfg", &data);
+            HANDLE find_file = FindFirstFileW(L"ssnes.cfg", &data);
             if (find_file != INVALID_HANDLE_VALUE)
             {
                FindClose(find_file);
-               return "ssnes.cfg";
+               char dir[256];
+               GetCurrentDirectoryA(sizeof(dir), dir);
+               return {dir, "\\ssnes.cfg"};
             }
 
             const char *path = std::getenv("APPDATA");
             if (path)
-               return {path, "/ssnes.cfg"};
+               return {path, "\\ssnes.cfg"};
             else
-               return "./ssnes.cfg"; // Just return something ...
+            {
+               char dir[256];
+               GetCurrentDirectoryA(sizeof(dir), dir);
+               return {dir, "\\ssnes.cfg"};
+            }
          }
       }
 #elif defined(__APPLE__)

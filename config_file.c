@@ -347,6 +347,8 @@ bool config_file_write(config_file_t *conf, const char *path)
          fprintf(stderr, "=== Failed to write config to \"%s\" ===\n", path);
          return false;
       }
+      else
+         fprintf(stderr, "=== Opened file at least ... ===\n");
    }
    else
       file = stdout;
@@ -357,7 +359,9 @@ bool config_file_write(config_file_t *conf, const char *path)
    if (path)
    {
       fprintf(stderr, "=== Closing file ===\n");
-      fclose(file);
+      fflush(file);
+      int ret = fclose(file);
+      fprintf(stderr, "=== fclose() = %d\n", ret);
    }
 
    return true;
