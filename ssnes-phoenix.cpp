@@ -435,7 +435,7 @@ class MainWindow : public Window
             else if (home_path)
             {
                cli_path = home_path;
-               cli_path.append("/.ssnesrc");
+               cli_path.append("/.ssnes.cfg");
             }
             else
                cli_path = "/etc/ssnes.cfg";
