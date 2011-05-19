@@ -760,13 +760,15 @@ class MainWindow : public Window
 
          if (can_hide)
          {
+            if (pipe(fds) < 0)
+               return;
+
             setVisible(false);
             general.hide();
             video.hide();
             audio.hide();
             input.hide();
 
-            pipe(fds);
             signal(SIGCHLD, SIG_DFL);
          }
          else
@@ -804,7 +806,8 @@ class MainWindow : public Window
             {
                // Redirect stderr to GUI reader.
                close(2);
-               dup(fds[1]);
+               if (dup(fds[1]) < 0)
+                  exit(255);
             }
             if (execvp(path, const_cast<char**>(cmd)) < 0)
                exit(255);
