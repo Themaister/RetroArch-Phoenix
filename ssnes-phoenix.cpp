@@ -205,7 +205,7 @@ class MainWindow : public Window
                edit.setText("");
                if (conf)
                   conf->set(config_key, string(""));
-               cb(this->getPath());
+               cb("");
             };
 
             edit.setEditable(false);
@@ -297,26 +297,28 @@ class MainWindow : public Window
 #ifdef _WIN32
       static string gui_config_path()
       {
+         // Insane hack. Goddamn, win32 file handling sucks ... :(
+         // After we have changed directoy in the file browser, this changes ...
+         // On startup this will be correct ...
+         static char dir[256];
+         if (!dir[0])
+            GetCurrentDirectoryA(sizeof(dir), dir);
+
          // If we have ssnes-phoenix.cfg in same directory, use that ...
-         WIN32_FIND_DATAW data;
-         HANDLE find_file = FindFirstFileW(L"ssnes-phoenix.cfg", &data);
+         WIN32_FIND_DATAA data;
+         string gui_path = {dir, "\\ssnes-phoenix.cfg"};
+         HANDLE find_file = FindFirstFileA(gui_path, &data);
          if (find_file != INVALID_HANDLE_VALUE)
          {
             FindClose(find_file);
-            char dir[256];
-            GetCurrentDirectoryA(sizeof(dir), dir);
-            return {dir, "\\ssnes-phoenix.cfg"};
+            return gui_path;
          }
 
          const char *path = std::getenv("APPDATA");
          if (path)
-            return {path, "/phoenix.cfg"};
+            return {path, "\\phoenix.cfg"};
          else
-         {
-            char dir[256];
-            GetCurrentDirectoryA(sizeof(dir), dir);
-            return {dir, "\\ssnes-phoenix.cfg"};
-         }
+            return gui_path;
       }
 
       string cli_config_path()
@@ -326,15 +328,18 @@ class MainWindow : public Window
             return tmp;
          else
          {
+            static char dir[256];
+            if (!dir[0])
+               GetCurrentDirectoryA(sizeof(dir), dir);
+
             // If we have ssnes.cfg in same directory, use that ...
-            WIN32_FIND_DATAW data;
-            HANDLE find_file = FindFirstFileW(L"ssnes.cfg", &data);
+            WIN32_FIND_DATAA data;
+            string cli_path = {dir, "\\ssnes.cfg"};
+            HANDLE find_file = FindFirstFileA(cli_path, &data);
             if (find_file != INVALID_HANDLE_VALUE)
             {
                FindClose(find_file);
-               char dir[256];
-               GetCurrentDirectoryA(sizeof(dir), dir);
-               return {dir, "\\ssnes.cfg"};
+               return cli_path;
             }
 
             const char *path = std::getenv("APPDATA");
@@ -457,7 +462,17 @@ class MainWindow : public Window
 
       void reload_cli_config(const string& path)
       {
-         configs.cli = ConfigFile(path);
+         if (path.length() > 0)
+         {
+            configs.cli = ConfigFile(path);
+            m_cli_path = path;
+         }
+         else
+         {
+            m_cli_path = cli_config_path();
+            configs.cli = ConfigFile(m_cli_path);
+         }
+
          init_cli_config();
       }
 
