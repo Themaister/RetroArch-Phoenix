@@ -816,31 +816,12 @@ namespace Internal
    };
 }
 
-class Video : public ToggleWindow
+class ShaderVideo : public ToggleWindow
 {
    public:
-      Video(ConfigFile &_conf) : ToggleWindow("SSNES || Video settings")
+      ShaderVideo(ConfigFile &_conf) : ToggleWindow("SSNES || Shader settings")
       {
-         setGeometry({256, 256, 600, 830});
-         widgets.append(ComboSetting::shared(_conf, "video_driver", "Video driver:", Internal::video_drivers, 0));
-         widgets.append(PathSetting::shared(_conf, "video_external_driver", "External video driver:", "", "Dynamic library (" DYNAMIC_EXTENSION ")"));
-         widgets.append(DoubleSetting::shared(_conf, "video_xscale", "Windowed X scale:", 3.0));
-         widgets.append(DoubleSetting::shared(_conf, "video_yscale", "Windowed Y scale:", 3.0));
-         widgets.append(IntSetting::shared(_conf, "video_fullscreen_x", "Fullscreen X resolution:", 0));
-         widgets.append(IntSetting::shared(_conf, "video_fullscreen_y", "Fullscreen Y resolution:", 0));
-         widgets.append(BoolSetting::shared(_conf, "video_fullscreen", "Start in fullscreen:", false));
-         widgets.append(BoolSetting::shared(_conf, "video_force_16bit", "Force 16-bit color:", false));
-         widgets.append(BoolSetting::shared(_conf, "video_smooth", "Bilinear filtering:", true));
-         widgets.append(BoolSetting::shared(_conf, "video_force_aspect", "Lock aspect ratio:", true));
-         widgets.append(BoolSetting::shared(_conf, "video_crop_overscan", "Crop overscan:", false));
-         widgets.append(DoubleSetting::shared(_conf, "video_aspect_ratio", "Aspect ratio:", 1.333));
-
-
-         widgets.append(PathSetting::shared(_conf, "video_font_path", "On-screen message font:", "", "TTF font (*.ttf)"));
-         widgets.append(IntSetting::shared(_conf, "video_font_size", "On-screen font size:", 48));
-         widgets.append(DoubleSetting::shared(_conf, "video_message_pos_x", "On-screen message pos X:", 0.05));
-         widgets.append(DoubleSetting::shared(_conf, "video_message_pos_y", "On-screen message pos Y:", 0.05));
-         widgets.append(PathSetting::shared(_conf, "video_filter", "bSNES video filter:", "", "bSNES filter (*.filter)"));
+         setGeometry({128, 128, 600, 320});
 
          paths.append(PathSetting::shared(_conf, "video_cg_shader", "Cg pixel shader:", "", "Cg shader (*.cg)"));
          paths.append(PathSetting::shared(_conf, "video_bsnes_shader", "bSNES XML shader:", "", "XML shader (*.shader)"));
@@ -862,11 +843,96 @@ class Video : public ToggleWindow
       void update() { foreach(i, widgets) i->update(); }
 
    private:
+      linear_vector<PathSetting::Ptr> paths;
       linear_vector<SettingLayout::APtr> widgets;
       VerticalLayout vbox;
+};
 
-      linear_vector<PathSetting::Ptr> paths;
+class FontVideo : public ToggleWindow
+{
+   public:
+      FontVideo(ConfigFile &_conf) : ToggleWindow("SSNES || Font settings")
+      {
+         setGeometry({128, 128, 600, 150});
 
+         widgets.append(PathSetting::shared(_conf, "video_font_path", "On-screen message font:", "", "TTF font (*.ttf)"));
+         widgets.append(IntSetting::shared(_conf, "video_font_size", "On-screen font size:", 48));
+         widgets.append(DoubleSetting::shared(_conf, "video_message_pos_x", "On-screen message pos X:", 0.05));
+         widgets.append(DoubleSetting::shared(_conf, "video_message_pos_y", "On-screen message pos Y:", 0.05));
+
+         foreach(i, widgets) { vbox.append(i->layout(), 0, 0, 3); }
+         vbox.setMargin(5);
+         append(vbox);
+      }
+
+      void update() { foreach(i, widgets) i->update(); }
+
+   private:
+      linear_vector<SettingLayout::APtr> widgets;
+      VerticalLayout vbox;
+};
+
+class Video : public ToggleWindow
+{
+   public:
+      Video(ConfigFile &_conf) : ToggleWindow("SSNES || Video settings"), shader_setting(_conf), font_setting(_conf)
+      {
+         setGeometry({256, 256, 600, 500});
+         widgets.append(ComboSetting::shared(_conf, "video_driver", "Video driver:", Internal::video_drivers, 0));
+         widgets.append(PathSetting::shared(_conf, "video_external_driver", "External video driver:", "", "Dynamic library (" DYNAMIC_EXTENSION ")"));
+         widgets.append(DoubleSetting::shared(_conf, "video_xscale", "Windowed X scale:", 3.0));
+         widgets.append(DoubleSetting::shared(_conf, "video_yscale", "Windowed Y scale:", 3.0));
+         widgets.append(IntSetting::shared(_conf, "video_fullscreen_x", "Fullscreen X resolution:", 0));
+         widgets.append(IntSetting::shared(_conf, "video_fullscreen_y", "Fullscreen Y resolution:", 0));
+         widgets.append(BoolSetting::shared(_conf, "video_fullscreen", "Start in fullscreen:", false));
+         widgets.append(BoolSetting::shared(_conf, "video_force_16bit", "Force 16-bit color:", false));
+         widgets.append(BoolSetting::shared(_conf, "video_smooth", "Bilinear filtering:", true));
+         widgets.append(BoolSetting::shared(_conf, "video_force_aspect", "Lock aspect ratio:", true));
+         widgets.append(BoolSetting::shared(_conf, "video_crop_overscan", "Crop overscan:", false));
+         widgets.append(DoubleSetting::shared(_conf, "video_aspect_ratio", "Aspect ratio:", 1.333));
+
+         widgets.append(PathSetting::shared(_conf, "video_filter", "bSNES video filter:", "", "bSNES filter (*.filter)"));
+
+         foreach(i, widgets) { vbox.append(i->layout(), 0, 0, 3); }
+
+         shader.button.setText("Open");
+         shader.button.onTick = [this]() { this->shader_setting.show(); };
+         shader.label.setText("Shader settings:");
+         shader.layout.append(shader.label, 150, WIDGET_HEIGHT);
+         shader.layout.append(shader.button, 100, WIDGET_HEIGHT);
+         vbox.append(shader.layout, 0, 0);
+
+         font.button.setText("Open");
+         font.button.onTick = [this]() { this->font_setting.show(); };
+         font.label.setText("Font settings:");
+         font.layout.append(font.label, 150, WIDGET_HEIGHT);
+         font.layout.append(font.button, 100, WIDGET_HEIGHT);
+         vbox.append(font.layout, 0, 0);
+
+
+         vbox.setMargin(5);
+         append(vbox);
+      }
+
+      void update() 
+      { 
+         foreach(i, widgets) i->update(); 
+         shader_setting.update();
+         font_setting.update();
+      }
+
+   private:
+      linear_vector<SettingLayout::APtr> widgets;
+      VerticalLayout vbox;
+      ShaderVideo shader_setting;
+      FontVideo font_setting;
+
+      struct
+      {
+         HorizontalLayout layout;
+         Label label;
+         Button button;
+      } shader, font;
 };
 
 
