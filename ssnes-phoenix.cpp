@@ -416,6 +416,7 @@ class MainWindow : public Window
       string cli_config_path()
       {
          const char *path = std::getenv("XDG_CONFIG_HOME");
+         const char *home_path = std::getenv("HOME");
          string cli_path;
          string tmp;
          if (configs.gui.get("config_path", tmp))
@@ -426,8 +427,15 @@ class MainWindow : public Window
          {
             if (path)
             {
+               string dir = {path, "/ssnes"};
+               mkdir(dir, 0644);
                cli_path = path;
                cli_path.append("/ssnes/ssnes.cfg");
+            }
+            else if (home_path)
+            {
+               cli_path = home_path;
+               cli_path.append("/.ssnesrc");
             }
             else
                cli_path = "/etc/ssnes.cfg";
