@@ -771,6 +771,7 @@ class General : public ToggleWindow
          foreach(i, widgets) { vbox.append(i->layout(), 3); }
 
          vbox.setMargin(5);
+
          append(vbox);
       }
 
@@ -1134,6 +1135,7 @@ class ExtROM : public ToggleWindow
 
          foreach(i, widgets) { vbox.append(i->layout(), 3); }
          vbox.setMargin(5);
+
          append(vbox);
       }
 

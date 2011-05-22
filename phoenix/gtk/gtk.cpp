@@ -137,7 +137,7 @@ void pOS::initialize() {
   settings.load();
 
   int argc = 1;
-  char *argv[2];
+  char *argv[3];
   argv[0] = new char[8];
   argv[1] = 0;
   strcpy(argv[0], "phoenix");

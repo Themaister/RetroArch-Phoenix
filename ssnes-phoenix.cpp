@@ -30,7 +30,6 @@ namespace Internal
 
    static void sigchld_handle(int)
    {
-      //print("SSNES child died!\n");
       while (waitpid(-1, NULL, WNOHANG) > 0);
    }
 }
@@ -63,7 +62,7 @@ class LogWindow : public ToggleWindow
 class MainWindow : public Window
 {
    public:
-      MainWindow() : general(configs.gui, configs.cli), video(configs.cli), audio(configs.cli), input(configs.cli), ext_rom(configs.gui)
+      MainWindow() : input(configs.cli), general(configs.gui, configs.cli), video(configs.cli), audio(configs.cli), ext_rom(configs.gui)
       {
          Global::init_widget_height();
 
@@ -91,10 +90,10 @@ class MainWindow : public Window
 
       Button start_btn;
 
+      Input input;
       General general;
       Video video;
       Audio audio;
-      Input input;
       ExtROM ext_rom;
 
       string m_cli_path;
@@ -657,12 +656,10 @@ class MainWindow : public Window
 
             vec_cmd.append("--port");
             port = net.port.text();
-            //print(string({"Port:", port}));
             vec_cmd.append(port);
 
             vec_cmd.append("-F");
             frames = net.frames.text();
-            //print(string({"Frames:", frames}));
             vec_cmd.append(frames);
          }
 
@@ -738,10 +735,6 @@ class MainWindow : public Window
             vec_cmd.append("-S");
             vec_cmd.append(savestate_dir);
          }
-
-
-         //foreach(i, vec_cmd) if (i) print(i, "\n");
-         //print("\n");
 
          vec_cmd.append(NULL);
          configs.gui.write();
@@ -850,13 +843,9 @@ class MainWindow : public Window
          while (*cmd) 
          { 
             cmdline.append("\""); 
-            //print("Appending: ", *cmd, "\n"); 
             cmdline.append(*cmd++); 
             cmdline.append("\" "); 
          }
-
-         //print(cmdline);
-         //print("\n");
 
          PROCESS_INFORMATION piProcInfo;
          STARTUPINFO siStartInfo;
