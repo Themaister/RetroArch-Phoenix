@@ -2,6 +2,7 @@
 
 #include "object.cpp"
 #include "font.cpp"
+#include "timer.cpp"
 #include "message-window.cpp"
 #include "window.cpp"
 
@@ -14,6 +15,7 @@
 
 #include "widget/widget.cpp"
 #include "widget/button.cpp"
+#include "widget/canvas.cpp"
 #include "widget/check-box.cpp"
 #include "widget/combo-box.cpp"
 #include "widget/hex-edit.cpp"
@@ -80,7 +82,7 @@ static string pOS_fileDialog(bool save, Window &parent, const string &path, cons
 
   bool result = (save == false ? GetOpenFileName(&ofn) : GetSaveFileName(&ofn));
   if(result == false) return "";
-  string name = utf8_t(wfilename);
+  string name = (const char*)utf8_t(wfilename);
   name.transform("\\", "/");
   return name;
 }
@@ -117,7 +119,7 @@ string pOS::folderSelect(Window &parent, const string &path) {
     }
   }
   if(result == false) return "";
-  string name = utf8_t(wfilename);
+  string name = (const char*)utf8_t(wfilename);
   if(name == "") return "";
   name.transform("\\", "/");
   if(name.endswith("/") == false) name.append("/");
@@ -179,6 +181,18 @@ void pOS::initialize() {
   wc.hInstance = GetModuleHandle(0);
   wc.lpfnWndProc = OS_windowProc;
   wc.lpszClassName = L"phoenix_window";
+  wc.lpszMenuName = 0;
+  wc.style = CS_HREDRAW | CS_VREDRAW;
+  RegisterClass(&wc);
+
+  wc.cbClsExtra = 0;
+  wc.cbWndExtra = 0;
+  wc.hbrBackground = CreateSolidBrush(RGB(0, 0, 0));
+  wc.hCursor = LoadCursor(0, IDC_ARROW);
+  wc.hIcon = LoadIcon(0, IDI_APPLICATION);
+  wc.hInstance = GetModuleHandle(0);
+  wc.lpfnWndProc = Canvas_windowProc;
+  wc.lpszClassName = L"phoenix_canvas";
   wc.lpszMenuName = 0;
   wc.style = CS_HREDRAW | CS_VREDRAW;
   RegisterClass(&wc);

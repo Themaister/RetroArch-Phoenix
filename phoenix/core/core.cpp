@@ -26,12 +26,17 @@ void OS::processEvents() { return pOS::processEvents(); }
 void OS::quit() { return pOS::quit(); }
 void OS::initialize() { static bool initialized = false; if(initialized == false) { initialized = true; return pOS::initialize(); } }
 
+Geometry Font::geometry(const string &text) { return p.geometry(text); }
 void Font::setBold(bool bold) { state.bold = bold; return p.setBold(bold); }
 void Font::setFamily(const string &family) { state.family = family; return p.setFamily(family); }
 void Font::setItalic(bool italic) { state.italic = italic; return p.setItalic(italic); }
 void Font::setSize(unsigned size) { state.size = size; return p.setSize(size); }
 void Font::setUnderline(bool underline) { state.underline = underline; return p.setUnderline(underline); }
 Font::Font() : state(*new State), p(*new pFont(*this)) { p.constructor(); }
+
+void Timer::setEnabled(bool enabled) { state.enabled = enabled; return p.setEnabled(enabled); }
+void Timer::setInterval(unsigned milliseconds) { state.milliseconds = milliseconds; return p.setInterval(milliseconds); }
+Timer::Timer() : state(*new State), p(*new pTimer(*this)) { p.constructor(); }
 
 MessageWindow::Response MessageWindow::information(Window &parent, const string &text, MessageWindow::Buttons buttons) { return pMessageWindow::information(parent, text, buttons); }
 MessageWindow::Response MessageWindow::question(Window &parent, const string &text, MessageWindow::Buttons buttons) { return pMessageWindow::question(parent, text, buttons); }
@@ -80,13 +85,15 @@ void CheckItem::setChecked(bool checked) { state.checked = checked; return p.set
 void CheckItem::setText(const string &text) { state.text = text; return p.setText(text); }
 CheckItem::CheckItem() : state(*new State), base_from_member<pCheckItem&>(*new pCheckItem(*this)), Action(base_from_member<pCheckItem&>::value), p(base_from_member<pCheckItem&>::value) { p.constructor(); }
 
-void RadioItem::group_(const reference_array<RadioItem&> &list) { foreach(item, list) item.p.setGroup(item.state.group = list); if(list.size()) list[0].setChecked(); }
+void RadioItem::group(const reference_array<RadioItem&> &list) { foreach(item, list) item.p.setGroup(item.state.group = list); if(list.size()) list[0].setChecked(); }
 bool RadioItem::checked() { return p.checked(); }
 void RadioItem::setChecked() { foreach(item, state.group) item.state.checked = false; state.checked = true; return p.setChecked(); }
 void RadioItem::setText(const string &text) { state.text = text; return p.setText(text); }
 RadioItem::RadioItem() : state(*new State), base_from_member<pRadioItem&>(*new pRadioItem(*this)), Action(base_from_member<pRadioItem&>::value), p(base_from_member<pRadioItem&>::value) { p.constructor(); }
 
 bool Widget::enabled() { return state.enabled; }
+Font& Widget::font() { return p.font(); }
+Geometry Widget::minimumGeometry() { return p.minimumGeometry(); }
 void Widget::setEnabled(bool enabled) { state.enabled = enabled; return p.setEnabled(enabled); }
 void Widget::setFocused() { return p.setFocused(); }
 void Widget::setFont(Font &font) { state.font = &font; return p.setFont(font); }
@@ -98,6 +105,10 @@ Widget::Widget(pWidget &p) : state(*new State), p(p) { p.constructor(); }
 
 void Button::setText(const string &text) { state.text = text; return p.setText(text); }
 Button::Button() : state(*new State), base_from_member<pButton&>(*new pButton(*this)), Widget(base_from_member<pButton&>::value), p(base_from_member<pButton&>::value) { p.constructor(); }
+
+uint32_t* Canvas::buffer() { return p.buffer(); }
+void Canvas::update() { return p.update(); }
+Canvas::Canvas() : base_from_member<pCanvas&>(*new pCanvas(*this)), Widget(base_from_member<pCanvas&>::value), p(base_from_member<pCanvas&>::value) { p.constructor(); }
 
 bool CheckBox::checked() { return p.checked(); }
 void CheckBox::setChecked(bool checked) { state.checked = checked; return p.setChecked(checked); }
@@ -148,7 +159,7 @@ ListView::ListView() : state(*new State), base_from_member<pListView&>(*new pLis
 void ProgressBar::setPosition(unsigned position) { state.position = position; return p.setPosition(position); }
 ProgressBar::ProgressBar() : state(*new State), base_from_member<pProgressBar&>(*new pProgressBar(*this)), Widget(base_from_member<pProgressBar&>::value), p(base_from_member<pProgressBar&>::value) { p.constructor(); }
 
-void RadioBox::group_(const reference_array<RadioBox&> &list) { foreach(item, list) item.p.setGroup(item.state.group = list); if(list.size()) list[0].setChecked(); }
+void RadioBox::group(const reference_array<RadioBox&> &list) { foreach(item, list) item.p.setGroup(item.state.group = list); if(list.size()) list[0].setChecked(); }
 bool RadioBox::checked() { return p.checked(); }
 void RadioBox::setChecked() { foreach(item, state.group) item.state.checked = false; state.checked = true; return p.setChecked(); }
 void RadioBox::setText(const string &text) { state.text = text; return p.setText(text); }

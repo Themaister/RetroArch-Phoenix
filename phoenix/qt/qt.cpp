@@ -3,6 +3,7 @@
 
 #include "settings.cpp"
 #include "font.cpp"
+#include "timer.cpp"
 #include "message-window.cpp"
 #include "window.cpp"
 
@@ -15,6 +16,7 @@
 
 #include "widget/widget.cpp"
 #include "widget/button.cpp"
+#include "widget/canvas.cpp"
 #include "widget/check-box.cpp"
 #include "widget/combo-box.cpp"
 #include "widget/hex-edit.cpp"
@@ -29,6 +31,7 @@
 #include "widget/viewport.cpp"
 
 QApplication *pOS::application = 0;
+Font pOS::defaultFont;
 
 Geometry pOS::availableGeometry() {
   QRect rect = QApplication::desktop()->availableGeometry();

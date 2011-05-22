@@ -43,8 +43,8 @@ class LogWindow : public ToggleWindow
       LogWindow() : ToggleWindow("SSNES || Log window")
       {
          label.setText("SSNES output:");
-         layout.append(label, 0, WIDGET_HEIGHT);
-         layout.append(box, 0, 0);
+         layout.append(label, 0, 0);
+         layout.append(box, ~0, ~0);
          box.setEditable(false);
          layout.setMargin(5);
          append(layout);
@@ -65,6 +65,8 @@ class MainWindow : public Window
    public:
       MainWindow() : general(configs.gui, configs.cli), video(configs.cli), audio(configs.cli), input(configs.cli), ext_rom(configs.gui)
       {
+         Global::init_widget_height();
+
          setTitle("SSNES || Phoenix");
          //setBackgroundColor(64, 64, 64);
          setGeometry({128, 128, 680, 350});
@@ -231,9 +233,9 @@ class MainWindow : public Window
             void apply_layout()
             {
                hlayout.append(label, 150, WIDGET_HEIGHT);
-               hlayout.append(edit, 0, WIDGET_HEIGHT);
-               hlayout.append(clear, 80, WIDGET_HEIGHT);
-               hlayout.append(button, 100, WIDGET_HEIGHT);
+               hlayout.append(edit, ~0, WIDGET_HEIGHT);
+               hlayout.append(clear, 0, WIDGET_HEIGHT);
+               hlayout.append(button, 0, WIDGET_HEIGHT);
             }
       } rom, config, ssnes, libsnes;
 
@@ -243,10 +245,10 @@ class MainWindow : public Window
          {
             enable_tick.setText("Enable");
             hlayout.append(label, 150, WIDGET_HEIGHT);
-            hlayout.append(edit, 0, WIDGET_HEIGHT, 5);
+            hlayout.append(edit, ~0, WIDGET_HEIGHT, 5);
             hlayout.append(enable_tick, 80, WIDGET_HEIGHT);
-            hlayout.append(clear, 80, WIDGET_HEIGHT);
-            hlayout.append(button, 100, WIDGET_HEIGHT);
+            hlayout.append(clear, 0, WIDGET_HEIGHT);
+            hlayout.append(button, 0, WIDGET_HEIGHT);
          }
 
          bool is_enabled() { return enable_tick.checked(); }
@@ -513,16 +515,16 @@ class MainWindow : public Window
          libsnes.setLabel("libsnes path:");
 
          start_btn.setText("Start SSNES");
-         vbox.append(rom.layout(), 0, 0, 3);
-         vbox.append(rom_type.layout(), 0, 0, 5);
-         vbox.append(movie_play.layout(), 0, 0, 10);
-         vbox.append(config.layout(), 0, 0, 3);
-         vbox.append(ssnes.layout(), 0, 0, 3);
-         vbox.append(libsnes.layout(), 0, 0, 3);
-         vbox.append(start_btn, 0, WIDGET_HEIGHT, 15);
-         vbox.append(net.hlayout[0], 0, 0);
-         vbox.append(net.hlayout[1], 0, 0, 0);
-         vbox.append(net.hlayout[2], 0, 0, 20);
+         vbox.append(rom.layout(), 3);
+         vbox.append(rom_type.layout(), 5);
+         vbox.append(movie_play.layout(), 10);
+         vbox.append(config.layout(), 3);
+         vbox.append(ssnes.layout(), 3);
+         vbox.append(libsnes.layout(), 3);
+         vbox.append(start_btn, ~0, WIDGET_HEIGHT, 15);
+         vbox.append(net.hlayout[0]);
+         vbox.append(net.hlayout[1]);
+         vbox.append(net.hlayout[2], 20);
 
          start_btn.onTick = [this]() { this->start_ssnes(); };
       }

@@ -1,5 +1,6 @@
 #ifndef __PHOENIX_HPP
 #define __PHOENIX_HPP
+
 #include <nall/array.hpp>
 #include <nall/config.hpp>
 #include <nall/foreach.hpp>
@@ -13,4 +14,5 @@
 namespace phoenix {
   #include "core/core.hpp"
 }
+
 #endif

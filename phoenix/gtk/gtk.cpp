@@ -2,6 +2,7 @@
 
 #include "settings.cpp"
 #include "font.cpp"
+#include "timer.cpp"
 #include "message-window.cpp"
 #include "window.cpp"
 
@@ -14,6 +15,7 @@
 
 #include "widget/widget.cpp"
 #include "widget/button.cpp"
+#include "widget/canvas.cpp"
 #include "widget/check-box.cpp"
 #include "widget/combo-box.cpp"
 #include "widget/hex-edit.cpp"
@@ -26,6 +28,8 @@
 #include "widget/text-edit.cpp"
 #include "widget/vertical-slider.cpp"
 #include "widget/viewport.cpp"
+
+Font pOS::defaultFont;
 
 Geometry pOS::availableGeometry() {
   //TODO: is there a GTK+ function for this?

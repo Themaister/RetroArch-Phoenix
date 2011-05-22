@@ -8,18 +8,30 @@
 #include "ruby/ruby.hpp"
 
 #ifdef _WIN32
-#define WIDGET_HEIGHT 24
+static unsigned WIDGET_HEIGHT = 24;
 #define DYNAMIC_EXTENSION "*.dll"
 #elif defined(__APPLE__)
-#define WIDGET_HEIGHT 28
+static unsigned WIDGET_HEIGHT = 28;
 #define DYNAMIC_EXTENSION "*.dylib"
 #else
-#define WIDGET_HEIGHT 28
+static unsigned WIDGET_HEIGHT = 28;
 #define DYNAMIC_EXTENSION "*.so"
 #endif
 
+#define EDIT_WIDTH 200
+
 using namespace phoenix;
 using namespace nall;
+
+namespace Global
+{
+   static void init_widget_height()
+   {
+      Font font;
+      auto geom = font.geometry("|/abcdefghijklmnopqrstuvwxyz");
+      WIDGET_HEIGHT = geom.height + 12;
+   }
+}
 
 struct ToggleWindow : public Window
 {
@@ -62,7 +74,7 @@ class StringSetting : public SettingLayout, public util::Shared<StringSetting>
       StringSetting(ConfigFile &_conf, const string& _key, const string& label, const string& _default) : SettingLayout(_conf, _key, label), m_default(_default)
       {
          edit.onChange = [this]() { conf.set(key, edit.text()); };
-         hlayout.append(edit, 0, WIDGET_HEIGHT); 
+         hlayout.append(edit, EDIT_WIDTH, WIDGET_HEIGHT); 
       }
       
       void update()
@@ -85,9 +97,9 @@ class PathSetting : public SettingLayout, public util::Shared<PathSetting>
          button.setText("Open ...");
          clear.setText("Clear");
          edit.onChange = [this]() { conf.set(key, edit.text()); };
-         hlayout.append(edit, 0, WIDGET_HEIGHT); 
-         hlayout.append(clear, 80, WIDGET_HEIGHT);
-         hlayout.append(button, 100, WIDGET_HEIGHT);
+         hlayout.append(edit, ~0, WIDGET_HEIGHT); 
+         hlayout.append(clear, 0, WIDGET_HEIGHT);
+         hlayout.append(button, 0, WIDGET_HEIGHT);
 
          edit.setEditable(false);
 
@@ -143,9 +155,9 @@ class DirSetting : public SettingLayout, public util::Shared<DirSetting>
          button.setText("Open ...");
          clear.setText("Clear");
          edit.onChange = [this]() { conf.set(key, edit.text()); };
-         hlayout.append(edit, 0, WIDGET_HEIGHT); 
-         hlayout.append(clear, 80, WIDGET_HEIGHT);
-         hlayout.append(button, 100, WIDGET_HEIGHT);
+         hlayout.append(edit, ~0, WIDGET_HEIGHT); 
+         hlayout.append(clear, 0, WIDGET_HEIGHT);
+         hlayout.append(button, 0, WIDGET_HEIGHT);
 
          edit.setEditable(false);
 
@@ -212,7 +224,7 @@ class ShaderSetting : public SettingLayout, public util::Shared<ShaderSetting>
          : SettingLayout(_conf, _key, "", false), elems(_elems)
       {
          foreach(i, elems)
-            vbox.append(i->layout(), 0, 0);
+            vbox.append(i->layout());
 
          assert(_keys.size() == _values.size());
 
@@ -234,8 +246,8 @@ class ShaderSetting : public SettingLayout, public util::Shared<ShaderSetting>
          RadioBox::group(list);
          boxes[0]->setChecked();
 
-         vbox.append(hbox, 0, 120);
-         hlayout.append(vbox, 0, 3 * WIDGET_HEIGHT);
+         vbox.append(hbox);
+         hlayout.append(vbox);
       }
 
       void update()
@@ -295,7 +307,7 @@ class IntSetting : public SettingLayout, public util::Shared<IntSetting>
       IntSetting(ConfigFile &_conf, const string& _key, const string& label, int _default) : SettingLayout(_conf, _key, label), m_default(_default)
       {
          edit.onChange = [this]() { conf.set(key, (int)nall::decimal(edit.text())); };
-         hlayout.append(edit, 0, WIDGET_HEIGHT);
+         hlayout.append(edit, EDIT_WIDTH, WIDGET_HEIGHT);
       }
 
       void update()
@@ -317,7 +329,7 @@ class DoubleSetting : public SettingLayout, public util::Shared<DoubleSetting>
          : SettingLayout(_conf, _key, label), m_default(_default)
       {
          edit.onChange = [this]() { conf.set(key, edit.text()); };
-         hlayout.append(edit, 0, WIDGET_HEIGHT);
+         hlayout.append(edit, EDIT_WIDTH, WIDGET_HEIGHT);
       }
 
       void update()
@@ -425,10 +437,10 @@ class InputSetting : public SettingLayout, public util::Shared<InputSetting>
          player.append("Player 5");
          player.append("Misc");
          hbox.append(player, 120, WIDGET_HEIGHT, 10);
-         hbox.append(def, 80, WIDGET_HEIGHT);
-         hbox.append(def_all, 80, WIDGET_HEIGHT);
-         hbox.append(clear, 80, WIDGET_HEIGHT);
-         hbox.append(erase, 80, WIDGET_HEIGHT);
+         hbox.append(def, 0, WIDGET_HEIGHT);
+         hbox.append(def_all, 0, WIDGET_HEIGHT);
+         hbox.append(clear, 0, WIDGET_HEIGHT);
+         hbox.append(erase, 0, WIDGET_HEIGHT);
 
          player.onChange = [this]() { this->update_list(); };
 
@@ -442,20 +454,20 @@ class InputSetting : public SettingLayout, public util::Shared<InputSetting>
          list_view.setHeaderVisible();
          list_view.onActivate = [this]() { this->update_bind(); };
 
-         vbox.append(hbox, 0, 0);
+         vbox.append(hbox);
 
          index_label.setText("Joypad #:");
          hbox_index.append(index_label, 60, WIDGET_HEIGHT);
          index_show.setEditable(false);
          hbox_index.append(index_show, 60, WIDGET_HEIGHT);
-         vbox.append(hbox_index, 0, 0);
+         vbox.append(hbox_index);
 
-         vbox.append(list_view, 0, 300);
+         vbox.append(list_view, ~0, 300);
 
          warn.setText("Note: Even if a key is detected properly here, it might not work in-game.\nIf it doesn't, please file a bug-report and try a different one for now.");
          vbox.append(warn, 0, 2.5 * WIDGET_HEIGHT);
 
-         hlayout.append(vbox, 0, 400);
+         hlayout.append(vbox);
       }
 
       void update()
@@ -739,6 +751,7 @@ class General : public ToggleWindow
    public:
       General(ConfigFile &_pconf, ConfigFile &_conf) : ToggleWindow("SSNES || General settings")
       {
+         Global::init_widget_height();
          setGeometry({256, 256, 600, 330});
          widgets.append(BoolSetting::shared(_conf, "rewind_enable", "Enable rewind:", false));
          widgets.append(IntSetting::shared(_conf, "rewind_buffer_size", "Rewind buffer size (MB):", 20));
@@ -755,7 +768,7 @@ class General : public ToggleWindow
          widgets.append(savestate_dir);
          widgets.append(async_fork);
 
-         foreach(i, widgets) { vbox.append(i->layout(), 0, 0, 3); }
+         foreach(i, widgets) { vbox.append(i->layout(), 3); }
 
          vbox.setMargin(5);
          append(vbox);
@@ -821,7 +834,7 @@ class ShaderVideo : public ToggleWindow
    public:
       ShaderVideo(ConfigFile &_conf) : ToggleWindow("SSNES || Shader settings")
       {
-         setGeometry({128, 128, 600, 320});
+         setGeometry({128, 128, 630, 320});
 
          paths.append(PathSetting::shared(_conf, "video_cg_shader", "Cg pixel shader:", "", "Cg shader (*.cg)"));
          paths.append(PathSetting::shared(_conf, "video_bsnes_shader", "bSNES XML shader:", "", "XML shader (*.shader)"));
@@ -835,7 +848,7 @@ class ShaderVideo : public ToggleWindow
          widgets.append(BoolSetting::shared(_conf, "video_second_pass_smooth", "Bilinear filtering (2. pass):", true));
          widgets.append(PathSetting::shared(_conf, "video_second_pass_shader", "Shader (2. pass):", "", "Cg shader, XML shader (*.cg, *.shader)"));
 
-         foreach(i, widgets) { vbox.append(i->layout(), 0, 0, 3); }
+         foreach(i, widgets) { vbox.append(i->layout(), 3); }
          vbox.setMargin(5);
          append(vbox);
       }
@@ -853,14 +866,14 @@ class FontVideo : public ToggleWindow
    public:
       FontVideo(ConfigFile &_conf) : ToggleWindow("SSNES || Font settings")
       {
-         setGeometry({128, 128, 600, 150});
+         setGeometry({128, 128, 630, 150});
 
          widgets.append(PathSetting::shared(_conf, "video_font_path", "On-screen message font:", "", "TTF font (*.ttf)"));
          widgets.append(IntSetting::shared(_conf, "video_font_size", "On-screen font size:", 48));
          widgets.append(DoubleSetting::shared(_conf, "video_message_pos_x", "On-screen message pos X:", 0.05));
          widgets.append(DoubleSetting::shared(_conf, "video_message_pos_y", "On-screen message pos Y:", 0.05));
 
-         foreach(i, widgets) { vbox.append(i->layout(), 0, 0, 3); }
+         foreach(i, widgets) { vbox.append(i->layout(), 3); }
          vbox.setMargin(5);
          append(vbox);
       }
@@ -877,6 +890,7 @@ class Video : public ToggleWindow
    public:
       Video(ConfigFile &_conf) : ToggleWindow("SSNES || Video settings"), shader_setting(_conf), font_setting(_conf)
       {
+         Global::init_widget_height();
          setGeometry({256, 256, 600, 500});
          widgets.append(ComboSetting::shared(_conf, "video_driver", "Video driver:", Internal::video_drivers, 0));
          widgets.append(PathSetting::shared(_conf, "video_external_driver", "External video driver:", "", "Dynamic library (" DYNAMIC_EXTENSION ")"));
@@ -893,22 +907,21 @@ class Video : public ToggleWindow
 
          widgets.append(PathSetting::shared(_conf, "video_filter", "bSNES video filter:", "", "bSNES filter (*.filter)"));
 
-         foreach(i, widgets) { vbox.append(i->layout(), 0, 0, 3); }
+         foreach(i, widgets) { vbox.append(i->layout(), 3); }
 
          shader.button.setText("Open");
          shader.button.onTick = [this]() { this->shader_setting.show(); };
          shader.label.setText("Shader settings:");
-         shader.layout.append(shader.label, 150, WIDGET_HEIGHT);
-         shader.layout.append(shader.button, 100, WIDGET_HEIGHT);
-         vbox.append(shader.layout, 0, 0);
+         shader.layout.append(shader.label, 225, WIDGET_HEIGHT);
+         shader.layout.append(shader.button, 0, WIDGET_HEIGHT);
+         vbox.append(shader.layout);
 
          font.button.setText("Open");
          font.button.onTick = [this]() { this->font_setting.show(); };
          font.label.setText("Font settings:");
-         font.layout.append(font.label, 150, WIDGET_HEIGHT);
-         font.layout.append(font.button, 100, WIDGET_HEIGHT);
-         vbox.append(font.layout, 0, 0);
-
+         font.layout.append(font.label, 225, WIDGET_HEIGHT);
+         font.layout.append(font.button, 0, WIDGET_HEIGHT);
+         vbox.append(font.layout);
 
          vbox.setMargin(5);
          append(vbox);
@@ -1029,6 +1042,7 @@ class Audio : public ToggleWindow
    public:
       Audio(ConfigFile &_conf) : ToggleWindow("SSNES || Audio settings")
       {
+         Global::init_widget_height();
          setGeometry({256, 256, 600, 330});
          widgets.append(BoolSetting::shared(_conf, "audio_enable", "Enable audio:", true));
          widgets.append(ComboSetting::shared(_conf, "audio_driver", "Audio driver:", Internal::audio_drivers, 0));
@@ -1041,7 +1055,7 @@ class Audio : public ToggleWindow
          widgets.append(BoolSetting::shared(_conf, "audio_sync", "Audio sync:", true));
          widgets.append(IntSetting::shared(_conf, "audio_latency", "Audio latency (ms):", 64));
 
-         foreach(i, widgets) { vbox.append(i->layout(), 0, 0, 3); }
+         foreach(i, widgets) { vbox.append(i->layout(), 3); }
          vbox.setMargin(5);
          append(vbox);
       }
@@ -1060,13 +1074,14 @@ class Input : public ToggleWindow
    public:
       Input(ConfigFile &_conf) : ToggleWindow("SSNES || Input settings")
       {
+         Global::init_widget_height();
          setGeometry({256, 256, 500, 500});
          widgets.append(DoubleSetting::shared(_conf, "input_axis_threshold", "Input axis threshold (0.0 to 1.0):", 0.5));
          widgets.append(BoolSetting::shared(_conf, "netplay_client_swap_input", "Use Player 1 binds as client:", false));
          widgets.append(InputSetting::shared(_conf, Internal::binds, 
                   [this](const string& msg) { this->setStatusText(msg); }, [this]() { this->setFocused(); }));
 
-         foreach(i, widgets) { vbox.append(i->layout(), 0, 0, 3); }
+         foreach(i, widgets) { vbox.append(i->layout(), 3); }
          vbox.setMargin(5);
          append(vbox);
 
@@ -1099,6 +1114,7 @@ class ExtROM : public ToggleWindow
    public:
       ExtROM(ConfigFile &_conf) : ToggleWindow("SSNES || Special ROM")
       {
+         Global::init_widget_height();
          setGeometry({256, 256, 600, 250});
          sgb_bios = PathSetting::shared(_conf, "sgb_bios_path", "Super Gameboy BIOS:", string(""), "Super Famicom, Super Magicom (*.sfc, *.smc)");
          sgb_rom = PathSetting::shared(_conf, "gameboy_path", "Gameboy ROM:", string(""), "Gameboy (*.gb)");
@@ -1116,7 +1132,7 @@ class ExtROM : public ToggleWindow
          widgets.append(bsx_bios);
          widgets.append(bsx_rom);
 
-         foreach(i, widgets) { vbox.append(i->layout(), 0, 0, 3); }
+         foreach(i, widgets) { vbox.append(i->layout(), 3); }
          vbox.setMargin(5);
          append(vbox);
       }
