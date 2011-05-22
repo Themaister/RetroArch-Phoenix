@@ -935,6 +935,13 @@ class Video : public ToggleWindow
          font_setting.update();
       }
 
+      void hide()
+      {
+         shader_setting.hide();
+         font_setting.hide();
+         ToggleWindow::hide();
+      }
+
    private:
       linear_vector<SettingLayout::APtr> widgets;
       VerticalLayout vbox;
