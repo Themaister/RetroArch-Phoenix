@@ -837,7 +837,7 @@ class ShaderVideo : public ToggleWindow
       {
          setGeometry({128, 128, 630, 320});
 
-         paths.append(PathSetting::shared(_conf, "video_cg_shader", "Cg pixel shader:", "", "Cg shader (*.cg)"));
+         paths.append(PathSetting::shared(_conf, "video_cg_shader", "Cg pixel shader:", "", "Cg shader, Cg meta-shader (*.cg, *.cgp)"));
          paths.append(PathSetting::shared(_conf, "video_bsnes_shader", "bSNES XML shader:", "", "XML shader (*.shader)"));
          widgets.append(ShaderSetting::shared(_conf, "video_shader_type", 
                   linear_vector<string>({"Automatic", "Cg", "bSNES XML", "None"}), 
