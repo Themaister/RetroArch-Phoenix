@@ -357,6 +357,7 @@ namespace Internal
       string config_base;
       string base;
       string display;
+      string def;
    };
 }
 
@@ -502,7 +503,11 @@ class InputSetting : public SettingLayout, public util::Shared<InputSetting>
          unsigned i = player.selection();
          if (list_view.selected())
          {
-            list[i][j].display = display;
+            if (display == "Default")
+               list[i][j].display = {"Default", " <", list[i][j].def, ">"};
+            else
+               list[i][j].display = display;
+
             conf.set(list[i][j].config_base, conf_string);
             conf.set({list[i][j].config_base, "_btn"}, conf_string);
             conf.set({list[i][j].config_base, "_axis"}, conf_string);
@@ -516,18 +521,22 @@ class InputSetting : public SettingLayout, public util::Shared<InputSetting>
          {
             foreach(j, i)
             {
-               j.display = display;
+               if (display == "Default")
+                  j.display = {"Default", " <", j.def, ">"};
+               else
+                  j.display = display;
+
                conf.set(j.config_base, conf_string);
                conf.set({j.config_base, "_btn"}, conf_string);
                conf.set({j.config_base, "_axis"}, conf_string);
             }
          }
          
-         conf.set("input_player1_joypad_index", (int)0);
-         conf.set("input_player2_joypad_index", (int)1);
-         conf.set("input_player3_joypad_index", (int)2);
-         conf.set("input_player4_joypad_index", (int)3);
-         conf.set("input_player5_joypad_index", (int)4);
+         conf.set("input_player1_joypad_index", 0);
+         conf.set("input_player2_joypad_index", 1);
+         conf.set("input_player3_joypad_index", 2);
+         conf.set("input_player4_joypad_index", 3);
+         conf.set("input_player5_joypad_index", 4);
 
          this->update_list();
       }
@@ -729,7 +738,7 @@ class InputSetting : public SettingLayout, public util::Shared<InputSetting>
                else if (is_valid[2])
                   j.display = {tmp[2], " (axis)"};
                else
-                  j.display = "Default";
+                  j.display = {"Default", " <", j.def, ">"};
             }
          }
       }
@@ -983,18 +992,32 @@ namespace Internal
    };
 
 #define DEFINE_BINDS(n_player) \
-      { "input_player" #n_player "_a", "A (right)", "" }, \
-      { "input_player" #n_player "_b", "B (down)", "" }, \
-      { "input_player" #n_player "_y", "Y (left)", "" }, \
-      { "input_player" #n_player "_x", "X (up)", "" }, \
-      { "input_player" #n_player "_start", "Start", "" }, \
-      { "input_player" #n_player "_select", "Select", "" }, \
-      { "input_player" #n_player "_l", "L", "" }, \
-      { "input_player" #n_player "_r", "R", "" }, \
-      { "input_player" #n_player "_left", "D-pad Left", "" }, \
-      { "input_player" #n_player "_right", "D-pad Right", "" }, \
-      { "input_player" #n_player "_up", "D-pad Up", "" }, \
-      { "input_player" #n_player "_down", "D-pad Down", "" },
+      { "input_player" #n_player "_a", "A (right)", "", "x" }, \
+      { "input_player" #n_player "_b", "B (down)", "", "z" }, \
+      { "input_player" #n_player "_y", "Y (left)", "", "a" }, \
+      { "input_player" #n_player "_x", "X (up)", "", "s" }, \
+      { "input_player" #n_player "_start", "Start", "", "enter" }, \
+      { "input_player" #n_player "_select", "Select", "", "rshift" }, \
+      { "input_player" #n_player "_l", "L", "", "q" }, \
+      { "input_player" #n_player "_r", "R", "", "w" }, \
+      { "input_player" #n_player "_left", "D-pad Left", "", "left" }, \
+      { "input_player" #n_player "_right", "D-pad Right", "", "right" }, \
+      { "input_player" #n_player "_up", "D-pad Up", "", "up" }, \
+      { "input_player" #n_player "_down", "D-pad Down", "", "down" },
+ 
+#define DEFINE_BINDS_OTHER(n_player) \
+      { "input_player" #n_player "_a", "A (right)", "", "" }, \
+      { "input_player" #n_player "_b", "B (down)", "", "" }, \
+      { "input_player" #n_player "_y", "Y (left)", "", "" }, \
+      { "input_player" #n_player "_x", "X (up)", "", "" }, \
+      { "input_player" #n_player "_start", "Start", "", "" }, \
+      { "input_player" #n_player "_select", "Select", "", "" }, \
+      { "input_player" #n_player "_l", "L", "", "" }, \
+      { "input_player" #n_player "_r", "R", "", "" }, \
+      { "input_player" #n_player "_left", "D-pad Left", "", "" }, \
+      { "input_player" #n_player "_right", "D-pad Right", "", "" }, \
+      { "input_player" #n_player "_up", "D-pad Up", "", "" }, \
+      { "input_player" #n_player "_down", "D-pad Down", "", "" },
  
 
    static const linear_vector<input_selection> player1 = {
@@ -1002,43 +1025,43 @@ namespace Internal
    };
 
    static const linear_vector<input_selection> player2 = {
-      DEFINE_BINDS(2)
+      DEFINE_BINDS_OTHER(2)
    };
 
    static const linear_vector<input_selection> player3 = {
-      DEFINE_BINDS(3)
+      DEFINE_BINDS_OTHER(3)
    };
 
    static const linear_vector<input_selection> player4 = {
-      DEFINE_BINDS(4)
+      DEFINE_BINDS_OTHER(4)
    };
 
    static const linear_vector<input_selection> player5 = {
-      DEFINE_BINDS(5)
+      DEFINE_BINDS_OTHER(5)
    };
 
    static const linear_vector<input_selection> misc = {
-      { "input_save_state", "Save state", "" },
-      { "input_load_state", "Load state", "" },
-      { "input_state_slot_increase", "Increase state slot", "" },
-      { "input_state_slot_decrease", "Decrease state slot", "" },
-      { "input_toggle_fast_forward", "Toggle fast forward", "" },
-      { "input_hold_fast_forward", "Hold fast forward", "" },
-      { "input_exit_emulator", "Exit emulator", "" },
-      { "input_toggle_fullscreen", "Toggle fullscreen", "" },
-      { "input_pause_toggle", "Pause toggle", "" },
-      { "input_movie_record_toggle", "Movie record toggle", "" },
-      { "input_rate_step_up", "Audio input rate step up", "" },
-      { "input_rate_step_down", "Audio input rate step down", "" },
-      { "input_rewind", "Rewind", "" },
-      { "input_reset", "Reset", "" },
-      { "input_shader_next", "Next shader", "" },
-      { "input_shader_prev", "Previous shader", "" },
-      { "input_cheat_index_minus", "Previous cheat index", "" },
-      { "input_cheat_index_plus", "Next cheat index", "" },
-      { "input_cheat_toggle", "Toggle cheat ON/OFF", "" },
-      { "input_screenshot", "Take screenshot", "" },
-      { "input_dsp_config", "Open DSP plugin config", "" },
+      { "input_save_state", "Save state", "", "f2" },
+      { "input_load_state", "Load state", "", "f4" },
+      { "input_state_slot_increase", "Increase state slot", "", "f7" },
+      { "input_state_slot_decrease", "Decrease state slot", "", "f6" },
+      { "input_toggle_fast_forward", "Toggle fast forward", "", "space" },
+      { "input_hold_fast_forward", "Hold fast forward", "", "l" },
+      { "input_exit_emulator", "Exit emulator", "", "escape" },
+      { "input_toggle_fullscreen", "Toggle fullscreen", "", "f" },
+      { "input_pause_toggle", "Pause toggle", "", "p" },
+      { "input_movie_record_toggle", "Movie record toggle", "", "o" },
+      { "input_rate_step_up", "Audio input rate step up", "", "kp_plus" },
+      { "input_rate_step_down", "Audio input rate step down", "", "kp_minus" },
+      { "input_rewind", "Rewind", "", "r" },
+      { "input_reset", "Reset", "", "h" },
+      { "input_shader_next", "Next shader", "", "m" },
+      { "input_shader_prev", "Previous shader", "", "n" },
+      { "input_cheat_index_minus", "Previous cheat index", "", "y" },
+      { "input_cheat_index_plus", "Next cheat index", "", "t" },
+      { "input_cheat_toggle", "Toggle cheat ON/OFF", "", "u" },
+      { "input_screenshot", "Take screenshot", "", "print_screen" },
+      { "input_dsp_config", "Open DSP plugin config", "", "c" },
    };
 
    static const linear_vector<linear_vector<input_selection>> binds = { 
