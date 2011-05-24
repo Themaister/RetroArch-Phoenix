@@ -298,6 +298,10 @@ void InputInterface::driver(const char *driver) {
   else if(!strcmp(driver, "DirectInput")) p = new InputDI();
   #endif
 
+  #ifdef INPUT_DISDL
+  else if (!strcmp(driver, "DISDL")) p = new InputDISDL();
+  #endif
+
   #ifdef INPUT_RAWINPUT
   else if(!strcmp(driver, "RawInput")) p = new InputRaw();
   #endif
@@ -323,6 +327,8 @@ const char* InputInterface::default_driver() {
   return "RawInput";
   #elif defined(INPUT_DIRECTINPUT)
   return "DirectInput";
+  #elif defined (INPUT_DISDL)
+  return "DISDL";
   #elif defined(INPUT_SDL)
   return "SDL";
   #elif defined(INPUT_X)

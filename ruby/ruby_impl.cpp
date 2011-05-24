@@ -165,6 +165,10 @@
   #include <ruby/input/directinput.cpp>
 #endif
 
+#ifdef INPUT_DISDL
+  #include <ruby/input/disdl.cpp>
+#endif
+
 #ifdef INPUT_RAWINPUT
   #include <ruby/input/rawinput.cpp>
 #endif

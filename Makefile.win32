@@ -1,7 +1,7 @@
 TARGET = ssnes-phoenix.exe
 
 RUBYOBJ = ruby/ruby.o
-RUBYDEFINES = -DINPUT_DIRECTINPUT
+RUBYDEFINES = -DINPUT_DISDL
 RUBYLIBS = -ldinput8 -ldxguid
 
 CXXFILES = $(wildcard *.cpp)
@@ -13,7 +13,7 @@ CC = gcc
 CXX = g++
 WINDRES = windres
 
-WIN32_LIBS = -lkernel32 -luser32 -lgdi32 -ladvapi32 -lcomctl32 -lcomdlg32 -lshell32 -lole32 -static-libgcc -static-libstdc++ -mwindows
+WIN32_LIBS = -lkernel32 -luser32 -lgdi32 -ladvapi32 -lcomctl32 -lcomdlg32 -lshell32 -lole32 -static-libgcc -static-libstdc++ -mwindows -L. -lSDL
 
 INCLUDES = -Iphoenix -I.
 
