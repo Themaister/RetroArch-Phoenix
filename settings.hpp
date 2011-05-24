@@ -1023,6 +1023,7 @@ namespace Internal
       { "input_state_slot_increase", "Increase state slot", "" },
       { "input_state_slot_decrease", "Decrease state slot", "" },
       { "input_toggle_fast_forward", "Toggle fast forward", "" },
+      { "input_hold_fast_forward", "Hold fast forward", "" },
       { "input_exit_emulator", "Exit emulator", "" },
       { "input_toggle_fullscreen", "Toggle fullscreen", "" },
       { "input_pause_toggle", "Pause toggle", "" },
