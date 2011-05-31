@@ -95,8 +95,6 @@ namespace ruby {
          }
 
          pInputDISDL() {
-            print("yay!\n");
-            print("yay!\n");
             device.context = 0;
             device.keyboard = 0;
             settings.handle = 0;
