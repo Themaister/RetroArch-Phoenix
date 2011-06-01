@@ -398,7 +398,7 @@ class MainWindow : public Window
          if (path)
          {
             string dir = {path, "/ssnes"};
-            mkdir(dir, 0644);
+            mkdir(dir, 0755);
 
             gui_path = path;
             gui_path.append("/ssnes/phoenix.cfg");
