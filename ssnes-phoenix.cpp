@@ -629,11 +629,10 @@ class MainWindow : public Window
          string frames;
          string movie_path;
 
-         vec_cmd.append("ssnes");
+         vec_cmd.append(ssnes_path);
 
          if (!append_rom(rom_path, vec_cmd))
             return;
-
 
          vec_cmd.append("-c");
          if (config_path.length() > 0)
@@ -742,6 +741,20 @@ class MainWindow : public Window
          fork_ssnes(ssnes_path, &vec_cmd[0]);
       }
 
+      static void print_cmd(const string& str, const char **cmd)
+      {
+         print("CMD: ", str, "\n");
+         print("Args: ");
+         unsigned cnt = 0;
+         const char *head = cmd[cnt];
+         while (head)
+         {
+            print(head, " ");
+            head = cmd[++cnt];
+         }
+         print("\n");
+      }
+
 #ifndef _WIN32
       void fork_ssnes(const string& path, const char **cmd)
       {
@@ -804,6 +817,9 @@ class MainWindow : public Window
                if (dup(fds[1]) < 0)
                   exit(255);
             }
+
+            print_cmd(path, cmd);
+
             if (execvp(path, const_cast<char**>(cmd)) < 0)
                exit(255);
          }
@@ -828,6 +844,8 @@ class MainWindow : public Window
             audio.hide();
             input.hide();
          }
+
+         print_cmd(path, cmd);
 
          HANDLE reader, writer;
          SECURITY_ATTRIBUTES saAttr;
