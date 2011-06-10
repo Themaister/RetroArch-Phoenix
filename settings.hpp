@@ -1131,7 +1131,7 @@ class Input : public ToggleWindow
       void init_input()
       {
 #ifdef _WIN32
-         ruby::input.driver("DISDL");
+         ruby::input.driver("DirectInput");
 #elif defined(__APPLE__)
          ruby::input.driver("Carbon");
 #else
