@@ -460,7 +460,10 @@ class InputSetting : public SettingLayout, public util::Shared<InputSetting>
          index_label.setText("Joypad #:");
          hbox_index.append(index_label, 60, WIDGET_HEIGHT);
          index_show.setEditable(false);
-         hbox_index.append(index_show, 60, WIDGET_HEIGHT);
+         hbox_index.append(index_show, 60, WIDGET_HEIGHT, 10);
+         analog_enable.setText("Detect analog");
+         analog_enable.setChecked();
+         hbox_index.append(analog_enable, 100, WIDGET_HEIGHT);
          vbox.append(hbox_index);
 
          vbox.append(list_view, ~0, 300);
@@ -493,6 +496,7 @@ class InputSetting : public SettingLayout, public util::Shared<InputSetting>
 
       Label index_label;
       LineEdit index_show;
+      CheckBox analog_enable;
       HorizontalLayout hbox_index;
 
       linear_vector<linear_vector<Internal::input_selection>> list;
@@ -653,6 +657,9 @@ class InputSetting : public SettingLayout, public util::Shared<InputSetting>
 
                   if (Joypad::isAnyAxis(i))
                   {
+                     if (!analog_enable.checked())
+                        continue;
+
                      if (std::abs((int)old_data[i] - (int)new_data[i]) < 20000)
                         continue;
 
