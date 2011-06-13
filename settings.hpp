@@ -344,6 +344,46 @@ class DoubleSetting : public SettingLayout, public util::Shared<DoubleSetting>
       double m_default;
 };
 
+class AspectSetting : public SettingLayout, public util::Shared<AspectSetting>
+{
+   public:
+      AspectSetting(ConfigFile &_conf, const string& _key, const string& label, double _default)
+         : SettingLayout(_conf, _key, label), m_default(_default)
+      {
+         edit.onChange = [this]() { conf.set(key, edit.text()); };
+         hlayout.append(edit, EDIT_WIDTH / 2, WIDGET_HEIGHT, 5);
+
+         aspect_4_3.setText("4:3");
+         aspect_8_7.setText("8:7");
+         aspect_16_9.setText("16:9");
+         aspect_4_3.onTick = [this]() { set_aspect(1.3333); };
+         aspect_8_7.onTick = [this]() { set_aspect(1.1429); };
+         aspect_16_9.onTick = [this]() { set_aspect(1.7778); };
+
+         hlayout.append(aspect_4_3, 0, WIDGET_HEIGHT);
+         hlayout.append(aspect_8_7, 0, WIDGET_HEIGHT);
+         hlayout.append(aspect_16_9, 0, WIDGET_HEIGHT);
+      }
+
+      void update()
+      {
+         double tmp = m_default;
+         conf.get(key, tmp);
+         edit.setText(tmp);
+      }
+
+   private:
+      TextEdit edit;
+      Button aspect_4_3, aspect_8_7, aspect_16_9;
+      double m_default;
+
+      void set_aspect(double aspect)
+      {
+         conf.set(key, aspect);
+         edit.setText(aspect);
+      }
+};
+
 namespace Internal
 {
    struct combo_selection
@@ -920,7 +960,7 @@ class Video : public ToggleWindow
          widgets.append(BoolSetting::shared(_conf, "video_smooth", "Bilinear filtering:", true));
          widgets.append(BoolSetting::shared(_conf, "video_force_aspect", "Lock aspect ratio:", true));
          widgets.append(BoolSetting::shared(_conf, "video_crop_overscan", "Crop overscan:", false));
-         widgets.append(DoubleSetting::shared(_conf, "video_aspect_ratio", "Aspect ratio:", 1.333));
+         widgets.append(AspectSetting::shared(_conf, "video_aspect_ratio", "Aspect ratio:", 1.333));
 
          widgets.append(PathSetting::shared(_conf, "video_filter", "bSNES video filter:", "", "bSNES filter (*.filter)"));
 
