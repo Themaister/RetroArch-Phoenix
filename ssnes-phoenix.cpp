@@ -153,6 +153,7 @@ class MainWindow : public Window
          Button button;
          Button clear;
          string filter;
+         bool save_file;
 
          ConfigFile *conf;
          string config_key;
@@ -163,6 +164,7 @@ class MainWindow : public Window
          {
             button.setText("Open ...");
             clear.setText("Clear");
+            save_file = false;
 
             if (preapply)
                apply_layout();
@@ -193,7 +195,12 @@ class MainWindow : public Window
                      start_path = path;
                }
 
-               string file = OS::fileLoad(Window::None, start_path, filter);
+               string file;
+               if (save_file)
+                  file = OS::fileSave(Window::None, start_path);
+               else
+                  file = OS::fileLoad(Window::None, start_path, filter);
+
                if (file.length() > 0)
                   edit.setText(file);
 
@@ -253,7 +260,7 @@ class MainWindow : public Window
          bool is_enabled() { return enable_tick.checked(); }
 
          CheckBox enable_tick;
-      } movie_play;
+      } movie_play, record;
 
       enum rom_type
       {
@@ -459,6 +466,9 @@ class MainWindow : public Window
          rom.setConfig(configs.gui, "last_rom");
          if (configs.gui.get("last_movie", tmp)) movie_play.setPath(tmp);
          movie_play.setConfig(configs.gui, "last_movie");
+         if (configs.gui.get("record_path", tmp)) record.setPath(tmp);
+         record.setConfig(configs.gui, "record_path");
+
          if (configs.gui.get("config_path", tmp)) config.setPath(tmp);
          config.setConfig(configs.gui, "config_path", {&MainWindow::reload_cli_config, this});
          libsnes.setConfig(configs.cli, "libsnes_path");
@@ -509,6 +519,7 @@ class MainWindow : public Window
 
          rom.setLabel("Normal ROM path:");
          movie_play.setLabel("BSV movie:");
+         record.setLabel("FFmpeg movie output:");
          config.setLabel("SSNES config file:");
          ssnes.setLabel("SSNES path:");
          libsnes.setLabel("libsnes path:");
@@ -516,7 +527,9 @@ class MainWindow : public Window
          start_btn.setText("Start SSNES");
          vbox.append(rom.layout(), 3);
          vbox.append(rom_type.layout(), 5);
-         vbox.append(movie_play.layout(), 10);
+         vbox.append(movie_play.layout(), 5);
+         record.save_file = true;
+         vbox.append(record.layout(), 10);
          vbox.append(config.layout(), 3);
          vbox.append(ssnes.layout(), 3);
          vbox.append(libsnes.layout(), 3);
@@ -628,6 +641,7 @@ class MainWindow : public Window
          string port;
          string frames;
          string movie_path;
+         string record_path;
 
          vec_cmd.append(ssnes_path);
 
@@ -667,6 +681,13 @@ class MainWindow : public Window
             vec_cmd.append("-P");
             movie_path = movie_play.getPath();
             vec_cmd.append(movie_path);
+         }
+
+         if (record.is_enabled())
+         {
+            vec_cmd.append("--record");
+            record_path = record.getPath();
+            vec_cmd.append(record_path);
          }
 
          if (settings.mouse_1.checked())
