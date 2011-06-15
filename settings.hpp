@@ -356,9 +356,9 @@ class AspectSetting : public SettingLayout, public util::Shared<AspectSetting>
          aspect_4_3.setText("4:3");
          aspect_8_7.setText("8:7");
          aspect_16_9.setText("16:9");
-         aspect_4_3.onTick = [this]() { set_aspect(1.3333); };
-         aspect_8_7.onTick = [this]() { set_aspect(1.1429); };
-         aspect_16_9.onTick = [this]() { set_aspect(1.7778); };
+         aspect_4_3.onTick = [this]() { this->set_aspect(1.3333); };
+         aspect_8_7.onTick = [this]() { this->set_aspect(1.1429); };
+         aspect_16_9.onTick = [this]() { this->set_aspect(1.7778); };
 
          hlayout.append(aspect_4_3, 0, WIDGET_HEIGHT);
          hlayout.append(aspect_8_7, 0, WIDGET_HEIGHT);
