@@ -489,7 +489,7 @@ class InputSetting : public SettingLayout, public util::Shared<InputSetting>
          hbox_index.append(index_show, 60, 0, 10);
          analog_enable.setText("Detect analog");
          analog_enable.setChecked();
-         hbox_index.append(analog_enable, 100, 0);
+         hbox_index.append(analog_enable, 150, 0);
          vbox.append(hbox_index);
 
          vbox.append(list_view, ~0, 300);
