@@ -17,16 +17,16 @@ INCLUDES = -Iphoenix -I.
 all: $(TARGET)
 
 %.o: %.cpp $(HEADERS)
-	$(CXX) $(CXXFLAGS) $(INCLUDES) -g -O3 -std=gnu++0x -c -o $@ $<
+	$(CXX) $(CXXFLAGS) $(INCLUDES) -O3 -std=gnu++0x -c -o $@ $<
 
 %.o: %.c $(HEADERS)
-	$(CC) $(CFLAGS) -g -O3 -std=gnu99 -c -o $@ $<
+	$(CC) $(CFLAGS) -O3 -std=gnu99 -c -o $@ $<
 
 phoenix/phoenix.o: $(wildcard phoenix/**/*.cpp) $(wildcard phoenix/**/*.hpp) phoenix/qt/qt.moc
-	$(CXX) $(CXXFLAGS) $(INCLUDES) -O3 -std=gnu++0x -DPHOENIX_GTK $(QT_CFLAGS) -c -o $@ phoenix/phoenix.cpp -g
+	$(CXX) $(CXXFLAGS) $(INCLUDES) -O3 -std=gnu++0x -DPHOENIX_GTK $(QT_CFLAGS) -c -o $@ phoenix/phoenix.cpp
 
 ruby/ruby.o: $(wildcard ruby/**/*.hpp) $(wildcard ruby/**/*.cpp)
-	$(CXX) $(CXXFLAGS) $(INCLUDES) $(RUBYDEFINES) -O3 -std=gnu++0x -c -o $@ ruby/ruby.cpp -g
+	$(CXX) $(CXXFLAGS) $(INCLUDES) $(RUBYDEFINES) -O3 -std=gnu++0x -c -o $@ ruby/ruby.cpp
 
 %.moc: %.moc.hpp
 	moc -i -o $@ $<
@@ -41,4 +41,10 @@ clean:
 	rm -f phoenix/*.o
 	rm -f ruby/*.o
 
-.PHONY: clean
+install: $(TARGET)
+	install -m755 $(TARGET) $(DESTDIR)$(PREFIX)/bin
+
+uninstall:
+	rm -f $(DESTDIR)$(PREFIX)/bin/$(TARGET)
+
+.PHONY: clean install uninstall
