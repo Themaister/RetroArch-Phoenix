@@ -237,7 +237,7 @@ class MainWindow : public Window
             void apply_layout()
             {
                hlayout.append(label, 150, 0);
-               hlayout.append(edit, EDIT_WIDTH + 80, 0);
+               hlayout.append(edit, ~0, 0);
                hlayout.append(clear, 0, 0);
                hlayout.append(button, 0, 0);
             }
