@@ -330,6 +330,62 @@ class DoubleSetting : public SettingLayout, public util::Shared<DoubleSetting>
       double m_default;
 };
 
+class SliderSetting : public SettingLayout, public util::Shared<SliderSetting>
+{
+   public:
+      SliderSetting(ConfigFile &_conf, const string& _key, const string& label, double _default, double _min, double _max)
+         : SettingLayout(_conf, _key, label), m_default(_default), m_min(_min), m_max(_max)
+      {
+         slider.setLength(100);
+         slider.setPosition(50);
+         slider_label.setText(val2str(pos2val(50)));
+         slider.onChange = [this]() 
+         { 
+            double val = pos2val(slider.position());
+            conf.set(key, val); 
+            slider_label.setText(val2str(val));
+         };
+         hlayout.append(slider, 150, 0, 3);
+         hlayout.append(slider_label, 0, 0);
+      }
+
+      void update()
+      {
+         double tmp = m_default;
+         conf.get(key, tmp);
+         slider.setPosition(val2pos(tmp));
+      }
+
+   private:
+      HorizontalSlider slider;
+      Label slider_label;
+      double m_default;
+      double m_min;
+      double m_max;
+
+      double pos2val(unsigned pos)
+      {
+         return m_min + (m_max - m_min) * pos / 100.0;
+      }
+
+      unsigned val2pos(double val)
+      {
+         if (val > m_max)
+            return 100;
+         if (val < m_min)
+            return 0;
+
+         return ((val - m_min) / (m_max - m_min)) * 100.0;
+      }
+
+      string val2str(double val)
+      {
+         char buf[64];
+         snprintf(buf, sizeof(buf), "%.2lf", val);
+         return buf;
+      }
+};
+
 class AspectSetting : public SettingLayout, public util::Shared<AspectSetting>
 {
    public:
@@ -615,10 +671,14 @@ class InputSetting : public SettingLayout, public util::Shared<InputSetting>
 
          auto& elem = list[player.selection()][list_view.selection()];
          list_view.setSelected(false);
+         list_view.setEnabled(false);
          if (OS::pendingEvents()) OS::processEvents();
 
          string option, ext;
+
          auto type = poll(option);
+         list_view.setEnabled(true);
+
          switch (type)
          {
             case Type::JoyAxis:
@@ -1140,10 +1200,11 @@ class Input : public ToggleWindow
    public:
       Input(ConfigFile &_conf) : ToggleWindow("SSNES || Input settings")
       {
-         widgets.append(DoubleSetting::shared(_conf, "input_axis_threshold", "Input axis threshold (0.0 to 1.0):", 0.5));
+         widgets.append(SliderSetting::shared(_conf, "input_axis_threshold", "Input axis threshold:", 0.5, 0.0, 1.0));
          widgets.append(BoolSetting::shared(_conf, "netplay_client_swap_input", "Use Player 1 binds as client:", false));
          widgets.append(InputSetting::shared(_conf, Internal::binds, 
-                  [this](const string& msg) { this->setStatusText(msg); }, [this]() { this->setFocused(); }));
+                  [this](const string& msg) { this->setStatusText(msg); }, 
+                  [this]() { this->setFocused(); }));
 
          foreach(i, widgets) { vbox.append(i->layout(), 3); }
          vbox.setMargin(5);
