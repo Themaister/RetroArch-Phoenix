@@ -64,11 +64,7 @@ class MainWindow : public Window
    public:
       MainWindow() : input(configs.cli), general(configs.gui, configs.cli), video(configs.cli), audio(configs.cli), ext_rom(configs.gui)
       {
-         Global::init_widget_height();
-
          setTitle("SSNES || Phoenix");
-         //setBackgroundColor(64, 64, 64);
-         setGeometry({128, 128, 680, 350});
 
          init_menu();
          onClose = []() { OS::quit(); };
@@ -76,6 +72,8 @@ class MainWindow : public Window
          init_main_frame();
 
          vbox.setMargin(5);
+         auto minimum = vbox.minimumGeometry();
+         setGeometry({256, 256, max(650, minimum.width), minimum.height});
          append(vbox);
          setMenuVisible();
          setStatusVisible();
@@ -114,26 +112,26 @@ class MainWindow : public Window
             server.setChecked();
             RadioBox::group(server, client);
 
-            hlayout[0].append(enable_label, 100, WIDGET_HEIGHT);
-            hlayout[0].append(enable, 80, WIDGET_HEIGHT, 0);
+            hlayout[0].append(enable_label, 100, 0);
+            hlayout[0].append(enable, 80, 0, 0);
             hlayout[0].append(server, 70, 20);
             hlayout[0].append(client, 70, 20);
 
-            hlayout[1].append(host_label, 80, WIDGET_HEIGHT, 20);
-            hlayout[1].append(host, 200, WIDGET_HEIGHT, 20);
-            hlayout[1].append(port_label, 120, WIDGET_HEIGHT, 20);
-            hlayout[1].append(port, 100, WIDGET_HEIGHT);
-            hlayout[2].append(frames_label, 80, WIDGET_HEIGHT, 20);
-            hlayout[2].append(frames, 60, WIDGET_HEIGHT);
+            hlayout[1].append(host_label, 80, 0, 20);
+            hlayout[1].append(host, 200, 0, 20);
+            hlayout[1].append(port_label, 120, 0, 20);
+            hlayout[1].append(port, 100, 0);
+            hlayout[2].append(frames_label, 80, 0, 20);
+            hlayout[2].append(frames, 60, 0);
          }
 
          HorizontalLayout hlayout[3];
          RadioBox server, client;
 
          Label port_label, host_label, frames_label;
-         TextEdit port;
-         TextEdit host;
-         TextEdit frames;
+         LineEdit port;
+         LineEdit host;
+         LineEdit frames;
          CheckBox enable;
          Label enable_label;
       } net;
@@ -149,7 +147,7 @@ class MainWindow : public Window
       {
          HorizontalLayout hlayout;
          Label label;
-         TextEdit edit;
+         LineEdit edit;
          Button button;
          Button clear;
          string filter;
@@ -238,10 +236,10 @@ class MainWindow : public Window
 
             void apply_layout()
             {
-               hlayout.append(label, 150, WIDGET_HEIGHT);
-               hlayout.append(edit, ~0, WIDGET_HEIGHT);
-               hlayout.append(clear, 0, WIDGET_HEIGHT);
-               hlayout.append(button, 0, WIDGET_HEIGHT);
+               hlayout.append(label, 150, 0);
+               hlayout.append(edit, ~0, 0);
+               hlayout.append(clear, 0, 0);
+               hlayout.append(button, 0, 0);
             }
       } rom, config, ssnes, libsnes;
 
@@ -250,11 +248,11 @@ class MainWindow : public Window
          enable_entry() : entry(false)
          {
             enable_tick.setText("Enable");
-            hlayout.append(label, 150, WIDGET_HEIGHT);
-            hlayout.append(edit, ~0, WIDGET_HEIGHT, 5);
-            hlayout.append(enable_tick, 80, WIDGET_HEIGHT);
-            hlayout.append(clear, 0, WIDGET_HEIGHT);
-            hlayout.append(button, 0, WIDGET_HEIGHT);
+            hlayout.append(label, 150, 0);
+            hlayout.append(edit, ~0, 0, 5);
+            hlayout.append(enable_tick, 80, 0);
+            hlayout.append(clear, 0, 0);
+            hlayout.append(button, 0, 0);
          }
 
          bool is_enabled() { return enable_tick.checked(); }
@@ -283,8 +281,8 @@ class MainWindow : public Window
             box.append("BSX slotted");
 
             label.setText("ROM type:");
-            hlayout.append(label, 150, WIDGET_HEIGHT);
-            hlayout.append(box, 200, WIDGET_HEIGHT);
+            hlayout.append(label, 150, 0);
+            hlayout.append(box, 200, 0);
          }
 
          enum rom_type type()
@@ -533,7 +531,7 @@ class MainWindow : public Window
          vbox.append(config.layout(), 3);
          vbox.append(ssnes.layout(), 3);
          vbox.append(libsnes.layout(), 3);
-         vbox.append(start_btn, ~0, WIDGET_HEIGHT, 15);
+         vbox.append(start_btn, ~0, 0, 15);
          vbox.append(net.hlayout[0]);
          vbox.append(net.hlayout[1]);
          vbox.append(net.hlayout[2], 20);
