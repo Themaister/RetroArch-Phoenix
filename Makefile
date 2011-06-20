@@ -4,7 +4,7 @@ ifneq ($(findstring Darwin,$(OS)),)
 include Makefile.osx
 else 
 ifneq ($(findstring Linux,$(OS)),)
-include Makefile.qt
+include Makefile.gtk
 else
 include Makefile.win32
 endif
