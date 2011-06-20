@@ -813,7 +813,7 @@ class General : public ToggleWindow
 
          vbox.setMargin(5);
          auto minimum = vbox.minimumGeometry();
-         setGeometry({256, 256, max(600, minimum.width), minimum.height});
+         setGeometry({256, 256, minimum.width, minimum.height});
 
          append(vbox);
       }
@@ -893,7 +893,7 @@ class ShaderVideo : public ToggleWindow
          foreach(i, widgets) { vbox.append(i->layout(), 3); }
          vbox.setMargin(5);
          auto minimum = vbox.minimumGeometry();
-         setGeometry({256, 256, max(600, minimum.width), minimum.height});
+         setGeometry({256, 256, minimum.width, minimum.height});
          append(vbox);
       }
 
@@ -918,7 +918,7 @@ class FontVideo : public ToggleWindow
          foreach(i, widgets) { vbox.append(i->layout(), 3); }
          vbox.setMargin(5);
          auto minimum = vbox.minimumGeometry();
-         setGeometry({256, 256, max(600, minimum.width), minimum.height});
+         setGeometry({256, 256, minimum.width, minimum.height});
          append(vbox);
       }
 
@@ -967,7 +967,7 @@ class Video : public ToggleWindow
 
          vbox.setMargin(5);
          auto minimum = vbox.minimumGeometry();
-         setGeometry({256, 256, max(600, minimum.width), minimum.height});
+         setGeometry({256, 256, minimum.width, minimum.height});
          append(vbox);
       }
 
@@ -1122,7 +1122,7 @@ class Audio : public ToggleWindow
          foreach(i, widgets) { vbox.append(i->layout(), 3); }
          vbox.setMargin(5);
          auto minimum = vbox.minimumGeometry();
-         setGeometry({256, 256, max(600, minimum.width), minimum.height});
+         setGeometry({256, 256, minimum.width, minimum.height});
          append(vbox);
       }
 
@@ -1148,7 +1148,7 @@ class Input : public ToggleWindow
          foreach(i, widgets) { vbox.append(i->layout(), 3); }
          vbox.setMargin(5);
          auto minimum = vbox.minimumGeometry();
-         setGeometry({256, 256, max(600, minimum.width), minimum.height});
+         setGeometry({256, 256, minimum.width, minimum.height});
          append(vbox);
 
          init_input();
@@ -1199,7 +1199,7 @@ class ExtROM : public ToggleWindow
          foreach(i, widgets) { vbox.append(i->layout(), 3); }
          vbox.setMargin(5);
          auto minimum = vbox.minimumGeometry();
-         setGeometry({256, 256, max(600, minimum.width), minimum.height});
+         setGeometry({256, 256, minimum.width, minimum.height});
 
          append(vbox);
       }

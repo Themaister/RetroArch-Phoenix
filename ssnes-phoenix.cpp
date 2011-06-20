@@ -73,7 +73,7 @@ class MainWindow : public Window
 
          vbox.setMargin(5);
          auto minimum = vbox.minimumGeometry();
-         setGeometry({256, 256, max(650, minimum.width), minimum.height});
+         setGeometry({256, 256, minimum.width, minimum.height});
          append(vbox);
          setMenuVisible();
          setStatusVisible();
@@ -237,7 +237,7 @@ class MainWindow : public Window
             void apply_layout()
             {
                hlayout.append(label, 150, 0);
-               hlayout.append(edit, ~0, 0);
+               hlayout.append(edit, EDIT_WIDTH, 0);
                hlayout.append(clear, 0, 0);
                hlayout.append(button, 0, 0);
             }
@@ -249,7 +249,7 @@ class MainWindow : public Window
          {
             enable_tick.setText("Enable");
             hlayout.append(label, 150, 0);
-            hlayout.append(edit, ~0, 0, 5);
+            hlayout.append(edit, EDIT_WIDTH, 0, 5);
             hlayout.append(enable_tick, 80, 0);
             hlayout.append(clear, 0, 0);
             hlayout.append(button, 0, 0);
