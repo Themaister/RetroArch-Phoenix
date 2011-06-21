@@ -312,7 +312,11 @@ void config_set_string(config_file_t *conf, const char *key, const char *val)
 void config_set_double(config_file_t *conf, const char *key, double val)
 {
    char buf[128];
+#ifdef _WIN32 // Yes, I'm serious ... :v
+   snprintf(buf, sizeof(buf), "%f", (float)val);
+#else
    snprintf(buf, sizeof(buf), "%lf", val);
+#endif
    config_set_string(conf, key, buf);
 }
 

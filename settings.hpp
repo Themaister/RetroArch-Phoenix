@@ -341,9 +341,10 @@ class SliderSetting : public SettingLayout, public util::Shared<SliderSetting>
          slider_label.setText(val2str(pos2val(50)));
          slider.onChange = [this]() 
          { 
-            double val = pos2val(slider.position());
-            conf.set(key, val); 
-            slider_label.setText(val2str(val));
+            double val = this->pos2val(this->slider.position());
+            this->conf.set(key, val); 
+            auto str = this->val2str(val);
+            this->slider_label.setText(str);
          };
          hlayout.append(slider, 150, 0, 3);
          hlayout.append(slider_label, 0, 0);
@@ -354,6 +355,7 @@ class SliderSetting : public SettingLayout, public util::Shared<SliderSetting>
          double tmp = m_default;
          conf.get(key, tmp);
          slider.setPosition(val2pos(tmp));
+         slider_label.setText(val2str(tmp));
       }
 
    private:
@@ -375,14 +377,15 @@ class SliderSetting : public SettingLayout, public util::Shared<SliderSetting>
          if (val < m_min)
             return 0;
 
-         return ((val - m_min) / (m_max - m_min)) * 100.0;
+         return (unsigned)(((val - m_min) / (m_max - m_min)) * 100.0);
       }
 
       string val2str(double val)
       {
          char buf[64];
-         snprintf(buf, sizeof(buf), "%.2lf", val);
-         return buf;
+         // Yes, %lf seems to fail on Win32 ... <____<
+         snprintf(buf, sizeof(buf), "%.2f", (float)val);
+         return {buf};
       }
 };
 
