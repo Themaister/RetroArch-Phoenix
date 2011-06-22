@@ -343,6 +343,10 @@ static LRESULT CALLBACK OS_windowProc(HWND hwnd, UINT msg, WPARAM wparam, LPARAM
           CheckBox &checkBox = (CheckBox&)*object;
           checkBox.setChecked(!checkBox.state.checked);
           if(checkBox.onTick) checkBox.onTick();
+        } else if (dynamic_cast<CheckBoxPlain*>(object)) {
+          CheckBoxPlain &checkBox = (CheckBoxPlain&)*object;
+          checkBox.setChecked(!checkBox.state.checked);
+          if(checkBox.onTick) checkBox.onTick();
         } else if(dynamic_cast<ComboBox*>(object)) {
           ComboBox &comboBox = (ComboBox&)*object;
           if(HIWORD(wparam) == CBN_SELCHANGE) {
