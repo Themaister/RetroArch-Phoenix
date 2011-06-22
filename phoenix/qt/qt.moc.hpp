@@ -282,6 +282,23 @@ public slots:
   void onTick();
 };
 
+struct pCheckBoxPlain : public QObject, public pWidget {
+  Q_OBJECT
+
+public:
+  CheckBoxPlain &checkBox;
+  QCheckBox *qtCheckBox;
+
+  bool checked();
+  Geometry minimumGeometry();
+  void setChecked(bool checked);
+  pCheckBoxPlain(CheckBoxPlain &checkBox) : pWidget(checkBox), checkBox(checkBox) {}
+  void constructor();
+
+public slots:
+   void onTick();
+};
+
 struct pComboBox : public QObject, public pWidget {
   Q_OBJECT
 
