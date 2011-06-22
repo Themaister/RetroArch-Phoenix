@@ -14,6 +14,8 @@ GTK_LIBS = $(shell pkg-config --libs gtk+-2.0)
 
 INCLUDES = -Iphoenix -I.
 
+PREFIX = /usr/local
+
 all: $(TARGET)
 
 %.o: %.cpp $(HEADERS)

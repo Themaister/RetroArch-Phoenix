@@ -270,7 +270,8 @@ class BoolSetting : public SettingLayout, public util::Shared<BoolSetting>
    public:
       BoolSetting(ConfigFile &_conf, const string& _key, const string& label, bool _default) : SettingLayout(_conf, _key, label), m_default(_default)
       {
-         check.onTick = [this]() { conf.set(key, check.checked()); check.setText(check.checked() ? "Enabled" : "Disabled"); };
+         check.setText("Enable");
+         check.onTick = [this]() { conf.set(key, check.checked()); };
          hlayout.append(check, 120, 0);
       }
 
@@ -279,7 +280,6 @@ class BoolSetting : public SettingLayout, public util::Shared<BoolSetting>
          bool tmp = m_default;
          conf.get(key, tmp);
          check.setChecked(tmp);
-         check.setText(tmp ? "Enabled" : "Disabled");
       }
 
       CheckBox check;
@@ -1204,7 +1204,7 @@ class Input : public ToggleWindow
       Input(ConfigFile &_conf) : ToggleWindow("SSNES || Input settings")
       {
          widgets.append(SliderSetting::shared(_conf, "input_axis_threshold", "Input axis threshold:", 0.5, 0.0, 1.0));
-         widgets.append(BoolSetting::shared(_conf, "netplay_client_swap_input", "Use Player 1 binds as client:", false));
+         widgets.append(BoolSetting::shared(_conf, "netplay_client_swap_input", "Use Player 1 binds as netplay client:", true));
          widgets.append(InputSetting::shared(_conf, Internal::binds, 
                   [this](const string& msg) { this->setStatusText(msg); }, 
                   [this]() { this->setFocused(); }));
