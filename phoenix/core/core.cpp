@@ -115,6 +115,10 @@ void CheckBox::setChecked(bool checked) { state.checked = checked; return p.setC
 void CheckBox::setText(const string &text) { state.text = text; return p.setText(text); }
 CheckBox::CheckBox() : state(*new State), base_from_member<pCheckBox&>(*new pCheckBox(*this)), Widget(base_from_member<pCheckBox&>::value), p(base_from_member<pCheckBox&>::value) { p.constructor(); }
 
+bool CheckBoxPlain::checked() { return p.checked(); }
+void CheckBoxPlain::setChecked(bool checked) { state.checked = checked; return p.setChecked(checked); }
+CheckBoxPlain::CheckBoxPlain() : state(*new State), base_from_member<pCheckBoxPlain&>(*new pCheckBoxPlain(*this)), Widget(base_from_member<pCheckBoxPlain&>::value), p(base_from_member<pCheckBoxPlain&>::value) { p.constructor(); }
+
 void ComboBox::append(const string &text) { state.text.append(text); return p.append(text); }
 void ComboBox::reset() { state.selection = 0; state.text.reset(); return p.reset(); }
 unsigned ComboBox::selection() { return p.selection(); }

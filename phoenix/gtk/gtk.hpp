@@ -226,6 +226,18 @@ struct pCheckBox : public pWidget {
   void constructor();
 };
 
+struct pCheckBoxPlain : public pWidget {
+  CheckBoxPlain &checkBox;
+
+  Geometry minimumGeometry();
+  bool checked();
+  void setChecked(bool checked);
+
+  pCheckBoxPlain(CheckBoxPlain &checkBoxPlain) : pWidget(checkBoxPlain), checkBox(checkBoxPlain) {}
+  void constructor();
+};
+
+
 struct pComboBox : public pWidget {
   ComboBox &comboBox;
   unsigned itemCounter;

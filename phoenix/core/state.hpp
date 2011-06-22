@@ -129,6 +129,13 @@ struct CheckBox::State {
   }
 };
 
+struct CheckBoxPlain::State {
+  bool checked;
+  State() {
+    checked = false;
+  }
+};
+
 struct ComboBox::State {
   unsigned selection;
   linear_vector<string> text;

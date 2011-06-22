@@ -270,7 +270,6 @@ class BoolSetting : public SettingLayout, public util::Shared<BoolSetting>
    public:
       BoolSetting(ConfigFile &_conf, const string& _key, const string& label, bool _default) : SettingLayout(_conf, _key, label), m_default(_default)
       {
-         check.setText("Enable");
          check.onTick = [this]() { conf.set(key, check.checked()); };
          hlayout.append(check, 120, 0);
       }
@@ -282,7 +281,7 @@ class BoolSetting : public SettingLayout, public util::Shared<BoolSetting>
          check.setChecked(tmp);
       }
 
-      CheckBox check;
+      CheckBoxPlain check;
    private:
       bool m_default;
 };

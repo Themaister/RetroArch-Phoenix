@@ -22,6 +22,7 @@ struct pWidget;
 struct pButton;
 struct pCanvas;
 struct pCheckBox;
+struct pCheckBoxPlain;
 struct pComboBox;
 struct pHexEdit;
 struct pHorizontalSlider;
@@ -271,6 +272,18 @@ struct CheckBox : private nall::base_from_member<pCheckBox&>, Widget {
   struct State;
   State &state;
   pCheckBox &p;
+};
+
+struct CheckBoxPlain : private nall::base_from_member<pCheckBoxPlain&>, Widget {
+  nall::function<void ()> onTick;
+
+  bool checked();
+  void setChecked(bool checked = true);
+
+  CheckBoxPlain();
+  struct State;
+  State &state;
+  pCheckBoxPlain &p;
 };
 
 struct ComboBox : private nall::base_from_member<pComboBox&>, Widget {
