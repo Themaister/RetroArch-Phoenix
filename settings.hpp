@@ -940,7 +940,7 @@ class ShaderVideo : public ToggleWindow
    public:
       ShaderVideo(ConfigFile &_conf) : ToggleWindow("SSNES || Shader settings")
       {
-         paths.append(PathSetting::shared(_conf, "video_cg_shader", "Cg pixel shader:", "", "Cg shader, Cg meta-shader (*.cg, *.cgp)"));
+         paths.append(PathSetting::shared(_conf, "video_cg_shader", "Cg pixel shader:", "", "Cg shader, Cg meta-shader (*.cg,*.cgp)"));
          paths.append(PathSetting::shared(_conf, "video_bsnes_shader", "bSNES XML shader:", "", "XML shader (*.shader)"));
          widgets.append(ShaderSetting::shared(_conf, "video_shader_type", 
                   linear_vector<string>({"Automatic", "Cg", "bSNES XML", "None"}), 
@@ -1243,12 +1243,12 @@ class ExtROM : public ToggleWindow
    public:
       ExtROM(ConfigFile &_conf) : ToggleWindow("SSNES || Special ROM")
       {
-         sgb_bios = PathSetting::shared(_conf, "sgb_bios_path", "Super Gameboy BIOS:", string(""), "Super Famicom, Super Magicom (*.sfc, *.smc)");
+         sgb_bios = PathSetting::shared(_conf, "sgb_bios_path", "Super Gameboy BIOS:", string(""), "Super Famicom, Super Magicom (*.sfc,*.smc)");
          sgb_rom = PathSetting::shared(_conf, "gameboy_path", "Gameboy ROM:", string(""), "Gameboy (*.gb)");
-         sufami_bios = PathSetting::shared(_conf, "sufami_bios_path", "Sufami Turbo BIOS:", string(""), "Super Famicom, Super Magicom (*.sfc, *.smc)");
+         sufami_bios = PathSetting::shared(_conf, "sufami_bios_path", "Sufami Turbo BIOS:", string(""), "Super Famicom, Super Magicom (*.sfc,*.smc)");
          sufami_slot_a = PathSetting::shared(_conf, "sufami_slot_a_path", "Sufami ROM (Slot A):", string(""), "Sufami Turbo (*.st)");
          sufami_slot_b = PathSetting::shared(_conf, "sufami_slot_b_path", "Sufami ROM (Slot B):", string(""), "Sufami Turbo (*.st)");
-         bsx_bios = PathSetting::shared(_conf, "bsx_bios_path", "BSX BIOS:", string(""), "Super Famicom, Super Magicom (*.sfc, *.smc)");
+         bsx_bios = PathSetting::shared(_conf, "bsx_bios_path", "BSX BIOS:", string(""), "Super Famicom, Super Magicom (*.sfc,*.smc)");
          bsx_rom = PathSetting::shared(_conf, "bsx_rom_path", "BSX ROM:", string(""), "BSX (*.bs)");
 
          widgets.append(sgb_bios);
