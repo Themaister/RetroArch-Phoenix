@@ -1066,8 +1066,9 @@ namespace Internal
 {
    static const linear_vector<combo_selection> audio_drivers = {
 #ifdef _WIN32
-      {"sdl", "SDL"},
+      {"dsound", "DirectSound"},
       {"xaudio", "XAudio2"},
+      {"sdl", "SDL"},
       {"rsound", "RSound"},
       {"ext", "External"},
 #elif defined(__APPLE__)
