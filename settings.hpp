@@ -1073,6 +1073,7 @@ namespace Internal
       {"rsound", "RSound"},
       {"ext", "External"},
 #elif defined(__APPLE__)
+      {"coreaudio", "CoreAudio"},
       {"openal", "OpenAL"},
       {"sdl", "SDL"},
       {"ext", "External"},
