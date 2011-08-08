@@ -1076,6 +1076,7 @@ namespace Internal
       {"coreaudio", "CoreAudio"},
       {"openal", "OpenAL"},
       {"sdl", "SDL"},
+      {"rsound", "RSound"},
       {"ext", "External"},
 #else
       {"alsa", "ALSA"},
