@@ -1004,6 +1004,7 @@ class Video : public ToggleWindow
          widgets.append(IntSetting::shared(_conf, "video_fullscreen_y", "Fullscreen Y resolution:", 0));
          widgets.append(BoolSetting::shared(_conf, "video_fullscreen", "Start in fullscreen:", false));
          widgets.append(BoolSetting::shared(_conf, "video_force_16bit", "Force 16-bit color:", false));
+         widgets.append(BoolSetting::shared(_conf, "video_disable_composition", "Disable composition (Win Vista/7):", false));
          widgets.append(BoolSetting::shared(_conf, "video_smooth", "Bilinear filtering:", true));
          widgets.append(BoolSetting::shared(_conf, "video_force_aspect", "Lock aspect ratio:", true));
          widgets.append(BoolSetting::shared(_conf, "video_crop_overscan", "Crop overscan:", false));
