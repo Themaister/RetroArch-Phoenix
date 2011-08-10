@@ -1,6 +1,3 @@
-#ifndef __PHOENIX_CORE_HPP
-#define __PHOENIX_CORE_HPP
-
 struct Font;
 struct Window;
 struct Menu;
@@ -25,6 +22,7 @@ struct pCheckBox;
 struct pCheckBoxPlain;
 struct pComboBox;
 struct pHexEdit;
+struct pHorizontalScrollBar;
 struct pHorizontalSlider;
 struct pLabel;
 struct pLineEdit;
@@ -32,6 +30,7 @@ struct pListView;
 struct pProgressBar;
 struct pRadioBox;
 struct pTextEdit;
+struct pVerticalScrollBar;
 struct pVerticalSlider;
 struct pViewport;
 
@@ -45,6 +44,12 @@ struct Geometry {
   unsigned width, height;
   inline Geometry() : x(0), y(0), width(0), height(0) {}
   inline Geometry(signed x, signed y, unsigned width, unsigned height) : x(x), y(y), width(width), height(height) {}
+};
+
+struct Color {
+  uint8_t red, green, blue, alpha;
+  inline Color() : red(0), green(0), blue(0), alpha(255) {}
+  inline Color(uint8_t red, uint8_t green, uint8_t blue, uint8_t alpha = 255) : red(red), green(green), blue(blue), alpha(alpha) {}
 };
 
 struct Object {
@@ -128,11 +133,12 @@ struct Window : Object {
   void append(Layout &layout);
   void append(Menu &menu);
   void append(Widget &widget);
+  Color backgroundColor();
   Geometry frameGeometry();
   Geometry frameMargin();
   bool focused();
   Geometry geometry();
-  void setBackgroundColor(uint8_t red, uint8_t green, uint8_t blue);
+  void setBackgroundColor(const Color &color);
   void setFrameGeometry(const Geometry &geometry);
   void setFocused();
   void setFullScreen(bool fullScreen = true);
@@ -227,6 +233,7 @@ struct Layout : Object {
 struct Widget : Object {
   bool enabled();
   Font& font();
+  Geometry geometry();
   Geometry minimumGeometry();
   void setEnabled(bool enabled = true);
   void setFocused();
@@ -314,6 +321,19 @@ struct HexEdit : private nall::base_from_member<pHexEdit&>, Widget {
   struct State;
   State &state;
   pHexEdit &p;
+};
+
+struct HorizontalScrollBar : private nall::base_from_member<pHorizontalScrollBar&>, Widget {
+  nall::function<void ()> onChange;
+
+  unsigned position();
+  void setLength(unsigned length);
+  void setPosition(unsigned position);
+
+  HorizontalScrollBar();
+  struct State;
+  State &state;
+  pHorizontalScrollBar &p;
 };
 
 struct HorizontalSlider : private nall::base_from_member<pHorizontalSlider&>, Widget {
@@ -422,6 +442,19 @@ struct TextEdit : private nall::base_from_member<pTextEdit&>, Widget {
   pTextEdit &p;
 };
 
+struct VerticalScrollBar : private nall::base_from_member<pVerticalScrollBar&>, Widget {
+  nall::function<void ()> onChange;
+
+  unsigned position();
+  void setLength(unsigned length);
+  void setPosition(unsigned position);
+
+  VerticalScrollBar();
+  struct State;
+  State &state;
+  pVerticalScrollBar &p;
+};
+
 struct VerticalSlider : private nall::base_from_member<pVerticalSlider&>, Widget {
   nall::function<void ()> onChange;
 
@@ -445,5 +478,3 @@ struct Viewport : private nall::base_from_member<pViewport&>, Widget {
 #include "layout/fixed-layout.hpp"
 #include "layout/horizontal-layout.hpp"
 #include "layout/vertical-layout.hpp"
-
-#endif

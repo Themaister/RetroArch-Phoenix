@@ -27,7 +27,6 @@ void pCheckBox::constructor() {
   g_signal_connect_swapped(G_OBJECT(gtkWidget), "toggled", G_CALLBACK(CheckBox_tick), (gpointer)&checkBox);
 }
 
-
 static void CheckBoxPlain_tick(CheckBox *self) {
   if(self->p.locked == false && self->onTick) self->onTick();
 }
@@ -52,3 +51,4 @@ void pCheckBoxPlain::constructor() {
   gtkWidget = gtk_check_button_new();
   g_signal_connect_swapped(G_OBJECT(gtkWidget), "toggled", G_CALLBACK(CheckBoxPlain_tick), (gpointer)&checkBox);
 }
+

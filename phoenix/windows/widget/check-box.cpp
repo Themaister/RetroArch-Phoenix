@@ -9,7 +9,7 @@ Geometry pCheckBox::minimumGeometry() {
 }
 
 void pCheckBox::setChecked(bool checked) {
-  SendMessage(hwnd, BM_SETCHECK, checked ? BST_CHECKED : BST_UNCHECKED, 0);
+  SendMessage(hwnd, BM_SETCHECK, (WPARAM)checked, 0);
 }
 
 void pCheckBox::setText(const string &text) {
@@ -31,7 +31,6 @@ void pCheckBox::setParent(Window &parent) {
   if(checkBox.state.checked) setChecked(true);
   setText(checkBox.state.text);
 }
-
 
 bool pCheckBoxPlain::checked() {
   return SendMessage(hwnd, BM_GETCHECK, 0, 0);
@@ -61,3 +60,4 @@ void pCheckBoxPlain::setParent(Window &parent) {
   setDefaultFont();
   if(checkBox.state.checked) setChecked(true);
 }
+

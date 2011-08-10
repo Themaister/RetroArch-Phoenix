@@ -1,5 +1,5 @@
-#ifndef __PHOENIX_HPP
-#define __PHOENIX_HPP
+#ifndef PHOENIX_HPP
+#define PHOENIX_HPP
 
 #include <nall/array.hpp>
 #include <nall/config.hpp>

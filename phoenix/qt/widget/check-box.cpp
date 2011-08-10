@@ -27,7 +27,6 @@ void pCheckBox::onTick() {
   if(locked == false && checkBox.onTick) checkBox.onTick();
 }
 
-
 bool pCheckBoxPlain::checked() {
   return qtCheckBox->isChecked();
 }
@@ -52,3 +51,4 @@ void pCheckBoxPlain::constructor() {
 void pCheckBoxPlain::onTick() {
   if(locked == false && checkBox.onTick) checkBox.onTick();
 }
+

@@ -1,3 +1,6 @@
+#ifndef PHOENIX_CPP
+#define PHOENIX_CPP
+
 #if defined(PHOENIX_WINDOWS)
   #define UNICODE
   #define WINVER 0x0501
@@ -11,21 +14,24 @@
   #include <io.h>
   #include <shlobj.h>
 #elif defined(PHOENIX_QT)
-#ifndef __APPLE__
-  #include <QApplication>
-  #include <QtGui>
-#else
+#ifdef __APPLE__
   #include <QtGui/QApplication>
   #include <QtGui/QtGui>
+#else
+  #include <QApplication>
+  #include <QtGui>
 #endif
 #elif defined(PHOENIX_GTK)
-  #define None X11None
+  #define None
   #define Window X11Window
+  #define X11None 0L
 
   #include <gtk/gtk.h>
+  #include <gdk/gdk.h>
   #include <gdk/gdkx.h>
   #include <cairo.h>
   #include <gdk/gdkkeysyms.h>
+  #include <X11/Xatom.h>
 
   #undef None
   #undef Window
@@ -40,3 +46,5 @@ using namespace nall;
 namespace phoenix {
   #include "core/core.cpp"
 }
+
+#endif

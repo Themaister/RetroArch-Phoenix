@@ -6,7 +6,7 @@
 #include <nall/string.hpp>
 
 #if defined(_WIN32)
-  #include <nall/utf8.hpp>
+  #include <nall/windows/utf8.hpp>
 #else
   #include <dirent.h>
   #include <stdio.h>
@@ -41,21 +41,22 @@ struct directory {
     if(handle != INVALID_HANDLE_VALUE) {
       if(wcscmp(data.cFileName, L".") && wcscmp(data.cFileName, L"..")) {
         if(data.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY) {
-          string name = utf8_t(data.cFileName);
-          if(wildcard(name, pattern)) list.append(string(name, "/"));
+          string name = (const char*)utf8_t(data.cFileName);
+          if(wildcard(name, pattern)) list.append(name);
         }
       }
       while(FindNextFile(handle, &data) != false) {
         if(wcscmp(data.cFileName, L".") && wcscmp(data.cFileName, L"..")) {
           if(data.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY) {
-            string name = utf8_t(data.cFileName);
-            if(wildcard(name, pattern)) list.append(string(name, "/"));
+            string name = (const char*)utf8_t(data.cFileName);
+            if(wildcard(name, pattern)) list.append(name);
           }
         }
       }
       FindClose(handle);
     }
     if(list.size() > 0) sort(&list[0], list.size());
+    foreach(name, list) name.append("/");  //must append after sorting
     return list;
   }
 
@@ -70,12 +71,12 @@ struct directory {
     handle = FindFirstFile(utf16_t(path), &data);
     if(handle != INVALID_HANDLE_VALUE) {
       if((data.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY) == 0) {
-        string name = utf8_t(data.cFileName);
+        string name = (const char*)utf8_t(data.cFileName);
         if(wildcard(name, pattern)) list.append(name);
       }
       while(FindNextFile(handle, &data) != false) {
         if((data.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY) == 0) {
-          string name = utf8_t(data.cFileName);
+          string name = (const char*)utf8_t(data.cFileName);
           if(wildcard(name, pattern)) list.append(name);
         }
       }
@@ -109,14 +110,14 @@ struct directory {
         if(!strcmp(ep->d_name, ".")) continue;
         if(!strcmp(ep->d_name, "..")) continue;
         if(ep->d_type & DT_DIR) {
-          if(wildcard(ep->d_name, pattern)) list.append(string(ep->d_name, "/"));
+          if(wildcard(ep->d_name, pattern)) list.append(ep->d_name);
         }
       }
       closedir(dp);
     }
     if(list.size() > 0) sort(&list[0], list.size());
+    foreach(name, list) name.append("/");  //must append after sorting
     return list;
-
   }
 
   inline lstring directory::files(const string &pathname, const string &pattern) {

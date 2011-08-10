@@ -19,6 +19,7 @@
 #include "widget/check-box.cpp"
 #include "widget/combo-box.cpp"
 #include "widget/hex-edit.cpp"
+#include "widget/horizontal-scroll-bar.cpp"
 #include "widget/horizontal-slider.cpp"
 #include "widget/label.cpp"
 #include "widget/line-edit.cpp"
@@ -26,16 +27,36 @@
 #include "widget/progress-bar.cpp"
 #include "widget/radio-box.cpp"
 #include "widget/text-edit.cpp"
+#include "widget/vertical-scroll-bar.cpp"
 #include "widget/vertical-slider.cpp"
 #include "widget/viewport.cpp"
 
 Font pOS::defaultFont;
 
 Geometry pOS::availableGeometry() {
-  //TODO: is there a GTK+ function for this?
-  //should return desktopGeometry() sans panels, toolbars, docks, etc.
-  Geometry geometry = desktopGeometry();
-  return { geometry.x + 64, geometry.y + 64, geometry.width - 128, geometry.height - 128 };
+  Display *display = XOpenDisplay(0);
+  int screen = DefaultScreen(display);
+
+  static Atom atom = X11None;
+  if(atom == X11None) atom = XInternAtom(display, "_NET_WORKAREA", True);
+
+  int format;
+  unsigned char *data = 0;
+  unsigned long items, after;
+  Atom returnAtom;
+
+  int result = XGetWindowProperty(
+    display, RootWindow(display, screen), atom, 0, 4, False, XA_CARDINAL, &returnAtom, &format, &items, &after, &data
+  );
+
+  XCloseDisplay(display);
+
+  if(result == Success && returnAtom == XA_CARDINAL && format == 32 && items == 4) {
+    unsigned long *workarea = (unsigned long*)data;
+    return { (signed)workarea[0], (signed)workarea[1], (unsigned)workarea[2], (unsigned)workarea[3] };
+  }
+
+  return desktopGeometry();
 }
 
 Geometry pOS::desktopGeometry() {
@@ -137,7 +158,7 @@ void pOS::initialize() {
   settings.load();
 
   int argc = 1;
-  char *argv[3];
+  char *argv[2];
   argv[0] = new char[8];
   argv[1] = 0;
   strcpy(argv[0], "phoenix");
