@@ -861,6 +861,8 @@ class General : public ToggleWindow
          widgets.append(IntSetting::shared(_conf, "rewind_granularity", "Rewind frames granularity:", 1));
          widgets.append(BoolSetting::shared(_conf, "pause_nonactive", "Pause when window loses focus:", true));
          widgets.append(IntSetting::shared(_conf, "autosave_interval", "Autosave interval (seconds):", 0));
+         widgets.append(BoolSetting::shared(_conf, "video_hires_record", "Record in hi-res", false));
+         widgets.append(BoolSetting::shared(_conf, "video_post_filter_record", "Records filtered output", false));
 
          widgets.append(PathSetting::shared(_conf, "cheat_database_path", "XML cheat database:", string(""), "XML files (*.xml)"));
          savefile_dir = DirSetting::shared(_pconf, "savefile_dir", "Savefile directory:", string(""));
