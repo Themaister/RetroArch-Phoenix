@@ -11,6 +11,7 @@ HEADERS = $(wildcard *.h) $(wildcard *.hpp)
 
 CC = gcc
 CXX = g++
+CXXFLAGS += -Wno-narrowing
 WINDRES = windres
 
 WIN32_LIBS = -lkernel32 -luser32 -lgdi32 -ladvapi32 -lcomctl32 -lcomdlg32 -lshell32 -lole32 -static-libgcc -static-libstdc++ -mwindows
