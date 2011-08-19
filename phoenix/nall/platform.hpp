@@ -27,6 +27,10 @@
 #include <sys/stat.h>
 
 #if defined(_WIN32)
+#if defined(_WIN64)
+  #undef interface
+  #define interface struct
+#endif
   #include <io.h>
   #include <direct.h>
   #include <shlobj.h>

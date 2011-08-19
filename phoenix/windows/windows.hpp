@@ -5,7 +5,7 @@ struct pLayout;
 struct pWidget;
 
 struct pObject {
-  unsigned id;
+  uintptr_t id;
   bool locked;
   static array<pObject*> objects;
 
