@@ -489,7 +489,7 @@ namespace Internal
 {
    static const char keymap[][64] = {
       "escape", "f1", "f2", "f3", "f4", "f5", "f6", "f7", "f8", "f9", "f10", "f11", "f12",
-      "print_screen", "scroll_lock", "pause", "(not implemented)",
+      "print_screen", "scroll_lock", "pause", "tilde",
       "num1", "num2", "num3", "num4", "num5", "num6", "num7", "num8", "num9", "num0",
       "dash", "equal", "backspace",
       "insert", "del", "home", "end", "pageup", "pagedown",
