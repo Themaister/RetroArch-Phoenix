@@ -9,7 +9,12 @@ CFILES = $(wildcard *.c)
 OBJ = phoenix/phoenix.o $(CXXFILES:.cpp=.o) $(CFILES:.c=.o) $(RUBYOBJ)
 HEADERS = $(wildcard *.h) $(wildcard *.hpp)
 
-QT_LIBS = -framework QtCore -framework QtGui
+ifneq ($(MACPORTS_QT),)
+   QT_LIBS = $(shell pkg-config QtCore QtGui --libs)
+   QT_CFLAGS = $(shell pkg-config QtCore QtGui --cflags)
+else
+   QT_LIBS = -framework QtCore -framework QtGui
+endif
 
 INCLUDES = -Iphoenix -I.
 
