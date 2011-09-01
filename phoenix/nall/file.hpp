@@ -155,8 +155,8 @@ namespace nall {
 
     static bool exists(const string &filename) {
       #if !defined(_WIN32)
-      struct stat64 data;
-      return stat64(filename, &data) == 0;
+      struct stat data;
+      return stat(filename, &data) == 0;
       #else
       struct __stat64 data;
       return _wstat64(utf16_t(filename), &data) == 0;
