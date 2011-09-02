@@ -165,8 +165,8 @@ namespace nall {
 
     static uintmax_t size(const string &filename) {
       #if !defined(_WIN32)
-      struct stat64 data;
-      stat64(filename, &data);
+      struct stat data;
+      stat(filename, &data);
       #else
       struct __stat64 data;
       _wstat64(utf16_t(filename), &data);
@@ -176,8 +176,8 @@ namespace nall {
 
     static time_t timestamp(const string &filename, file::time mode = file::time::create) {
       #if !defined(_WIN32)
-      struct stat64 data;
-      stat64(filename, &data);
+      struct stat data;
+      stat(filename, &data);
       #else
       struct __stat64 data;
       _wstat64(utf16_t(filename), &data);
