@@ -130,7 +130,7 @@ class MainWindow : public Window
          setStatusVisible();
 
          forked_timer.onTimeout = [this]() { this->forked_event(); };
-         forked_timer.setInterval(10);
+         forked_timer.setInterval(100);
 
          init_config();
          setVisible();
