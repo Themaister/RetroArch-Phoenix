@@ -38,7 +38,7 @@ namespace Internal
    static void sigchld_handle(int)
    {
       if (async)
-         while (waitpid(-1, NULL, WNOHANG) > 0);
+         while (waitpid(-1, NULL, WNOHANG) > 0) print("Reaped zombie ...\n");
       else
       {
          int pstatus;
