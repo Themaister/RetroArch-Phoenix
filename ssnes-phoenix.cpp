@@ -100,7 +100,7 @@ class LogWindow : public ToggleWindow
          append(layout);
       }
 
-      void push(const char *text) { log.append(text); box.setText(log); if(OS::pendingEvents()) OS::processEvents(); }
+      void push(const char *text) { log.append(text); box.setText(log); }
       void clear() { log = ""; box.setText(log); }
 
    private:
