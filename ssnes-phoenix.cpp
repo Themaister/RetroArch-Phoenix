@@ -6,6 +6,8 @@
 #include <sys/types.h>
 #include <sys/wait.h>
 #include <sys/stat.h>
+#include <sys/poll.h>
+#include <fcntl.h>
 #include <signal.h>
 #else
 #define WIN32_LEAN_AND_MEAN
@@ -20,9 +22,14 @@
 using namespace nall;
 using namespace phoenix;
 
-#ifndef _WIN32
 namespace Internal
 {
+#ifndef _WIN32
+   static volatile sig_atomic_t child_quit;
+   static volatile sig_atomic_t status;
+   static bool async;
+   static pid_t child_pid;
+
    extern "C"
    {
       static void sigchld_handle(int);
@@ -30,10 +37,54 @@ namespace Internal
 
    static void sigchld_handle(int)
    {
-      while (waitpid(-1, NULL, WNOHANG) > 0);
+      if (async)
+         while (waitpid(-1, NULL, WNOHANG) > 0);
+      else
+      {
+         int pstatus;
+         waitpid(child_pid, &pstatus, 0);
+         status = WEXITSTATUS(pstatus);
+         child_quit = 1;
+      }
    }
-}
+#else
+   static char read_buf[2048];
+   static DWORD read_ptr = 0;
+   CRITICAL_SECTION crit;
+
+   static DWORD CALLBACK read_thread(void *data)
+   {
+      HANDLE read_handle = (HANDLE)data;
+
+      DWORD read_bytes;
+
+      for (;;)
+      {
+         char tmp_buf[2048];
+
+         if (sizeof(read_buf) - read_ptr <= 1)
+            Sleep(10);
+
+         if (ReadFile(read_handle, tmp_buf, sizeof(read_buf) - read_ptr - 1, &read_bytes, NULL) == FALSE || read_bytes == 0)
+         {
+            EnterCriticalSection(&crit);
+            read_ptr = 0;
+            LeaveCriticalSection(&crit);
+            break;
+         }
+         else
+         {
+            EnterCriticalSection(&crit);
+            memcpy(read_buf + read_ptr, tmp_buf, read_bytes);
+            read_ptr += read_bytes;
+            LeaveCriticalSection(&crit);
+         }
+      }
+
+      ExitThread(0);
+   }
 #endif
+}
 
 
 class LogWindow : public ToggleWindow
@@ -77,6 +128,9 @@ class MainWindow : public Window
          append(vbox);
          setMenuVisible();
          setStatusVisible();
+
+         forked_timer.onTimeout = [this]() { this->forked_event(); };
+         forked_timer.setInterval(10);
 
          init_config();
          setVisible();
@@ -303,12 +357,16 @@ class MainWindow : public Window
 #ifdef _WIN32
       static string gui_config_path()
       {
-         // Insane hack. Goddamn, win32 file handling sucks ... :(
+         // Insane hack. Goddamn, Win32 file handling sucks ... :(
          // After we have changed directoy in the file browser, this changes ...
-         // On startup this will be correct ...
-         static char dir[256];
-         if (!dir[0])
+         // On startup this will be correct though ...
+         static bool dir_set = false;
+         static char dir[512];
+         if (!dir_set)
+         {
             GetCurrentDirectoryA(sizeof(dir), dir);
+            dir_set = true;
+         }
 
          // If we have ssnes-phoenix.cfg in same directory, use that ...
          WIN32_FIND_DATAA data;
@@ -334,9 +392,13 @@ class MainWindow : public Window
             return tmp;
          else
          {
-            static char dir[256];
-            if (!dir[0])
+            static bool dir_set = false;
+            static char dir[512];
+            if (!dir_set)
+            {
                GetCurrentDirectoryA(sizeof(dir), dir);
+               dir_set = true;
+            }
 
             // If we have ssnes.cfg in same directory, use that ...
             WIN32_FIND_DATAA data;
@@ -513,6 +575,8 @@ class MainWindow : public Window
          libsnes.setFilter("Dynamic library (" DYNAMIC_EXTENSION ")");
 #ifdef _WIN32
          ssnes.setFilter("Executable file (*.exe)");
+#else
+         ssnes.setFilter("Any file (*)");
 #endif
 
          rom.setLabel("Normal ROM path:");
@@ -784,57 +848,157 @@ class MainWindow : public Window
          print("\n");
       }
 
+      Timer forked_timer;
+#ifdef _WIN32
+      HANDLE fork_file;
+      PROCESS_INFORMATION forked_pinfo;
+      bool forked_async;
+
+      HANDLE forked_read_thread;
+
+      void forked_event()
+      {
+         bool should_restore = false;
+         DWORD exit_status = 255;
+         if (WaitForSingleObject(forked_pinfo.hProcess, 0) == WAIT_OBJECT_0)
+         {
+            GetExitCodeProcess(forked_pinfo.hProcess, &exit_status);
+            CloseHandle(forked_pinfo.hThread);
+            CloseHandle(forked_pinfo.hProcess);
+            memset(&forked_pinfo, 0, sizeof(forked_pinfo));
+            should_restore = true;
+         }
+
+         if (!forked_async)
+         {
+            EnterCriticalSection(&Internal::crit);
+
+            if (Internal::read_ptr > 0)
+            {
+               Internal::read_buf[Internal::read_ptr] = '\0';
+               log_win.push(Internal::read_buf);
+               Internal::read_ptr = 0;
+            }
+
+            LeaveCriticalSection(&Internal::crit);
+         }
+
+         if (!should_restore)
+            return;
+
+set_visible:
+         if (fork_file)
+         {
+            CloseHandle(fork_file);
+            fork_file = NULL;
+         }
+
+         if (!forked_async)
+         {
+            setVisible();
+            if (exit_status == 255)
+               setStatusText("Something unexpected happened ...");
+            else if (exit_status == 0)
+               setStatusText("SSNES returned successfully!");
+            else
+               setStatusText({"SSNES returned with an error! Code: ", (unsigned)exit_status});
+         }
+
+         forked_timer.setEnabled(false);
+
+         if (forked_pinfo.hThread)
+            CloseHandle(forked_pinfo.hThread);
+         if (forked_pinfo.hProcess)
+            CloseHandle(forked_pinfo.hProcess);
+         memset(&forked_pinfo, 0, sizeof(forked_pinfo));
+
+         if (!forked_async)
+         {
+            WaitForSingleObject(forked_read_thread, INFINITE);
+            CloseHandle(forked_read_thread);
+            DeleteCriticalSection(&Internal::crit);
+         }
+      }
+#else
+      int fork_fd;
+      void forked_event()
+      {
+         if (Internal::child_quit)
+         {
+            forked_timer.setEnabled(false);
+            close(fork_fd);
+
+            if (Internal::status == 255)
+               setStatusText("Could not find SSNES!");
+            else if (Internal::status != 0)
+               setStatusText("Failed to open ROM!");
+            else
+               setStatusText("SSNES exited successfully.");
+
+            setVisible();
+         }
+
+         char line[2048];
+         ssize_t ret;
+
+         struct pollfd poll_fd = {0};
+         poll_fd.fd = fork_fd;
+         poll_fd.events = POLLIN;
+
+         if (poll(&poll_fd, 1, 0) <= 0)
+            return;
+
+         if (poll_fd.revents & POLLHUP)
+            return;
+
+         if (poll_fd.revents & POLLIN)
+         {
+            ret = read(fork_fd, line, sizeof(line) - 1);
+            if (ret < 0)
+               return;
+
+            line[ret] = '\0';
+            log_win.push(line);
+         }
+      }
+#endif
+
 #ifndef _WIN32
       void fork_ssnes(const string& path, const char **cmd)
       {
-         // I think we had to do this with GTK+ at least :v
-         if (OS::pendingEvents()) OS::processEvents();
-
-         bool can_hide = !general.getAsyncFork();
+         Internal::async = general.getAsyncFork();
+         bool can_hide = !Internal::async;
 
          // Gotta love Unix :)
          int fds[2];
+
+         Internal::status = 0;
+         Internal::child_quit = 0;
+         signal(SIGCHLD, Internal::sigchld_handle);
 
          if (can_hide)
          {
             if (pipe(fds) < 0)
                return;
 
+            fork_fd = fds[0];
+            for (unsigned i = 0; i < 2; i++)
+               fcntl(fds[i], F_SETFL, fcntl(fds[i], F_GETFL) | O_NONBLOCK);
+
             setVisible(false);
             general.hide();
             video.hide();
             audio.hide();
             input.hide();
-
-            signal(SIGCHLD, SIG_DFL);
          }
-         else
-            signal(SIGCHLD, Internal::sigchld_handle);
 
-         if (fork())
+         log_win.clear();
+         if ((Internal::child_pid = fork()))
          {
             if (can_hide)
             {
                close(fds[1]);
-               log_win.clear();
-               char line[1024] = {0};
-               ssize_t ret;
-               while((ret = read(fds[0], line, sizeof(line) - 1)) > 0)
-               {
-                  line[ret] = '\0';
-                  log_win.push(line);
-               }
-
-               int status = 0;
-               wait(&status);
-               status = WEXITSTATUS(status);
-               if (status == 255)
-                  setStatusText({"Could not find SSNES in given path ", path});
-               else if (status != 0)
-                  setStatusText({"Failed to open ROM!"});
-               else
-                  setStatusText("SSNES exited successfully.");
-               close(fds[0]);
+               forked_timer.setEnabled();
             }
          }
          else
@@ -852,28 +1016,10 @@ class MainWindow : public Window
             if (execvp(path, const_cast<char**>(cmd)) < 0)
                exit(255);
          }
-
-         if (can_hide)
-            setVisible();
       }
 #else
-      // This will be hell on Earth :v
       void fork_ssnes(const string& path, const char **cmd)
       {
-         if (OS::pendingEvents())
-            OS::processEvents();
-
-         bool can_hide = !general.getAsyncFork();
-
-         if (can_hide)
-         {
-            setVisible(false);
-            general.hide();
-            video.hide();
-            audio.hide();
-            input.hide();
-         }
-
          print_cmd(path, cmd);
 
          HANDLE reader, writer;
@@ -906,8 +1052,15 @@ class MainWindow : public Window
          siStartInfo.hStdInput = NULL;
          siStartInfo.dwFlags |= STARTF_USESTDHANDLES;
 
-         WCHAR wcmdline[1024] = {0};
-         MultiByteToWideChar(CP_UTF8, 0, cmdline, cmdline.length(), wcmdline, 1023);
+         WCHAR wcmdline[1024];
+         if (MultiByteToWideChar(CP_UTF8, 0, cmdline, -1, wcmdline, 1024) == 0)
+         {
+            if (reader)
+               CloseHandle(reader);
+            if (writer)
+               CloseHandle(writer);
+            return;
+         }
 
          bSuccess = CreateProcessW(NULL,
                wcmdline,
@@ -920,35 +1073,40 @@ class MainWindow : public Window
                &siStartInfo,
                &piProcInfo);
 
+         log_win.clear();
+
+         forked_async = general.getAsyncFork();
+         bool can_hide = !forked_async;
+
          if (can_hide)
          {
             if (bSuccess)
             {
+               setVisible(false);
+               general.hide();
+               video.hide();
+               audio.hide();
+               input.hide();
+
                CloseHandle(writer);
                writer = NULL;
-               log_win.clear();
-               char buf[1024];
-               DWORD dwRead;
-               while (ReadFile(reader, buf, sizeof(buf) - 1, &dwRead, NULL) == TRUE && dwRead > 0)
-               {
-                  buf[dwRead] = '\0';
-                  log_win.push(buf);
-               }
-               setStatusText("SSNES returned successfully!");
+
+               fork_file = reader;
+               forked_pinfo = piProcInfo;
+
+               InitializeCriticalSection(&Internal::crit);
+               forked_read_thread = CreateThread(NULL, 0, Internal::read_thread, reader, 0, NULL);
+               forked_timer.setEnabled();
             }
             else
-            {
                setStatusText("Failed to start SSNES");
-            }
          }
+         else
+            fork_file = NULL;
 
-         if (reader)
-            CloseHandle(reader);
+
          if (writer)
             CloseHandle(writer);
-
-         if (can_hide)
-            setVisible();
       }
 #endif
 
