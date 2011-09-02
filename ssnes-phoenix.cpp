@@ -887,12 +887,6 @@ class MainWindow : public Window
             return;
 
 set_visible:
-         if (fork_file)
-         {
-            CloseHandle(fork_file);
-            fork_file = NULL;
-         }
-
          if (!forked_async)
          {
             setVisible();
@@ -917,6 +911,12 @@ set_visible:
             WaitForSingleObject(forked_read_thread, INFINITE);
             CloseHandle(forked_read_thread);
             DeleteCriticalSection(&Internal::crit);
+         }
+
+         if (fork_file)
+         {
+            CloseHandle(fork_file);
+            fork_file = NULL;
          }
       }
 #else
