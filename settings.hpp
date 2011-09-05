@@ -865,6 +865,7 @@ class General : public ToggleWindow
          widgets.append(BoolSetting::shared(_conf, "video_post_filter_record", "Records filtered output", false));
 
          widgets.append(PathSetting::shared(_conf, "cheat_database_path", "XML cheat database:", string(""), "XML files (*.xml)"));
+         widgets.append(PathSetting::shared(_conf, "cheat_settings_path", "XML cheat settings:", string(""), "Config files (*.cfg)"));
          savefile_dir = DirSetting::shared(_pconf, "savefile_dir", "Savefile directory:", string(""));
          savestate_dir = DirSetting::shared(_pconf, "savestate_dir", "Savestate directory:", string(""));
          widgets.append(DirSetting::shared(_conf, "screenshot_directory", "Screenshot directory:", string("")));
