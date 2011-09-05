@@ -978,6 +978,7 @@ class FontVideo : public ToggleWindow
          widgets.append(IntSetting::shared(_conf, "video_font_size", "On-screen font size:", 48));
          widgets.append(DoubleSetting::shared(_conf, "video_message_pos_x", "On-screen message pos X:", 0.05));
          widgets.append(DoubleSetting::shared(_conf, "video_message_pos_y", "On-screen message pos Y:", 0.05));
+         widgets.append(StringSetting::shared(_conf, "video_message_color", "Message color (RGB hex):", "ffffff"));
 
          foreach(i, widgets) { vbox.append(i->layout(), 3); }
          vbox.setMargin(5);
