@@ -556,7 +556,23 @@ class InputSetting : public SettingLayout, public util::Shared<InputSetting>
          warn.setText("Note: Even if a key is detected properly here, it might not work in-game.\nIf it doesn't, please file a bug-report and try a different one for now.");
          vbox.append(warn, 0, 2.5 * 0);
 
+         cancel_poll_btn.setText("Cancel input");
+         cancel_poll_btn.setEnabled(false);
+         cancel_poll_btn.onTick = {&InputSetting::cancel_poll, this};
+         vbox.append(cancel_poll_btn, 0, 0);
+
          hlayout.append(vbox);
+
+         timer.onTimeout = {&InputSetting::update_bind_event, this};
+         timer.setInterval(10);
+      }
+
+      void cancel_poll()
+      {
+         timer.setEnabled(false);
+         list_view.setEnabled(true);
+         cancel_poll_btn.setEnabled(false);
+         msg_cb("");
       }
 
       void update()
@@ -564,7 +580,6 @@ class InputSetting : public SettingLayout, public util::Shared<InputSetting>
          update_from_config();
          update_list();
       }
-
       
    private:
       function<void (const string&)> msg_cb;
@@ -578,6 +593,11 @@ class InputSetting : public SettingLayout, public util::Shared<InputSetting>
       Button def;
       Button erase;
       Label warn;
+      Button cancel_poll_btn;
+
+      Timer timer;
+      int16_t old_data[Scancode::Limit];
+      Internal::input_selection *poll_elem;
 
       Label index_label;
       LineEdit index_show;
@@ -664,6 +684,58 @@ class InputSetting : public SettingLayout, public util::Shared<InputSetting>
          }
       }
 
+      void update_bind_event()
+      {
+         string option, ext;
+         auto type = poll(option);
+         if (type == Type::None)
+            return;
+
+         timer.setEnabled(false);
+         list_view.setEnabled(true);
+         cancel_poll_btn.setEnabled(false);
+
+         switch (type)
+         {
+            case Type::JoyAxis:
+               conf.set({poll_elem->config_base, "_axis"}, option);
+               conf.set({poll_elem->config_base, "_btn"}, string("nul"));
+               conf.set({poll_elem->config_base, ""}, string("nul"));
+               ext = " (axis)";
+               break;
+
+            case Type::JoyButton:
+               conf.set({poll_elem->config_base, "_axis"}, string("nul"));
+               conf.set({poll_elem->config_base, "_btn"}, option);
+               conf.set({poll_elem->config_base, ""}, string("nul"));
+               ext = " (button)";
+               break;
+
+            case Type::JoyHat:
+               conf.set({poll_elem->config_base, "_axis"}, string("nul"));
+               conf.set({poll_elem->config_base, "_btn"}, option);
+               conf.set({poll_elem->config_base, ""}, string("nul"));
+               ext = " (hat)";
+               break;
+
+            case Type::Keyboard:
+               conf.set({poll_elem->config_base, "_axis"}, string("nul"));
+               conf.set({poll_elem->config_base, "_btn"}, string("nul"));
+               conf.set({poll_elem->config_base, ""}, option);
+               break;
+
+            default:
+               return;
+         }
+
+         poll_elem->display = option;
+         if (ext.length() > 0)
+            poll_elem->display.append(ext);
+
+         msg_cb("");
+         update_list();
+      }
+
       void update_bind()
       {
          const string& opt = list[player.selection()][list_view.selection()].config_base;
@@ -671,136 +743,87 @@ class InputSetting : public SettingLayout, public util::Shared<InputSetting>
 
          focus_cb();
 
-         auto& elem = list[player.selection()][list_view.selection()];
+         poll_elem = &list[player.selection()][list_view.selection()];
          list_view.setSelected(false);
          list_view.setEnabled(false);
-         if (OS::pendingEvents()) OS::processEvents();
+         cancel_poll_btn.setEnabled(true);
 
-         string option, ext;
+         timer.setEnabled(true);
 
-         auto type = poll(option);
-         list_view.setEnabled(true);
-
-         switch (type)
-         {
-            case Type::JoyAxis:
-               conf.set({elem.config_base, "_axis"}, option);
-               conf.set({elem.config_base, "_btn"}, string("nul"));
-               conf.set({elem.config_base, ""}, string("nul"));
-               ext = " (axis)";
-               break;
-
-            case Type::JoyButton:
-               conf.set({elem.config_base, "_axis"}, string("nul"));
-               conf.set({elem.config_base, "_btn"}, option);
-               conf.set({elem.config_base, ""}, string("nul"));
-               ext = " (button)";
-               break;
-
-            case Type::JoyHat:
-               conf.set({elem.config_base, "_axis"}, string("nul"));
-               conf.set({elem.config_base, "_btn"}, option);
-               conf.set({elem.config_base, ""}, string("nul"));
-               ext = " (hat)";
-               break;
-
-            case Type::Keyboard:
-               conf.set({elem.config_base, "_axis"}, string("nul"));
-               conf.set({elem.config_base, "_btn"}, string("nul"));
-               conf.set({elem.config_base, ""}, option);
-               break;
-
-            default:
-               break;
-         }
-
-         elem.display = option;
-         if (ext.length() > 0)
-            elem.display.append(ext);
-
-         update_list();
-         msg_cb("");
+         memset(old_data, 0, sizeof(old_data));
+         ruby::input.poll(old_data);
       }
 
       Type poll(string& opt)
       {
          auto type = Type::None;
-         int16_t old_data[Scancode::Limit] = {0};
          int16_t new_data[Scancode::Limit] = {0};
          opt = "";
 
-         ruby::input.poll(old_data);
-
-         for (;;)
+         ruby::input.poll(new_data);
+         for (int i = 0; i < Scancode::Limit; i++)
          {
-            // TODO: Find some better way to block ... xD
-            usleep(10000);
-
-            ruby::input.poll(new_data);
-            for (int i = 0; i < Scancode::Limit; i++)
+            if (old_data[i] != new_data[i])
             {
-               if (old_data[i] != new_data[i])
+               if (Mouse::isAnyButton(i) || Mouse::isAnyAxis(i))
+                  continue;
+
+               if (Joypad::isAnyAxis(i))
                {
-                  if (Mouse::isAnyButton(i) || Mouse::isAnyAxis(i))
+                  if (!analog_enable.checked())
                      continue;
 
-                  if (Joypad::isAnyAxis(i))
-                  {
-                     if (!analog_enable.checked())
-                        continue;
+                  if (std::abs((int)old_data[i] - (int)new_data[i]) < 20000)
+                     continue;
 
-                     if (std::abs((int)old_data[i] - (int)new_data[i]) < 20000)
-                        continue;
-
-                     type = Type::JoyAxis;
-                  }
-                  else if (Joypad::isAnyButton(i))
-                     type = Type::JoyButton;
-                  else if (Joypad::isAnyHat(i))
-                     type = Type::JoyHat;
-                  else
-                     type = Type::Keyboard;
-
-                  if ((Joypad::isAnyAxis(i) || Joypad::isAnyButton(i) || Joypad::isAnyHat(i)) 
-                        && player.selection() < max_players)
-                  {
-                     conf.set(string("input_player", 
-                           (unsigned)(player.selection() + 1), "_joypad_index"), 
-                           Joypad::numberDecode(i));
-                  }
-
-                  signed code = 0;
-                  if ((code = Joypad::buttonDecode(i)) >= 0)
-                     opt = string((unsigned)code);
-                  else if ((code = Joypad::axisDecode(i)) >= 0)
-                  {
-                     if (old_data[i] < new_data[i])
-                        opt = string("+", (unsigned)code);
-                     else
-                        opt = string("-", (unsigned)code);
-                  }
-                  else if ((code = Joypad::hatDecode(i)) >= 0)
-                  {
-                     opt = {"h", (unsigned)code};
-                     int16_t j = new_data[i];
-                     if (j & Joypad::HatUp)
-                        opt.append("up");
-                     else if (j & Joypad::HatDown)
-                        opt.append("down");
-                     else if (j & Joypad::HatRight)
-                        opt.append("right");
-                     else if (j & Joypad::HatLeft)
-                        opt.append("left");
-                  }
-                  else
-                  {
-                     opt = encode(i);
-                  }
-
-                  return type;
+                  type = Type::JoyAxis;
                }
+               else if (Joypad::isAnyButton(i))
+                  type = Type::JoyButton;
+               else if (Joypad::isAnyHat(i))
+                  type = Type::JoyHat;
+               else
+                  type = Type::Keyboard;
+
+               if ((Joypad::isAnyAxis(i) || Joypad::isAnyButton(i) || Joypad::isAnyHat(i)) 
+                     && player.selection() < max_players)
+               {
+                  conf.set(string("input_player", 
+                        (unsigned)(player.selection() + 1), "_joypad_index"), 
+                        Joypad::numberDecode(i));
+               }
+
+               int code = 0;
+               if ((code = Joypad::buttonDecode(i)) >= 0)
+                  opt = string((unsigned)code);
+               else if ((code = Joypad::axisDecode(i)) >= 0)
+               {
+                  if (old_data[i] < new_data[i])
+                     opt = string("+", (unsigned)code);
+                  else
+                     opt = string("-", (unsigned)code);
+               }
+               else if ((code = Joypad::hatDecode(i)) >= 0)
+               {
+                  opt = {"h", (unsigned)code};
+                  int16_t j = new_data[i];
+                  if (j & Joypad::HatUp)
+                     opt.append("up");
+                  else if (j & Joypad::HatDown)
+                     opt.append("down");
+                  else if (j & Joypad::HatRight)
+                     opt.append("right");
+                  else if (j & Joypad::HatLeft)
+                     opt.append("left");
+               }
+               else
+                  opt = encode(i);
+
+               break;
             }
          }
+
+         return type;
       }
 
       void update_from_config()
@@ -1212,7 +1235,7 @@ class Input : public ToggleWindow
       {
          widgets.append(SliderSetting::shared(_conf, "input_axis_threshold", "Input axis threshold:", 0.5, 0.0, 1.0));
          widgets.append(BoolSetting::shared(_conf, "netplay_client_swap_input", "Use Player 1 binds as netplay client:", true));
-         widgets.append(InputSetting::shared(_conf, Internal::binds, 
+         widgets.append(input_setting = InputSetting::shared(_conf, Internal::binds, 
                   [this](const string& msg) { this->setStatusText(msg); }, 
                   [this]() { this->setFocused(); }));
 
@@ -1228,10 +1251,12 @@ class Input : public ToggleWindow
       }
 
       void update() { foreach(i, widgets) i->update(); }
+      void hide() { input_setting->cancel_poll(); ToggleWindow::hide(); }
 
    private:
       linear_vector<SettingLayout::APtr> widgets;
       VerticalLayout vbox;
+      InputSetting::Ptr input_setting;
 
       void init_input()
       {
