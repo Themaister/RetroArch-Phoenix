@@ -884,6 +884,7 @@ class General : public ToggleWindow
          widgets.append(IntSetting::shared(_conf, "rewind_granularity", "Rewind frames granularity:", 1));
          widgets.append(BoolSetting::shared(_conf, "pause_nonactive", "Pause when window loses focus:", true));
          widgets.append(IntSetting::shared(_conf, "autosave_interval", "Autosave interval (seconds):", 0));
+         widgets.append(BoolSetting::shared(_conf, "block_sram_overwrite", "Block SRAM overwrite:", false));
          widgets.append(BoolSetting::shared(_conf, "video_hires_record", "Record in hi-res", false));
          widgets.append(BoolSetting::shared(_conf, "video_post_filter_record", "Records filtered output", false));
 
@@ -893,6 +894,7 @@ class General : public ToggleWindow
          savestate_dir = DirSetting::shared(_pconf, "savestate_dir", "Savestate directory:", string(""));
          widgets.append(DirSetting::shared(_conf, "screenshot_directory", "Screenshot directory:", string("")));
          async_fork = BoolSetting::shared(_pconf, "async_fork", "Keep UI visible:", false);
+
          widgets.append(savefile_dir);
          widgets.append(savestate_dir);
          widgets.append(async_fork);
