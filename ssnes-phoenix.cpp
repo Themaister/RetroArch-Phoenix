@@ -50,7 +50,8 @@ namespace Internal
 #else
    static char read_buf[2048];
    static DWORD read_ptr = 0;
-   CRITICAL_SECTION crit;
+   static CRITICAL_SECTION crit;
+   static volatile bool thread_alive;
 
    static DWORD CALLBACK read_thread(void *data)
    {
@@ -58,18 +59,29 @@ namespace Internal
 
       DWORD read_bytes;
 
-      for (;;)
+      while (thread_alive)
       {
          char tmp_buf[2048];
 
+         EnterCriticalSection(&crit);
          if (sizeof(read_buf) - read_ptr <= 1)
+         {
+            LeaveCriticalSection(&crit);
             Sleep(10);
+            continue;
+         }
+         else
+            LeaveCriticalSection(&crit);
 
          if (ReadFile(read_handle, tmp_buf, sizeof(read_buf) - read_ptr - 1, &read_bytes, NULL) == FALSE || read_bytes == 0)
          {
+            DWORD err = GetLastError();
+
             EnterCriticalSection(&crit);
-            read_ptr = 0;
+            snprintf(read_buf, sizeof(read_buf), "[SSNES-Phoenix]: Win32 error in thread = %u\n", (unsigned)err);
+            read_ptr = strlen(read_buf);
             LeaveCriticalSection(&crit);
+
             break;
          }
          else
@@ -876,11 +888,14 @@ class MainWindow : public Window
             if (Internal::read_ptr > 0)
             {
                Internal::read_buf[Internal::read_ptr] = '\0';
-               log_win.push(Internal::read_buf);
+               string str = Internal::read_buf;
                Internal::read_ptr = 0;
-            }
+               LeaveCriticalSection(&Internal::crit);
 
-            LeaveCriticalSection(&Internal::crit);
+               log_win.push(str);
+            }
+            else
+               LeaveCriticalSection(&Internal::crit);
          }
 
          if (!should_restore)
@@ -908,6 +923,7 @@ set_visible:
 
          if (!forked_async)
          {
+            Internal::thread_alive = false;
             WaitForSingleObject(forked_read_thread, INFINITE);
             CloseHandle(forked_read_thread);
             DeleteCriticalSection(&Internal::crit);
@@ -1045,12 +1061,14 @@ set_visible:
          BOOL bSuccess = FALSE;
          ZeroMemory(&piProcInfo, sizeof(piProcInfo));
 
+         forked_async = general.getAsyncFork();
+
          ZeroMemory(&siStartInfo, sizeof(siStartInfo));
          siStartInfo.cb = sizeof(siStartInfo);
          siStartInfo.hStdError = writer;
          siStartInfo.hStdOutput = NULL;
          siStartInfo.hStdInput = NULL;
-         siStartInfo.dwFlags |= STARTF_USESTDHANDLES;
+         siStartInfo.dwFlags |= forked_async ? 0 : STARTF_USESTDHANDLES;
 
          WCHAR wcmdline[1024];
          if (MultiByteToWideChar(CP_UTF8, 0, cmdline, -1, wcmdline, 1024) == 0)
@@ -1075,7 +1093,6 @@ set_visible:
 
          log_win.clear();
 
-         forked_async = general.getAsyncFork();
          bool can_hide = !forked_async;
 
          if (can_hide)
@@ -1095,6 +1112,7 @@ set_visible:
                forked_pinfo = piProcInfo;
 
                InitializeCriticalSection(&Internal::crit);
+               Internal::thread_alive = true;
                forked_read_thread = CreateThread(NULL, 0, Internal::read_thread, reader, 0, NULL);
                forked_timer.setEnabled();
             }
@@ -1103,7 +1121,6 @@ set_visible:
          }
          else
             fork_file = NULL;
-
 
          if (writer)
             CloseHandle(writer);
