@@ -885,6 +885,7 @@ class General : public ToggleWindow
          widgets.append(BoolSetting::shared(_conf, "pause_nonactive", "Pause when window loses focus:", true));
          widgets.append(IntSetting::shared(_conf, "autosave_interval", "Autosave interval (seconds):", 0));
          widgets.append(BoolSetting::shared(_conf, "block_sram_overwrite", "Block SRAM overwrite:", false));
+         widgets.append(BoolSetting::shared(_conf, "savestate_auto_index", "Auto-increment save state slots:", false));
          widgets.append(BoolSetting::shared(_conf, "video_hires_record", "Record in hi-res", false));
          widgets.append(BoolSetting::shared(_conf, "video_post_filter_record", "Records filtered output", false));
 
