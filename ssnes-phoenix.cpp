@@ -581,7 +581,7 @@ class MainWindow : public Window
 
       void init_main_frame()
       {
-         rom.setFilter("Super Magicom, Super Famicom (*.smc,*.sfc)");
+         rom.setFilter("Game ROM (*)");
          movie_play.setFilter("BSNES Movie (*.bsv)");
          config.setFilter("Config file (*.cfg)");
          libsnes.setFilter("Dynamic library (" DYNAMIC_EXTENSION ")");
