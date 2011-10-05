@@ -942,6 +942,16 @@ set_visible:
          if (Internal::child_quit)
          {
             forked_timer.setEnabled(false);
+
+            // Flush out log messages ...
+            char line[2048];
+            ssize_t ret;
+            while ((ret = read(fork_fd, line, sizeof(line) - 1)) > 0)
+            {
+               line[ret] = '\0';
+               log_win.push(line);
+            }
+
             close(fork_fd);
 
             if (Internal::status == 255)
