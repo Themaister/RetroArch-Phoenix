@@ -27,6 +27,7 @@ namespace Internal
 #ifndef _WIN32
    static volatile sig_atomic_t child_quit;
    static volatile sig_atomic_t status;
+   static volatile sig_atomic_t abnormal_quit;
    static bool async;
    static pid_t child_pid;
 
@@ -45,6 +46,7 @@ namespace Internal
          waitpid(child_pid, &pstatus, 0);
          status = WEXITSTATUS(pstatus);
          child_quit = 1;
+         abnormal_quit = !WIFEXITED(pstatus);
       }
    }
 #else
@@ -955,7 +957,9 @@ set_visible:
 
             close(fork_fd);
 
-            if (Internal::status == 255)
+            if (Internal::abnormal_quit)
+               setStatusText("SSNES exited abnormally!");
+            else if (Internal::status == 255)
                setStatusText("Could not find SSNES!");
             else if (Internal::status != 0)
                setStatusText("Failed to open ROM!");
@@ -1001,6 +1005,7 @@ set_visible:
 
          Internal::status = 0;
          Internal::child_quit = 0;
+         Internal::abnormal_quit = 0;
          signal(SIGCHLD, Internal::sigchld_handle);
 
          if (can_hide)
