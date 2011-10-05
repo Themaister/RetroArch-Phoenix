@@ -75,13 +75,14 @@ namespace Internal
 
          if (ReadFile(read_handle, tmp_buf, sizeof(read_buf) - read_ptr - 1, &read_bytes, NULL) == FALSE || read_bytes == 0)
          {
+#if 0
             DWORD err = GetLastError();
 
             EnterCriticalSection(&crit);
             snprintf(read_buf, sizeof(read_buf), "[SSNES-Phoenix]: Win32 error in thread = %u\n", (unsigned)err);
             read_ptr = strlen(read_buf);
             LeaveCriticalSection(&crit);
-
+#endif
             break;
          }
          else
