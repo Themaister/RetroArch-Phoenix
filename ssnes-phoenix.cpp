@@ -24,6 +24,29 @@ using namespace phoenix;
 
 namespace Internal
 {
+   static lstring split_strings(const char *text, unsigned size)
+   {
+      lstring list;
+
+      unsigned ptr = 0;
+      list.append(text);
+
+      for (;;)
+      {
+         while (text[ptr] && ptr < size)
+            ptr++;
+
+         ptr++;
+
+         if (ptr >= size)
+            break;
+
+         list.append(&text[ptr]);
+      }
+
+      return list;
+   }
+
 #ifndef _WIN32
    static volatile sig_atomic_t child_quit;
    static volatile sig_atomic_t status;
@@ -50,57 +73,41 @@ namespace Internal
       }
    }
 #else
-   static char read_buf[2048];
-   static DWORD read_ptr = 0;
+
+   // Windows is stupid, and doesn't even have something as basic as pollable non-blocking files.
+   // So here we go with threading ...
+   static lstring log_strings;
    static CRITICAL_SECTION crit;
    static volatile bool thread_alive;
 
    static DWORD CALLBACK read_thread(void *data)
    {
       HANDLE read_handle = (HANDLE)data;
-
+      log_strings.reset();
       DWORD read_bytes;
 
       while (thread_alive)
       {
          char tmp_buf[2048];
 
-         EnterCriticalSection(&crit);
-         if (sizeof(read_buf) - read_ptr <= 1)
+         if (ReadFile(read_handle, tmp_buf, sizeof(tmp_buf) - 1, &read_bytes, NULL) && read_bytes > 0)
          {
-            LeaveCriticalSection(&crit);
-            Sleep(10);
-            continue;
-         }
-         else
-            LeaveCriticalSection(&crit);
-
-         if (ReadFile(read_handle, tmp_buf, sizeof(read_buf) - read_ptr - 1, &read_bytes, NULL) == FALSE || read_bytes == 0)
-         {
-#if 0
-            DWORD err = GetLastError();
+            tmp_buf[read_bytes] = '\0';
+            auto list = split_strings(tmp_buf, read_bytes);
 
             EnterCriticalSection(&crit);
-            snprintf(read_buf, sizeof(read_buf), "[SSNES-Phoenix]: Win32 error in thread = %u\n", (unsigned)err);
-            read_ptr = strlen(read_buf);
+            foreach (str, list)
+               log_strings.append(str);
             LeaveCriticalSection(&crit);
-#endif
+         }
+         else
             break;
-         }
-         else
-         {
-            EnterCriticalSection(&crit);
-            memcpy(read_buf + read_ptr, tmp_buf, read_bytes);
-            read_ptr += read_bytes;
-            LeaveCriticalSection(&crit);
-         }
       }
 
       ExitThread(0);
    }
 #endif
 }
-
 
 class LogWindow : public ToggleWindow
 {
@@ -116,6 +123,21 @@ class LogWindow : public ToggleWindow
       }
 
       void push(const char *text) { log.append(text); box.setText(log); }
+
+      void push(const lstring &list)
+      {
+         foreach (str, list)
+            log.append(str);
+
+         box.setText(log);
+      }
+
+      // Push strings which are split by NUL. text[size] needs to be NUL.
+      void push(const char *text, unsigned size)
+      {
+         push(Internal::split_strings(text, size));
+      }
+
       void clear() { log = ""; box.setText(log); }
 
    private:
@@ -123,6 +145,7 @@ class LogWindow : public ToggleWindow
       TextEdit box;
       Label label;
       string log;
+
 };
 
 class MainWindow : public Window
@@ -888,17 +911,9 @@ class MainWindow : public Window
          {
             EnterCriticalSection(&Internal::crit);
 
-            if (Internal::read_ptr > 0)
-            {
-               Internal::read_buf[Internal::read_ptr] = '\0';
-               string str = Internal::read_buf;
-               Internal::read_ptr = 0;
-               LeaveCriticalSection(&Internal::crit);
-
-               log_win.push(str);
-            }
-            else
-               LeaveCriticalSection(&Internal::crit);
+            log_win.push(Internal::log_strings);
+            Internal::log_strings.reset();
+            LeaveCriticalSection(&Internal::crit);
          }
 
          if (!should_restore)
@@ -934,6 +949,15 @@ set_visible:
 
          if (fork_file)
          {
+            // Drain out the remaining data in the FIFO.
+            char final_buf[512];
+            DWORD read_bytes;
+            while (ReadFile(fork_file, final_buf, sizeof(final_buf) - 1, &read_bytes, NULL) && read_bytes > 0)
+            {
+               final_buf[read_bytes] = '\0';
+               log_win.push(final_buf, read_bytes);
+            }
+
             CloseHandle(fork_file);
             fork_file = NULL;
          }
@@ -952,7 +976,7 @@ set_visible:
             while ((ret = read(fork_fd, line, sizeof(line) - 1)) > 0)
             {
                line[ret] = '\0';
-               log_win.push(line);
+               log_win.push(line, ret);
             }
 
             close(fork_fd);
@@ -989,7 +1013,7 @@ set_visible:
                return;
 
             line[ret] = '\0';
-            log_win.push(line);
+            log_win.push(line, ret);
          }
       }
 #endif
