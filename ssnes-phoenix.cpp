@@ -18,7 +18,10 @@
 #include <utility>
 #include <functional>
 #include "settings.hpp"
+
+#ifdef _WIN32
 #include "updater.hpp"
+#endif
 
 using namespace nall;
 using namespace phoenix;
@@ -177,7 +180,11 @@ class MainWindow : public Window
 
    private:
       VerticalLayout vbox;
-      Menu file_menu, settings_menu, updater_menu, help_menu;
+      Menu file_menu, settings_menu, help_menu;
+
+#ifdef _WIN32
+      Menu updater_menu;
+#endif
 
       Button start_btn;
 
@@ -186,7 +193,10 @@ class MainWindow : public Window
       Video video;
       Audio audio;
       ExtROM ext_rom;
+
+#ifdef _WIN32
       Updater updater;
+#endif
 
       string m_cli_path;
 
@@ -734,7 +744,9 @@ class MainWindow : public Window
 
       void start_ssnes()
       {
+#ifdef _WIN32
          updater.cancel();
+#endif
 
          linear_vector<const char*> vec_cmd;
          string ssnes_path = ssnes.getPath();
@@ -1206,10 +1218,12 @@ set_visible:
          RadioItem none_2;
       } settings;
 
+#ifdef _WIN32
       struct
       {
          Item update;
       } updater_elems;
+#endif
 
       struct
       {
@@ -1220,11 +1234,15 @@ set_visible:
       {
          file_menu.setText("File");
          settings_menu.setText("Settings");
+#ifdef _WIN32
          updater_menu.setText("SSNES");
+#endif
          help_menu.setText("Help");
          append(file_menu);
          append(settings_menu);
+#ifdef _WIN32
          append(updater_menu);
+#endif
          append(help_menu);
 
          file.ext_rom.setText("Special ROM");
@@ -1283,8 +1301,10 @@ set_visible:
          RadioItem::group(settings.gamepad_1, settings.mouse_1, settings.none_1);
          RadioItem::group(settings.gamepad_2, settings.multitap_2, settings.mouse_2, settings.scope_2, settings.justifier_2, settings.justifiers_2, settings.none_2);
 
+#ifdef _WIN32
          updater_elems.update.setText("Update SSNES");
          updater_menu.append(updater_elems.update);
+#endif
 
          help_menu.append(help.about);
          init_menu_callbacks();
@@ -1302,7 +1322,10 @@ set_visible:
          settings.audio.onTick = [this]() { audio.show(); };
          settings.input.onTick = [this]() { input.show(); };
          file.ext_rom.onTick = [this]() { ext_rom.show(); };
+
+#ifdef _WIN32
          updater_elems.update.onTick = [this]() { updater.show(); };
+#endif
       }
 };
 

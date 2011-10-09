@@ -75,10 +75,10 @@ struct http {
   }
 
   inline bool send(const string &data) {
-    return send((const uint8_t*)(const char*)data, data.length());
+    return send((const char*)data, data.length());
   }
 
-  inline bool send(const uint8_t *data, unsigned size) {
+  inline bool send(const char *data, unsigned size) {
     while(size) {
       int length = ::send(serversocket, data, size, 0);
       if(length == -1) return false;

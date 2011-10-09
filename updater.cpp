@@ -149,6 +149,10 @@ bool Updater::extract_zip(const nall::string &path)
 
    foreach (file, z.file)
    {
+      // Don't overwrite config files.
+      if (file.name.endswith(".cfg") && nall::file::exists(file.name))
+         continue;
+
       uint8_t *data;
       unsigned size;
       if (!z.extract(file, data, size))
@@ -259,13 +263,7 @@ void Updater::download_thread(const nall::string &path)
 
    bool ret;
    if ((ret = dl.connect(base_host)))
-   {
-      //print("Connected!\n");
       ret = dl.download({base_folder, path});
-      //print("Finished? ", ret, "\n");
-   }
-   else
-      print("Failed to connect!\n");
 
    scoped_lock(transfer.lock);
    transfer.success = ret;
