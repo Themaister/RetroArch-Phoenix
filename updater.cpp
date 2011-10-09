@@ -49,11 +49,11 @@ Updater::Updater()
    RadioBox::group(opts_slim, opts_full, opts_redist);
 
    opts_arch.setText("CPU:");
-   opts_layout.append(opts_arch, 0, 0);
+   opts_layout.append(opts_arch, 0, 0, 5);
    opts_layout.append(opts_32bit, 0, 0);
    opts_layout.append(opts_64bit, 0, 0, 30);
    opts_build.setText("Build:");
-   opts_layout.append(opts_build, 0, 0);
+   opts_layout.append(opts_build, 0, 0, 5);
    opts_layout.append(opts_slim, 0, 0);
    opts_layout.append(opts_full, 0, 0);
    opts_layout.append(opts_redist, 0, 0);
@@ -94,7 +94,7 @@ Updater::Updater()
    };
 
    cancel_download.onTick = [this] {
-      scoped_lock(transfer.lock);
+      nall::scoped_lock lock(transfer.lock);
       transfer.cancelled = true;
    };
 
@@ -124,7 +124,7 @@ void Updater::cancel()
 {
    hide();
    progress_label.setText("N/A");
-   scoped_lock(transfer.lock);
+   nall::scoped_lock lock(transfer.lock);
    transfer.cancelled = true;
 }
 
@@ -156,15 +156,12 @@ bool Updater::extract_zip(const nall::string &path)
       uint8_t *data;
       unsigned size;
       if (!z.extract(file, data, size))
-      {
-         MessageWindow::critical(*this, "Failed extracting file!");
-         return false;
-      }
+         continue;
 
       if (!nall::file::write(file.name, data, size))
       {
          delete [] data;
-         return false;
+         continue;
       }
 
       delete [] data;
@@ -175,10 +172,11 @@ bool Updater::extract_zip(const nall::string &path)
 
 void Updater::timer_event()
 {
-   scoped_lock(transfer.lock);
+   nall::scoped_lock lock(transfer.lock);
 
    if (transfer.finished)
    {
+      timer.setEnabled(false);
       if (transfer.success)
       {
          progress.setPosition(100);
@@ -194,7 +192,6 @@ void Updater::timer_event()
             string latest("Latest release: ", transfer.version);
             latest_label.setText(latest);
 
-            download.setEnabled(true);
             version_download.setEnabled(false);
          }
          else
@@ -214,13 +211,10 @@ void Updater::timer_event()
             else if (valid)
                MessageWindow::critical(*this, "Failed opening ZIP!");
          }
-
-         download.setEnabled(true);
       }
       else
          MessageWindow::warning(*this, "Download was not completed!");
 
-      timer.setEnabled(false);
       cancel_download.setEnabled(false);
    }
    else if (transfer.cancelled)
@@ -230,6 +224,8 @@ void Updater::timer_event()
       cancel_download.setEnabled(false);
    }
 
+   if (transfer.version.length() > 0)
+      download.setEnabled(true);
    update_progress();
 }
 
@@ -263,23 +259,26 @@ void Updater::download_thread(const nall::string &path)
 
    bool ret;
    if ((ret = dl.connect(base_host)))
+   {
       ret = dl.download({base_folder, path});
+      dl.disconnect();
+   }
 
-   scoped_lock(transfer.lock);
+   nall::scoped_lock lock(transfer.lock);
    transfer.success = ret;
    transfer.finished = true;
 }
 
 void Updater::update(const char *content, unsigned size)
 {
-   scoped_lock(transfer.lock);
+   nall::scoped_lock lock(transfer.lock);
    transfer.data.insert(transfer.data.end(), content, content + size);
    transfer.now = transfer.data.size();
 }
 
 bool Updater::progress_update(unsigned now, unsigned total)
 {
-   scoped_lock(transfer.lock);
+   nall::scoped_lock lock(transfer.lock);
 
    transfer.now = now;
    transfer.total = total;
