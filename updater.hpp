@@ -16,7 +16,7 @@ class Updater : public Window
       void hide();
       void cancel();
 
-      void update(const char *content, size_t size);
+      void update(const char *content, unsigned size);
       bool progress_update(unsigned now, unsigned total);
 
    private:
@@ -67,8 +67,9 @@ class Updater : public Window
 
       VerticalLayout vbox;
 
-      constexpr static const char * base_url = "http://themaister.net/ssnes-dl/";
-      constexpr static const char * latest_file = "latest";
+      constexpr static const char *base_host = "themaister.net";
+      constexpr static const char *base_folder = "/ssnes-dl/";
+      constexpr static const char *latest_file = "latest";
 };
 
 #endif

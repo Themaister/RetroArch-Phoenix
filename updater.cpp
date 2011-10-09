@@ -2,25 +2,9 @@
 #include <nall/thread.hpp>
 #include <nall/file.hpp>
 #include <nall/zip.hpp>
-
-#include <curl/curl.h>
+#include <nall/http.hpp>
 
 using namespace nall;
-
-extern "C" {
-   static size_t write_cb(void *content, size_t size, size_t nmemb, void *userp)
-   {
-      Updater *up = reinterpret_cast<Updater*>(userp);
-      up->update((const char*)content, size * nmemb);
-      return size * nmemb;
-   }
-
-   static int progress_cb(void *userp, double dltotal, double dlnow, double, double)
-   {
-      Updater *up = reinterpret_cast<Updater*>(userp);
-      return up->progress_update(dlnow, dltotal) ? 0 : 1;
-   }
-}
 
 Updater::Updater()
 {
@@ -202,7 +186,10 @@ void Updater::timer_event()
 
             transfer.data.back() = 0; // Remove EOF.
             transfer.version = transfer.data.data();
-            latest_label.setText({"Latest release: ", transfer.version});
+
+            string latest("Latest release: ", transfer.version);
+            latest_label.setText(latest);
+
             download.setEnabled(true);
             version_download.setEnabled(false);
          }
@@ -223,11 +210,13 @@ void Updater::timer_event()
             else if (valid)
                MessageWindow::critical(*this, "Failed opening ZIP!");
          }
+
+         download.setEnabled(true);
       }
+      else
+         MessageWindow::warning(*this, "Download was not completed!");
 
       timer.setEnabled(false);
-
-      download.setEnabled(true);
       cancel_download.setEnabled(false);
    }
    else if (transfer.cancelled)
@@ -264,30 +253,26 @@ void Updater::update_progress()
 
 void Updater::download_thread(const nall::string &path)
 {
-   curl_global_init(CURL_GLOBAL_ALL);
-   CURL *curl = curl_easy_init();
+   nall::http dl;
+   dl.write_cb = {&Updater::update, this};
+   dl.progress_cb = {&Updater::progress_update, this};
 
-   string url(base_url, path);
-   curl_easy_setopt(curl, CURLOPT_URL, (const char*)url);
-   curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, write_cb);
-   curl_easy_setopt(curl, CURLOPT_WRITEDATA, this);
-   curl_easy_setopt(curl, CURLOPT_USERAGENT, "libcurl-agent/1.0");
-
-   curl_easy_setopt(curl, CURLOPT_PROGRESSFUNCTION, progress_cb);
-   curl_easy_setopt(curl, CURLOPT_PROGRESSDATA, this);
-   curl_easy_setopt(curl, CURLOPT_NOPROGRESS, 0L);
-
-   CURLcode err = curl_easy_perform(curl);
-   curl_easy_cleanup(curl);
-
-   curl_global_cleanup();
+   bool ret;
+   if ((ret = dl.connect(base_host)))
+   {
+      //print("Connected!\n");
+      ret = dl.download({base_folder, path});
+      //print("Finished? ", ret, "\n");
+   }
+   else
+      print("Failed to connect!\n");
 
    scoped_lock(transfer.lock);
-   transfer.success = err == 0;
+   transfer.success = ret;
    transfer.finished = true;
 }
 
-void Updater::update(const char *content, size_t size)
+void Updater::update(const char *content, unsigned size)
 {
    scoped_lock(transfer.lock);
    transfer.data.insert(transfer.data.end(), content, content + size);

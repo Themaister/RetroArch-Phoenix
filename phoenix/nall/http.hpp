@@ -25,16 +25,14 @@ struct http {
   string header;
 
   unsigned total_length;
+  unsigned total_read;
+
   function<bool (unsigned, unsigned)> progress_cb;
+  function<void (const char *, unsigned)> write_cb;
 
-  inline void set_progress_cb(const function<bool (unsigned, unsigned)> &cb) {
-    progress_cb = cb;
-  }
-
-  inline bool download(const string &path, uint8_t *&data, unsigned &size) {
-    data = 0;
-    size = 0;
+  inline bool download(const string &path) {
     total_length = 0;
+    total_read = 0;
 
     send({
       "GET ", path, " HTTP/1.1\r\n"
@@ -45,14 +43,10 @@ struct http {
     });
 
     header = downloadHeader();
+    if(!header.iposition("200 OK"))
+      return false;
 
-    if (!header.iposition("200 OK"))
-       return false;
-
-    if (header.length() == 0)
-       return false;
-
-    return downloadContent(data, size);
+    return downloadContent();
   }
 
   inline bool connect(string host, unsigned port = 80) {
@@ -118,27 +112,24 @@ struct http {
     return output;
   }
 
-  inline bool downloadContent(uint8_t *&data, unsigned &size) {
-    unsigned capacity = 0;
+  inline bool downloadContent() {
 
     if(header.iposition("\r\nTransfer-Encoding: chunked\r\n")) {
       while(true) {
         unsigned length = hex(downloadChunkLength());
         if(length == 0) break;
-        capacity += length;
-        data = (uint8_t*)realloc(data, capacity);
 
-        char buffer[length];
         while(length) {
-          int packetlength = recv(serversocket, buffer, length, 0);
+          char buffer[2048];
+          int packetlength = recv(serversocket, buffer, min(sizeof(buffer), length), 0);
           if(packetlength <= 0) break;
-          memcpy(data + size, buffer, packetlength);
-          size += packetlength;
+          total_read += packetlength;
           length -= packetlength;
-        }
 
-        if(progress_cb && !progress_cb(capacity, total_length))
-          return false;
+          write_cb(buffer, packetlength);
+          if(progress_cb && !progress_cb(total_read, total_length))
+            return false;
+        }
       }
     } else if(auto position = header.iposition("\r\nContent-Length: ")) {
       unsigned length = decimal((const char*)header + position() + 18);
@@ -147,35 +138,29 @@ struct http {
         char buffer[2048];
         int packetlength = recv(serversocket, buffer, min(sizeof(buffer), length), 0);
         if(packetlength <= 0) break;
-        capacity += packetlength;
-        data = (uint8_t*)realloc(data, capacity);
-        memcpy(data + size, buffer, packetlength);
-        size += packetlength;
+        total_read += packetlength;
         length -= packetlength;
 
-        if(progress_cb && !progress_cb(capacity, total_length))
+        write_cb(buffer, packetlength);
+        if(progress_cb && !progress_cb(total_read, total_length))
           return false;
       }
 
-      if(capacity < total_length)
+      if(total_read < total_length)
         return false;
     } else {
       while(true) {
         char buffer[2048];
         int packetlength = recv(serversocket, buffer, 2048, 0);
         if(packetlength <= 0) break;
-        capacity += packetlength;
-        data = (uint8_t*)realloc(data, capacity);
-        memcpy(data + size, buffer, packetlength);
-        size += packetlength;
+        total_read += packetlength;
 
-        if(progress_cb && !progress_cb(capacity, total_length))
+        write_cb(buffer, packetlength);
+        if(progress_cb && !progress_cb(total_read, total_length))
           return false;
       }
     }
 
-    data = (uint8_t*)realloc(data, capacity + 1);
-    data[capacity] = 0;
     return true;
   }
 
