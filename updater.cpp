@@ -1,3 +1,5 @@
+#ifdef _WIN32
+
 #include <nall/http.hpp>
 #include <nall/thread.hpp>
 #include <nall/file.hpp>
@@ -286,3 +288,4 @@ bool Updater::progress_update(unsigned now, unsigned total)
    return !transfer.cancelled;
 }
 
+#endif
