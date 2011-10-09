@@ -14,6 +14,7 @@
 
 #include <nall/platform.hpp>
 #include <nall/string.hpp>
+#include <nall/function.hpp>
 
 namespace nall {
 
@@ -23,23 +24,38 @@ struct http {
   int serversocket;
   string header;
 
-  inline void download(const string &path, uint8_t *&data, unsigned &size) {
+  unsigned total_length;
+  function<bool (unsigned, unsigned)> progress_cb;
+
+  inline void set_progress_cb(const function<bool (unsigned, unsigned)> &cb) {
+    progress_cb = cb;
+  }
+
+  inline bool download(const string &path, uint8_t *&data, unsigned &size) {
     data = 0;
     size = 0;
+    total_length = 0;
 
     send({
       "GET ", path, " HTTP/1.1\r\n"
       "Host: ", hostname, "\r\n"
       "Connection: close\r\n"
+      "User-Agent: nall::http\r\n"
       "\r\n"
     });
 
     header = downloadHeader();
-    print(header, "\n");
-    downloadContent(data, size);
+
+    if (!header.iposition("200 OK"))
+       return false;
+
+    if (header.length() == 0)
+       return false;
+
+    return downloadContent(data, size);
   }
 
-  inline bool connect(string host, unsigned port) {
+  inline bool connect(string host, unsigned port = 80) {
     hostname = host;
 
     addrinfo hints;
@@ -102,7 +118,7 @@ struct http {
     return output;
   }
 
-  inline void downloadContent(uint8_t *&data, unsigned &size) {
+  inline bool downloadContent(uint8_t *&data, unsigned &size) {
     unsigned capacity = 0;
 
     if(header.iposition("\r\nTransfer-Encoding: chunked\r\n")) {
@@ -120,33 +136,47 @@ struct http {
           size += packetlength;
           length -= packetlength;
         }
+
+        if(progress_cb && !progress_cb(capacity, total_length))
+          return false;
       }
     } else if(auto position = header.iposition("\r\nContent-Length: ")) {
-      unsigned length = decimal((const char*)header + position() + 16);
+      unsigned length = decimal((const char*)header + position() + 18);
+      total_length = length;
       while(length) {
-        char buffer[256];
-        int packetlength = recv(serversocket, buffer, min(256, length), 0);
+        char buffer[2048];
+        int packetlength = recv(serversocket, buffer, min(sizeof(buffer), length), 0);
         if(packetlength <= 0) break;
         capacity += packetlength;
         data = (uint8_t*)realloc(data, capacity);
         memcpy(data + size, buffer, packetlength);
         size += packetlength;
         length -= packetlength;
+
+        if(progress_cb && !progress_cb(capacity, total_length))
+          return false;
       }
+
+      if(capacity < total_length)
+        return false;
     } else {
       while(true) {
-        char buffer[256];
-        int packetlength = recv(serversocket, buffer, 256, 0);
+        char buffer[2048];
+        int packetlength = recv(serversocket, buffer, 2048, 0);
         if(packetlength <= 0) break;
         capacity += packetlength;
         data = (uint8_t*)realloc(data, capacity);
         memcpy(data + size, buffer, packetlength);
         size += packetlength;
+
+        if(progress_cb && !progress_cb(capacity, total_length))
+          return false;
       }
     }
 
     data = (uint8_t*)realloc(data, capacity + 1);
     data[capacity] = 0;
+    return true;
   }
 
   inline void disconnect() {
