@@ -35,6 +35,7 @@ struct http {
     });
 
     header = downloadHeader();
+    print(header, "\n");
     downloadContent(data, size);
   }
 
@@ -43,9 +44,13 @@ struct http {
 
     addrinfo hints;
     memset(&hints, 0, sizeof(addrinfo));
+
+#ifdef _WIN32
+    hints.ai_family = AF_INET;
+#else
     hints.ai_family = AF_UNSPEC;
+#endif
     hints.ai_socktype = SOCK_STREAM;
-    hints.ai_flags = AI_PASSIVE;
 
     int status = getaddrinfo(hostname, string(port), &hints, &serverinfo);
     if(status != 0) return false;

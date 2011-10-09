@@ -175,6 +175,7 @@ namespace nall {
   template<unsigned length = 0, char padding = '0'> inline string binary(uintmax_t value);
   inline unsigned fp(char *str, double value);
   inline string fp(double value);
+  inline string fp(double value, unsigned precision);
 
   //variadic.hpp
   template<typename... Args> inline void print(Args&&... args);

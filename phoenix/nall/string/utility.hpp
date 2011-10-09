@@ -220,7 +220,7 @@ template<unsigned length_, char padding> string binary(uintmax_t value) {
 //hand, digit-by-digit, results in subtle rounding errors.
 unsigned fp(char *str, double value) {
   char buffer[256];
-  sprintf(buffer, "%f", value);
+  sprintf(buffer, "%f", (float)value);
 
   //remove excess 0's in fraction (2.500000 -> 2.5)
   for(char *p = buffer; *p; p++) {
@@ -244,6 +244,12 @@ string fp(double value) {
   temp.reserve(fp(0, value));
   fp(temp(), value);
   return temp;
+}
+
+string fp(double value, unsigned precision) {
+  char buf[256];
+  snprintf(buf, sizeof(buf), "%.*f", precision, (float)value);
+  return buf;
 }
 
 }

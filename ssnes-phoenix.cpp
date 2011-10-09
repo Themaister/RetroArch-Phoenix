@@ -18,6 +18,7 @@
 #include <utility>
 #include <functional>
 #include "settings.hpp"
+#include "updater.hpp"
 
 using namespace nall;
 using namespace phoenix;
@@ -176,7 +177,7 @@ class MainWindow : public Window
 
    private:
       VerticalLayout vbox;
-      Menu file_menu, settings_menu, help_menu;
+      Menu file_menu, settings_menu, updater_menu, help_menu;
 
       Button start_btn;
 
@@ -185,6 +186,7 @@ class MainWindow : public Window
       Video video;
       Audio audio;
       ExtROM ext_rom;
+      Updater updater;
 
       string m_cli_path;
 
@@ -732,6 +734,8 @@ class MainWindow : public Window
 
       void start_ssnes()
       {
+         updater.cancel();
+
          linear_vector<const char*> vec_cmd;
          string ssnes_path = ssnes.getPath();
          if (ssnes_path.length() == 0) ssnes_path = "ssnes";
@@ -1204,6 +1208,11 @@ set_visible:
 
       struct
       {
+         Item update;
+      } updater_elems;
+
+      struct
+      {
          Item about;
       } help;
 
@@ -1211,9 +1220,11 @@ set_visible:
       {
          file_menu.setText("File");
          settings_menu.setText("Settings");
+         updater_menu.setText("SSNES");
          help_menu.setText("Help");
          append(file_menu);
          append(settings_menu);
+         append(updater_menu);
          append(help_menu);
 
          file.ext_rom.setText("Special ROM");
@@ -1272,6 +1283,9 @@ set_visible:
          RadioItem::group(settings.gamepad_1, settings.mouse_1, settings.none_1);
          RadioItem::group(settings.gamepad_2, settings.multitap_2, settings.mouse_2, settings.scope_2, settings.justifier_2, settings.justifiers_2, settings.none_2);
 
+         updater_elems.update.setText("Update SSNES");
+         updater_menu.append(updater_elems.update);
+
          help_menu.append(help.about);
          init_menu_callbacks();
       }
@@ -1288,6 +1302,7 @@ set_visible:
          settings.audio.onTick = [this]() { audio.show(); };
          settings.input.onTick = [this]() { input.show(); };
          file.ext_rom.onTick = [this]() { ext_rom.show(); };
+         updater_elems.update.onTick = [this]() { updater.show(); };
       }
 };
 
