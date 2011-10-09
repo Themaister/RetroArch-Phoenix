@@ -1,8 +1,8 @@
-#include "updater.hpp"
+#include <nall/http.hpp>
 #include <nall/thread.hpp>
 #include <nall/file.hpp>
 #include <nall/zip.hpp>
-#include <nall/http.hpp>
+#include "updater.hpp"
 
 using namespace nall;
 
