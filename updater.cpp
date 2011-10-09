@@ -213,11 +213,15 @@ void Updater::timer_event()
             else if (valid)
                MessageWindow::critical(*this, "Failed opening ZIP!");
          }
+
       }
       else
          MessageWindow::warning(*this, "Download was not completed!");
 
       cancel_download.setEnabled(false);
+
+      if (transfer.version.length() > 0)
+         download.setEnabled(true);
    }
    else if (transfer.cancelled)
    {
@@ -226,8 +230,6 @@ void Updater::timer_event()
       cancel_download.setEnabled(false);
    }
 
-   if (transfer.version.length() > 0)
-      download.setEnabled(true);
    update_progress();
 }
 
