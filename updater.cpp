@@ -13,6 +13,7 @@ Updater::Updater()
 
    timer.onTimeout = {&Updater::timer_event, this};
    timer.setInterval(50);
+   timer.setEnabled(false);
 
 #if 0
    server_label.setText("URL:");
@@ -22,10 +23,6 @@ Updater::Updater()
 
    vbox.append(server_hbox);
 #endif
-
-   download.setEnabled(false);
-   cancel_download.setEnabled(false);
-
    version_download.setText("Check version");
    dl_layout.append(version_download, 0, 0);
    download.setText("Download");
@@ -99,6 +96,9 @@ Updater::Updater()
    };
 
    append(vbox);
+
+   download.setEnabled(false);
+   cancel_download.setEnabled(false);
 }
 
 void Updater::start_download(const string &path)
