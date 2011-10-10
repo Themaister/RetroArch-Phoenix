@@ -349,20 +349,44 @@ class MainWindow : public Window
 
       struct enable_entry : entry
       {
-         enable_entry() : entry(false)
+         enable_entry(bool enable = true) : entry(false)
          {
-            enable_tick.setText("Enable");
-            hlayout.append(label, 150, 0);
-            hlayout.append(edit, ~0, 0, 5);
-            hlayout.append(enable_tick, 80, 0);
-            hlayout.append(clear, 0, 0);
-            hlayout.append(button, 0, 0);
+            if (enable)
+            {
+               enable_tick.setText("Enable");
+               hlayout.append(label, 150, 0);
+               hlayout.append(edit, ~0, 0, 5);
+               hlayout.append(enable_tick, 80, 0);
+               hlayout.append(clear, 0, 0);
+               hlayout.append(button, 0, 0);
+            }
          }
 
          bool is_enabled() { return enable_tick.checked(); }
 
          CheckBox enable_tick;
-      } movie_play, record;
+      } movie_play;
+
+      struct record_entry : enable_entry
+      {
+         record_entry() : enable_entry(false)
+         {
+            enable_tick.setText("Enable");
+            hlayout.append(label, 150, 0);
+            hlayout.append(edit, ~0, 0, 5);
+
+            dim_label.setText("Size:");
+            hlayout.append(dim_label, 0, 0, 3);
+            hlayout.append(dim_edit, 80, 0, 5);
+
+            hlayout.append(enable_tick, 80, 0);
+            hlayout.append(clear, 0, 0);
+            hlayout.append(button, 0, 0);
+         }
+
+         Label dim_label;
+         LineEdit dim_edit;
+      } record;
 
       enum rom_type
       {
@@ -758,6 +782,7 @@ class MainWindow : public Window
          string frames;
          string movie_path;
          string record_path;
+         string record_size;
 
          vec_cmd.append(ssnes_path);
 
@@ -804,6 +829,41 @@ class MainWindow : public Window
             vec_cmd.append("--record");
             record_path = record.getPath();
             vec_cmd.append(record_path);
+         }
+
+         if (record.dim_edit.text().length() > 0)
+         {
+            if (!record.is_enabled())
+            {
+               show_error("Recording size was set,\nbut FFmpeg recording is not enabled.");
+               return;
+            }
+
+            auto str = record.dim_edit.text();
+            auto pos = str.iposition("x");
+
+            if (pos)
+            {
+               bool invalid = false;
+               str[pos()] = '\0';
+               invalid |= strtoul((const char*)str, 0, 0) == 0;
+               invalid |= strtoul((const char*)str + pos() + 1, 0, 0) == 0;
+
+               if (invalid)
+               {
+                  show_error("Invalid size parameter for recording. (Format: WIDTHxHEIGHT)");
+                  return;
+               }
+
+               vec_cmd.append("--size");
+               record_size = record.dim_edit.text();
+               vec_cmd.append(record_size);
+            }
+            else
+            {
+               show_error("Invalid size parameter for recording. (Format: WIDTHxHEIGHT)");
+               return;
+            }
          }
 
          if (settings.mouse_1.checked())
