@@ -70,6 +70,8 @@ class Updater : public Window
       static const char *base_host()   { return "themaister.net"; }
       static const char *base_folder() { return "/ssnes-dl/"; }
       static const char *latest_file() { return "latest"; }
+
+      static nall::string basedir();
 };
 
 #endif

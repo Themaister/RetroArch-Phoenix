@@ -142,8 +142,9 @@ void Updater::hide()
 
 bool Updater::extract_zip(const nall::string &path)
 {
+   
    nall::zip z;
-   if (!z.open(path))
+   if (!z.open({basedir(), path}))
    {
       MessageWindow::critical(*this, "Failed opening ZIP!");
       return false;
@@ -152,7 +153,7 @@ bool Updater::extract_zip(const nall::string &path)
    foreach (file, z.file)
    {
       // Don't overwrite config files.
-      if (file.name.endswith(".cfg") && nall::file::exists(file.name))
+      if (file.name.endswith(".cfg") && nall::file::exists({basedir(), file.name}))
          continue;
 
       uint8_t *data;
@@ -160,7 +161,7 @@ bool Updater::extract_zip(const nall::string &path)
       if (!z.extract(file, data, size))
          continue;
 
-      if (!nall::file::write(file.name, data, size))
+      if (!nall::file::write({basedir(), file.name}, data, size))
       {
          delete [] data;
          continue;
@@ -198,8 +199,9 @@ void Updater::timer_event()
          }
          else
          {
+
             bool valid = false;
-            if (nall::file::write(transfer.file_path,
+            if (nall::file::write({basedir(), transfer.file_path},
                   (const uint8_t *)transfer.data.data(),
                   transfer.data.size()))
             {
@@ -290,4 +292,17 @@ bool Updater::progress_update(unsigned now, unsigned total)
    return !transfer.cancelled;
 }
 
+nall::string Updater::basedir()
+{
+   // Windows is completely batshit retarded and the relative path might "change" by going into the file manager, so we have to manually figure out the full path. :)
+   char dir_path[MAX_PATH];
+   GetModuleFileName(GetModuleHandle(0), dir_path, sizeof(dir_path));
+   char *split = strrchr(dir_path, '\\');
+   if (!split) split = strrchr(dir_path, '/');
+   if (split) split[1] = '\0';
+   return dir_path;
+   //MessageWindow::information(*this, path);
+}
+
 #endif
+
