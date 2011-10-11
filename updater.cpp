@@ -188,7 +188,7 @@ void Updater::timer_event()
             if (transfer.data.size() == 0)
                return;
 
-            transfer.data.back() = 0; // Remove EOF.
+            transfer.data.push_back('\0');
             transfer.version = transfer.data.data();
 
             string latest("Latest release: ", transfer.version);
