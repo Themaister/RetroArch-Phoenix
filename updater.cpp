@@ -235,7 +235,7 @@ void Updater::end_transfer_list()
       {
          const auto &elem = line2desc(elem_);
          libsnes_list.append(elem);
-         libsnes_listview.append(elem.system, elem.core, elem.version, elem.arch, elem.basename);
+         libsnes_listview.append(elem.system, elem.core, elem.version, elem.arch, nall::string(elem.basename, ".dll"));
       }
    }
 
