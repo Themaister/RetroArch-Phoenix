@@ -71,7 +71,7 @@ Updater::Updater()
    libsnes_listview.setHeaderVisible();
    libsnes_listview.autoSizeColumns();
    libsnes_listview.setEnabled(false);
-   vbox.append(libsnes_listview, ~0, 250);
+   vbox.append(libsnes_listview, 550, 250);
    libsnes_dlhint.setText("Double-click core to download. Use core by setting libsnes path to desired library.");
    vbox.append(libsnes_dlhint, 0, 0);
 
