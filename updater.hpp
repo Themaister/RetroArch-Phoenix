@@ -65,6 +65,25 @@ class Updater : public Window
       RadioBox opts_slim, opts_full, opts_redist;
       HorizontalLayout opts_layout;
 
+      Label libsnes_label;
+      Label libsnes_dlhint;
+      ListView libsnes_listview;
+      struct libsnes_desc
+      {
+         nall::string system;
+         nall::string core;
+         nall::string version;
+         nall::string arch;
+         nall::string basename;
+      };
+      nall::linear_vector<libsnes_desc> libsnes_list;
+      static libsnes_desc line2desc(const nall::string &line);
+
+      void enable_downloads();
+      void disable_downloads();
+      void end_transfer_list();
+      void end_file_transfer();
+
       VerticalLayout vbox;
 
       static const char *base_host()   { return "themaister.net"; }

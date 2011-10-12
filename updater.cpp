@@ -62,7 +62,18 @@ Updater::Updater()
    opts_slim.setChecked();
 
    latest_label.setText("Latest release: N/A");
-   vbox.append(latest_label, ~0, 0);
+   vbox.append(latest_label, ~0, 0, 20);
+
+   libsnes_label.setText("Cores:");
+   vbox.append(libsnes_label, 0, 0);
+
+   libsnes_listview.setHeaderText("System", "Core", "Version", "Architecture", "Library");
+   libsnes_listview.setHeaderVisible();
+   libsnes_listview.autoSizeColumns();
+   libsnes_listview.setEnabled(false);
+   vbox.append(libsnes_listview, ~0, 250);
+   libsnes_dlhint.setText("Double-click core to download. Use core by setting libsnes path to desired library.");
+   vbox.append(libsnes_dlhint, 0, 0);
 
    vbox.setMargin(5);
 
@@ -92,6 +103,13 @@ Updater::Updater()
       start_download(path);
    };
 
+   libsnes_listview.onActivate = [this] {
+      transfer.version_only = false;
+
+      const auto &elem = libsnes_list[libsnes_listview.selection()];
+      start_download({elem.basename, ".zip"});
+   };
+
    cancel_download.onTick = [this] {
       nall::scoped_lock lock(transfer.lock);
       transfer.cancelled = true;
@@ -99,7 +117,7 @@ Updater::Updater()
 
    append(vbox);
 
-   download.setEnabled(false);
+   disable_downloads();
    cancel_download.setEnabled(false);
 }
 
@@ -113,7 +131,7 @@ void Updater::start_download(const string &path)
    transfer.data.clear();
 
    progress.setPosition(0);
-   download.setEnabled(false);
+   disable_downloads();
    cancel_download.setEnabled(true);
 
    transfer.file_path = path;
@@ -173,6 +191,75 @@ bool Updater::extract_zip(const nall::string &path)
    return true;
 }
 
+Updater::libsnes_desc Updater::line2desc(const nall::string &line)
+{
+   nall::lstring list;
+   list.split(",", line);
+
+   static const nall::string na = "<Invalid>";
+   if (list.size() < 5)
+      return {na, na, na, na, na};
+
+   return { // This is starting to look like JavaScript ... :D
+      list[0].trim(" ", " "),
+      list[1].trim(" ", " "),
+      list[2].trim(" ", " "),
+      list[3].trim(" ", " "),
+      list[4].trim(" ", " "),
+   };
+}
+
+void Updater::end_transfer_list()
+{
+   if (transfer.data.size() == 0)
+      return;
+
+   transfer.data.push_back('\0');
+
+   nall::lstring list;
+   list.split("\n", transfer.data.data());
+   if (list.size() == 0)
+      return;
+
+   transfer.version = list[0];
+   list.remove(0);
+
+   string latest("Latest release: ", transfer.version);
+   latest_label.setText({"Latest release: ", transfer.version});
+
+   version_download.setEnabled(false);
+
+   foreach (elem_, list)
+   {
+      if (elem_.length() > 0)
+      {
+         const auto &elem = line2desc(elem_);
+         libsnes_list.append(elem);
+         libsnes_listview.append(elem.system, elem.core, elem.version, elem.arch, elem.basename);
+      }
+   }
+
+   libsnes_listview.autoSizeColumns();
+}
+
+void Updater::end_file_transfer()
+{
+   bool valid = false;
+   if (nall::file::write({basedir(), transfer.file_path},
+            (const uint8_t *)transfer.data.data(),
+            transfer.data.size()))
+   {
+      valid = true;
+   }
+   else
+      MessageWindow::critical(*this, "Failed saving archive to disk!");
+
+   if (valid && extract_zip(transfer.file_path))
+      MessageWindow::information(*this, "Extracted archive! :)");
+   else if (valid)
+      MessageWindow::critical(*this, "Failed opening ZIP!");
+}
+
 void Updater::timer_event()
 {
    nall::scoped_lock lock(transfer.lock);
@@ -185,37 +272,9 @@ void Updater::timer_event()
          progress.setPosition(100);
 
          if (transfer.version_only)
-         {
-            if (transfer.data.size() == 0)
-               return;
-
-            transfer.data.push_back('\0');
-            transfer.version = transfer.data.data();
-
-            string latest("Latest release: ", transfer.version);
-            latest_label.setText(latest);
-
-            version_download.setEnabled(false);
-         }
+            end_transfer_list();
          else
-         {
-
-            bool valid = false;
-            if (nall::file::write({basedir(), transfer.file_path},
-                  (const uint8_t *)transfer.data.data(),
-                  transfer.data.size()))
-            {
-               valid = true;
-            }
-            else
-               MessageWindow::critical(*this, "Failed saving archive to disk!");
-
-            if (valid && extract_zip(transfer.file_path))
-               MessageWindow::information(*this, "Extracted archive! :)");
-            else if (valid)
-               MessageWindow::critical(*this, "Failed opening ZIP!");
-         }
-
+            end_file_transfer();
       }
       else
          MessageWindow::warning(*this, "Download was not completed!");
@@ -223,12 +282,12 @@ void Updater::timer_event()
       cancel_download.setEnabled(false);
 
       if (transfer.version.length() > 0)
-         download.setEnabled(true);
+         enable_downloads();
    }
    else if (transfer.cancelled)
    {
       timer.setEnabled(false);
-      download.setEnabled(true);
+      enable_downloads();
       cancel_download.setEnabled(false);
    }
 
@@ -295,6 +354,7 @@ bool Updater::progress_update(unsigned now, unsigned total)
 nall::string Updater::basedir()
 {
    // Windows is completely batshit retarded and the relative path might "change" by going into the file manager, so we have to manually figure out the full path. :)
+#ifdef _WIN32
    char dir_path[MAX_PATH];
    GetModuleFileName(GetModuleHandle(0), dir_path, sizeof(dir_path));
    char *split = strrchr(dir_path, '\\');
@@ -302,7 +362,23 @@ nall::string Updater::basedir()
    if (split) split[1] = '\0';
    return dir_path;
    //MessageWindow::information(*this, path);
+#else
+   return nall::string();
+#endif
 }
+
+void Updater::enable_downloads()
+{
+   download.setEnabled(true);
+   libsnes_listview.setEnabled(true);
+}
+
+void Updater::disable_downloads()
+{
+   download.setEnabled(false);
+   libsnes_listview.setEnabled(false);
+}
+
 
 #endif
 
