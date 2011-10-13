@@ -96,7 +96,7 @@ class Updater : public Window
       void enable_downloads();
       void disable_downloads();
       void end_transfer_list();
-      void end_file_transfer();
+      bool end_file_transfer();
 
       VerticalLayout vbox;
 

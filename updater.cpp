@@ -306,7 +306,6 @@ void Updater::end_transfer_list()
    }
 
    update_listview();
-
 }
 
 void Updater::update_listview()
@@ -333,7 +332,7 @@ void Updater::update_listview()
    libsnes_listview.autoSizeColumns();
 }
 
-void Updater::end_file_transfer()
+bool Updater::end_file_transfer()
 {
    bool valid = false;
    if (nall::file::write({basedir(), transfer.file_path},
@@ -365,7 +364,12 @@ void Updater::end_file_transfer()
       }
    }
    else if (valid)
+   {
       MessageWindow::critical(*this, "Failed opening ZIP!");
+      return false;
+   }
+
+   return true;
 }
 
 void Updater::timer_event()
@@ -383,24 +387,30 @@ void Updater::timer_event()
             end_transfer_list();
          else
          {
-            end_file_transfer();
+            bool success = end_file_transfer();
 
-            // Not perfect, but it's very unlikely that rsound.dll is present if redist wasn't downloaded already ... :)
-            if (opts_full.checked() && !nall::file::exists({basedir(), "rsound.dll"}))
+            if (success)
             {
-               auto response = MessageWindow::information(*this,
-                     "You downloaded full build, but appear to not have redist downloaded.\n"
-                     "Do you want to download it now?",
-                     MessageWindow::Buttons::YesNo);
-
-               if (response == MessageWindow::Response::Yes)
+               // Not perfect, but it's very unlikely that rsound.dll is present if redist wasn't downloaded already ... :)
+               if (opts_full.checked() && !nall::file::exists({basedir(), "rsound.dll"}))
                {
-                  transfer.libsnes = false;
-                  transfer.version_only = false;
-                  nall::string arch(opts_32bit.checked() ? "32-" : "64-");
-                  start_download({"SSNES-win", arch, "libs.zip"});
-                  return;
+                  auto response = MessageWindow::information(*this,
+                        "You downloaded full build, but appear to not have redist downloaded.\n"
+                        "Do you want to download it now?",
+                        MessageWindow::Buttons::YesNo);
+
+                  if (response == MessageWindow::Response::Yes)
+                  {
+                     transfer.libsnes = false;
+                     transfer.version_only = false;
+                     nall::string arch(opts_32bit.checked() ? "32-" : "64-");
+                     start_download({"SSNES-win", arch, "libs.zip"});
+                     return;
+                  }
                }
+
+               MessageWindow::information(*this,
+                     "SSNES-Phoenix is updated. Restart the program to complete the update.");
             }
          }
       }
