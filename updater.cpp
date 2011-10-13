@@ -358,7 +358,26 @@ void Updater::timer_event()
          if (transfer.version_only)
             end_transfer_list();
          else
+         {
             end_file_transfer();
+
+            if (opts_full.checked() && !nall::file::exists({basedir(), "rsound.dll"}))
+            {
+               auto response = MessageWindow::information(*this,
+                     "You downloaded full build, but appear to not have redist downloaded.\n"
+                     "Do you want to download it now?",
+                     MessageWindow::Buttons::YesNo);
+
+               if (response == MessageWindow::Response::Yes)
+               {
+                  transfer.libsnes = false;
+                  transfer.version_only = false;
+                  nall::string arch(opts_32bit.checked() ? "32-" : "64-");
+                  start_download({"SSNES-win", arch, "libs.zip"});
+                  return;
+               }
+            }
+         }
       }
       else
          MessageWindow::warning(*this, "Download was not completed!");
@@ -481,7 +500,7 @@ void Updater::update_ssnes_version()
    fgets(buffer, sizeof(buffer), file);
    fgets(buffer, sizeof(buffer), file);
 
-   // Second line of --help has "-- v13.17 --". :D
+   // Second line of --help has "-- v13.37 --". :D
    const char *start = strstr(buffer, "-- v");
    if (start)
    {
