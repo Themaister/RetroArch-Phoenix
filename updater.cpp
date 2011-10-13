@@ -106,7 +106,7 @@ Updater::Updater()
    libsnes_listview.onActivate = [this] {
       transfer.version_only = false;
 
-      const auto &elem = libsnes_list[libsnes_listview.selection()];
+      const auto &elem = libsnes_current[libsnes_listview.selection()];
       start_download({elem.basename, ".zip"});
    };
 
