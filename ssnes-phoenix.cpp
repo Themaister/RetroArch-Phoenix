@@ -1392,6 +1392,9 @@ set_visible:
             configs.cli.set("libsnes_path", path);
             libsnes.setPath(path);
          };
+
+         // Might use config later.
+         updater.ssnes_path_cb = [this]() -> nall::string { return "ssnes"; };
 #endif
       }
 };

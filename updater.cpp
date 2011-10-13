@@ -5,6 +5,7 @@
 #include <nall/file.hpp>
 #include <nall/zip.hpp>
 #include "updater.hpp"
+#include <stdio.h>
 
 using namespace nall;
 
@@ -59,10 +60,14 @@ Updater::Updater()
    vbox.append(opts_layout, 3);
 
    opts_32bit.setChecked();
+
+   update_ssnes_version();
    opts_slim.setChecked();
 
    latest_label.setText("Latest release: N/A");
-   vbox.append(latest_label, ~0, 0, 20);
+   current_label.setText("Downloaded release: N/A");
+   vbox.append(latest_label, ~0, 0);
+   vbox.append(current_label, ~0, 0, 20);
 
    libsnes_label.setText("Cores:");
    vbox.append(libsnes_label, 0, 0);
@@ -70,7 +75,6 @@ Updater::Updater()
    libsnes_listview.setHeaderText("System", "Core", "Version", "Architecture", "Library", "Downloaded");
    libsnes_listview.setHeaderVisible();
    libsnes_listview.autoSizeColumns();
-   libsnes_listview.setEnabled(false);
    vbox.append(libsnes_listview, 550, 250);
    libsnes_dlhint.setText("Double-click core to download. Use core by setting libsnes path to desired library.");
    vbox.append(libsnes_dlhint, 0, 0);
@@ -180,6 +184,7 @@ void Updater::cancel()
 
 void Updater::show()
 {
+   update_ssnes_version();
    setVisible();
 }
 
@@ -330,7 +335,10 @@ void Updater::end_file_transfer()
          update_listview();
       }
       else
+      {
          MessageWindow::information(*this, "Extracted SSNES!");
+         update_ssnes_version();
+      }
    }
    else if (valid)
       MessageWindow::critical(*this, "Failed opening ZIP!");
@@ -455,6 +463,39 @@ void Updater::disable_downloads()
    libsnes_listview.setEnabled(false);
 }
 
+void Updater::update_ssnes_version()
+{
+   if (!ssnes_path_cb)
+      return;
+
+   FILE *file = popen(nall::string(ssnes_path_cb(), " --help"), "r");
+   if (!file)
+   {
+      current_label.setText("Downloaded release: N/A");
+      return;
+   }
+
+   nall::string version = "N/A";
+
+   char buffer[1024] = {0};
+   fgets(buffer, sizeof(buffer), file);
+   fgets(buffer, sizeof(buffer), file);
+
+   // Second line of --help has "-- v13.17 --". :D
+   const char *start = strstr(buffer, "-- v");
+   if (start)
+   {
+      start += 4;
+      char *end = strchr(start, ' ');
+      if (end)
+         *end = '\0';
+
+      version = start;
+   }
+
+   current_label.setText({"Downloaded release: ", version});
+   fclose(file);
+}
 
 #endif
 

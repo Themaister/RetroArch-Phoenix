@@ -21,6 +21,7 @@ class Updater : public Window
       bool progress_update(unsigned now, unsigned total);
 
       nall::function<void (const nall::string &path)> libsnes_path_cb;
+      nall::function<nall::string()> ssnes_path_cb;
 
    private:
       Timer timer;
@@ -65,6 +66,7 @@ class Updater : public Window
       HorizontalLayout dl_layout;
 
       Label latest_label;
+      Label current_label;
 
       Label opts_arch, opts_build;
       RadioBox opts_32bit, opts_64bit;
@@ -87,6 +89,7 @@ class Updater : public Window
       nall::linear_vector<libsnes_desc> libsnes_current;
       static libsnes_desc line2desc(const nall::string &line);
       void update_listview();
+      void update_ssnes_version();
 
       void enable_downloads();
       void disable_downloads();
