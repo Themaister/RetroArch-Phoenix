@@ -31,6 +31,8 @@ class Updater : public Window
       void download_thread(const nall::string &path);
       void update_progress();
       bool extract_zip(const nall::string &path);
+      void move_self_exe();
+      void delete_old_exe();
       struct
       {
          bool finished;

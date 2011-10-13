@@ -11,6 +11,9 @@ using namespace nall;
 
 Updater::Updater()
 {
+   // After an update, killit! :D
+   delete_old_exe();
+
    setTitle("SSNES || Core Manager");
    onClose = [this]{ this->hide(); };
 
@@ -193,6 +196,24 @@ void Updater::hide()
    setVisible(false);
 }
 
+// This is awkward as shit. We can't overwrite ourselves (ssnes-phoenix.exe),
+// but we can rename ourselves and overwrite ... :D
+void Updater::move_self_exe()
+{
+   char path[MAX_PATH];
+   GetModuleFileName(GetModuleHandle(0), path, sizeof(path));
+   nall::string new_path(path, ".old-deleteme");
+   MoveFile(path, new_path);
+}
+
+void Updater::delete_old_exe()
+{
+   char path[MAX_PATH];
+   GetModuleFileName(GetModuleHandle(0), path, sizeof(path));
+   nall::string backup_path(path, ".old-deleteme");
+   DeleteFile(backup_path);
+}
+
 bool Updater::extract_zip(const nall::string &path)
 {
    nall::zip z;
@@ -212,6 +233,9 @@ bool Updater::extract_zip(const nall::string &path)
       unsigned size;
       if (!z.extract(file, data, size))
          continue;
+
+      if (file.name == "ssnes-phoenix.exe") // Oh snap, we have to do magic trickery! :D
+         move_self_exe();
 
       if (!nall::file::write({basedir(), file.name}, data, size))
       {
@@ -361,6 +385,7 @@ void Updater::timer_event()
          {
             end_file_transfer();
 
+            // Not perfect, but it's very unlikely that rsound.dll is present if redist wasn't downloaded already ... :)
             if (opts_full.checked() && !nall::file::exists({basedir(), "rsound.dll"}))
             {
                auto response = MessageWindow::information(*this,
