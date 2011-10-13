@@ -1362,7 +1362,7 @@ set_visible:
          RadioItem::group(settings.gamepad_2, settings.multitap_2, settings.mouse_2, settings.scope_2, settings.justifier_2, settings.justifiers_2, settings.none_2);
 
 #ifdef _WIN32
-         updater_elems.update.setText("Update SSNES");
+         updater_elems.update.setText("Manage SSNES");
          updater_menu.append(updater_elems.update);
 #endif
 
@@ -1385,8 +1385,10 @@ set_visible:
 
 #ifdef _WIN32
          updater_elems.update.onTick = [this]() { updater.show(); };
-         updater.libsnes_path_cb = [this](const nall::string &path)
+         updater.libsnes_path_cb = [this](const nall::string &path_)
          {
+            auto path = path_;
+            path.transform("\\", "/");
             configs.cli.set("libsnes_path", path);
             libsnes.setPath(path);
          };

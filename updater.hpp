@@ -81,6 +81,7 @@ class Updater : public Window
          nall::string version;
          nall::string arch;
          nall::string basename;
+         bool downloaded;
       };
       nall::linear_vector<libsnes_desc> libsnes_list;
       nall::linear_vector<libsnes_desc> libsnes_current;

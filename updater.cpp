@@ -10,7 +10,7 @@ using namespace nall;
 
 Updater::Updater()
 {
-   setTitle("SSNES || Update");
+   setTitle("SSNES || Core Manager");
    onClose = [this]{ this->hide(); };
 
    timer.onTimeout = {&Updater::timer_event, this};
@@ -67,7 +67,7 @@ Updater::Updater()
    libsnes_label.setText("Cores:");
    vbox.append(libsnes_label, 0, 0);
 
-   libsnes_listview.setHeaderText("System", "Core", "Version", "Architecture", "Library");
+   libsnes_listview.setHeaderText("System", "Core", "Version", "Architecture", "Library", "Downloaded");
    libsnes_listview.setHeaderVisible();
    libsnes_listview.autoSizeColumns();
    libsnes_listview.setEnabled(false);
@@ -111,7 +111,30 @@ Updater::Updater()
 
       const auto &elem = libsnes_current[libsnes_listview.selection()];
       transfer.libsnes_path = {basedir(), elem.basename, ".dll"};
-      start_download({elem.basename, ".zip"});
+
+      if (elem.downloaded)
+      {
+         auto response = MessageWindow::information(*this,
+               "This core is already downloaded.\nWould you like to use it?",
+               MessageWindow::Buttons::YesNo);
+
+         if (response == MessageWindow::Response::Yes)
+         {
+            if (response == MessageWindow::Response::Yes && libsnes_path_cb)
+               libsnes_path_cb(transfer.libsnes_path);
+         }
+         else
+         {
+            response = MessageWindow::information(*this,
+                  "Would you like to redownload it (in case there was a hotfix)?",
+                  MessageWindow::Buttons::YesNo);
+
+            if (response == MessageWindow::Response::Yes)
+               start_download({elem.basename, ".zip"});
+         }
+      }
+      else
+         start_download({elem.basename, ".zip"});
    };
 
    cancel_download.onTick = [this] {
@@ -271,9 +294,11 @@ void Updater::update_listview()
          libsnes_current.append(elem);
    }
 
+   auto dir = basedir();
    foreach (elem, libsnes_current)
    {
-      libsnes_listview.append(elem.system, elem.core, elem.version, elem.arch, nall::string(elem.basename, ".dll"));
+      elem.downloaded = nall::file::exists({dir, elem.basename, ".dll"});
+      libsnes_listview.append(elem.system, elem.core, elem.version, elem.arch, nall::string(elem.basename, ".dll"), nall::string(elem.downloaded ? "Yes" : "No"));
    }
 
    libsnes_listview.autoSizeColumns();
@@ -301,6 +326,8 @@ void Updater::end_file_transfer()
 
          if (response == MessageWindow::Response::Yes && libsnes_path_cb)
             libsnes_path_cb(transfer.libsnes_path);
+
+         update_listview();
       }
       else
          MessageWindow::information(*this, "Extracted SSNES!");
