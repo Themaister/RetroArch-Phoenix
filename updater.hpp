@@ -77,7 +77,9 @@ class Updater : public Window
          nall::string basename;
       };
       nall::linear_vector<libsnes_desc> libsnes_list;
+      nall::linear_vector<libsnes_desc> libsnes_current;
       static libsnes_desc line2desc(const nall::string &line);
+      void update_listview();
 
       void enable_downloads();
       void disable_downloads();

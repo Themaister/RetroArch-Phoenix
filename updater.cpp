@@ -115,6 +115,9 @@ Updater::Updater()
       transfer.cancelled = true;
    };
 
+   opts_32bit.onTick = {&Updater::update_listview, this};
+   opts_64bit.onTick = {&Updater::update_listview, this};
+
    append(vbox);
 
    disable_downloads();
@@ -235,8 +238,30 @@ void Updater::end_transfer_list()
       {
          const auto &elem = line2desc(elem_);
          libsnes_list.append(elem);
-         libsnes_listview.append(elem.system, elem.core, elem.version, elem.arch, nall::string(elem.basename, ".dll"));
       }
+   }
+
+   update_listview();
+
+}
+
+void Updater::update_listview()
+{
+   libsnes_listview.reset();
+   libsnes_current.reset();
+
+   bool x86 = opts_32bit.checked();
+   foreach (elem, libsnes_list)
+   {
+      if (opts_32bit.checked() && elem.arch == "x86")
+         libsnes_current.append(elem);
+      else if (opts_64bit.checked() && elem.arch == "x64")
+         libsnes_current.append(elem);
+   }
+
+   foreach (elem, libsnes_current)
+   {
+      libsnes_listview.append(elem.system, elem.core, elem.version, elem.arch, nall::string(elem.basename, ".dll"));
    }
 
    libsnes_listview.autoSizeColumns();
