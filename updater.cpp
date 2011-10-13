@@ -40,7 +40,7 @@ Updater::Updater()
    vbox.append(progress_layout);
 
    opts_32bit.setText("x86");
-   opts_64bit.setText("x64");
+   opts_64bit.setText("x86_64");
    opts_slim.setText("Slim");
    opts_full.setText("Full");
    opts_redist.setText("Redist");
@@ -255,7 +255,7 @@ void Updater::update_listview()
    {
       if (opts_32bit.checked() && elem.arch == "x86")
          libsnes_current.append(elem);
-      else if (opts_64bit.checked() && elem.arch == "x64")
+      else if (opts_64bit.checked() && elem.arch == "x86_64")
          libsnes_current.append(elem);
    }
 
