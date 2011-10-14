@@ -1362,7 +1362,7 @@ set_visible:
          RadioItem::group(settings.gamepad_2, settings.multitap_2, settings.mouse_2, settings.scope_2, settings.justifier_2, settings.justifiers_2, settings.none_2);
 
 #ifdef _WIN32
-         updater_elems.update.setText("Manage/Update SSNES");
+         updater_elems.update.setText("Update SSNES");
          updater_menu.append(updater_elems.update);
 #endif
 

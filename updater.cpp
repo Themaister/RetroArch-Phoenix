@@ -14,7 +14,7 @@ Updater::Updater()
    // After an update, killit! :D
    delete_old_exe();
 
-   setTitle("SSNES || Core Manager");
+   setTitle("SSNES || Updater");
    onClose = [this]{ this->hide(); };
 
    timer.onTimeout = {&Updater::timer_event, this};
