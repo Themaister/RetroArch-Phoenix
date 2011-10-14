@@ -33,6 +33,7 @@ class Updater : public Window
       bool extract_zip(const nall::string &path);
       void move_self_exe();
       void delete_old_exe();
+      static unsigned current_redist_version();
       struct
       {
          bool finished;
@@ -42,6 +43,9 @@ class Updater : public Window
          nall::mutex lock;
 
          nall::string version;
+         nall::string ssnes_version;
+         unsigned redist_version;
+
          bool version_only;
 
          nall::string file_path;

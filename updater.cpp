@@ -95,6 +95,7 @@ Updater::Updater()
    };
 
    download.onTick = [this] {
+
       transfer.version_only = false;
       transfer.libsnes = false;
       
@@ -290,6 +291,8 @@ void Updater::end_transfer_list()
 
    transfer.version = list[0];
    list.remove(0);
+   transfer.redist_version = strtoul(list[0], 0, 0);
+   list.remove(0);
 
    string latest("Latest release: ", transfer.version);
    latest_label.setText({"Latest release: ", transfer.version});
@@ -306,6 +309,10 @@ void Updater::end_transfer_list()
    }
 
    update_listview();
+
+   if (transfer.version == transfer.ssnes_version)
+      MessageWindow::information(*this,
+            "SSNES is up to date!");
 }
 
 void Updater::update_listview()
@@ -391,12 +398,13 @@ void Updater::timer_event()
 
             if (success)
             {
-               // Not perfect, but it's very unlikely that rsound.dll is present if redist wasn't downloaded already ... :)
-               if (opts_full.checked() && !nall::file::exists({basedir(), "rsound.dll"}))
+               if (opts_full.checked() && (current_redist_version() != transfer.redist_version))
                {
                   auto response = MessageWindow::information(*this,
-                        "You downloaded full build, but appear to not have redist downloaded.\n"
-                        "Do you want to download it now?",
+                        {"You downloaded full build, but redist is outdated.\n",
+                        "Current: ", current_redist_version(), "\n",
+                        "Available: ", transfer.redist_version, "\n",
+                        "Do you want to download it now?"},
                         MessageWindow::Buttons::YesNo);
 
                   if (response == MessageWindow::Response::Yes)
@@ -433,6 +441,22 @@ void Updater::timer_event()
    }
 
    update_progress();
+}
+
+unsigned Updater::current_redist_version()
+{
+   nall::string path = {basedir(), "ssnes-redist-version"};
+   uint8_t *data;
+   unsigned size;
+   if (nall::file::read(path, data, size))
+   {
+      std::vector<char> buf(data, data + size);
+      buf.push_back('\0');
+      delete [] data;
+      return strtoul(buf.data(), 0, 0);
+   }
+   else
+      return 0;
 }
 
 void Updater::update_progress()
@@ -552,6 +576,7 @@ void Updater::update_ssnes_version()
 
    current_label.setText({"Downloaded release: ", version});
    fclose(file);
+   transfer.ssnes_version = version;
 }
 
 #endif
