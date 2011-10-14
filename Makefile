@@ -6,6 +6,6 @@ else
 ifneq ($(findstring Linux,$(OS)),)
 include Makefile.gtk
 else
-include Makefile.win32
+include Makefile.win
 endif
 endif
