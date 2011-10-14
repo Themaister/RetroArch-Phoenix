@@ -359,7 +359,7 @@ bool Updater::end_file_transfer()
       }
       else
       {
-         MessageWindow::information(*this, "Extracted SSNES!");
+         MessageWindow::information(*this, "Extracted archive!");
          update_ssnes_version();
       }
    }
@@ -409,8 +409,11 @@ void Updater::timer_event()
                   }
                }
 
-               MessageWindow::information(*this,
-                     "SSNES-Phoenix is updated. Restart the program to complete the update.");
+               if (!transfer.libsnes && !opts_redist.checked())
+               {
+                  MessageWindow::information(*this,
+                        "SSNES-Phoenix is updated. Restart the program to complete the update.");
+               }
             }
          }
       }
