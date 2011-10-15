@@ -532,8 +532,29 @@ class InputSetting : public SettingLayout, public util::Shared<InputSetting>
          clear.onTick = [this]() { this->set_single("None", "nul"); };
          def.onTick = [this]() { this->set_single("Default", ""); };
 
-         def_all.onTick = [this]() { this->set_all_list("Default", ""); };
-         erase.onTick = [this]() { this->set_all_list("None", "nul"); };
+         def_all.onTick = [this]()
+         {
+            auto response = MessageWindow::information(Window::None,
+                  "Would you like to default binds on other pages as well?",
+                  MessageWindow::Buttons::YesNo);
+
+            if (response == MessageWindow::Response::Yes)
+               this->set_all_list("Default", "");
+            else
+               this->set_all_current_list("Default", "");
+         };
+
+         erase.onTick = [this]()
+         {
+            auto response = MessageWindow::information(Window::None,
+                  "Would you like to clear binds on other pages as well?",
+                  MessageWindow::Buttons::YesNo);
+
+            if (response == MessageWindow::Response::Yes)
+               this->set_all_list("None", "nul");
+            else
+               this->set_all_current_list("None", "nul");
+         };
 
          list_view.setHeaderText(string("SSNES Bind"), string("Bind"));
          list_view.setHeaderVisible();
@@ -646,6 +667,23 @@ class InputSetting : public SettingLayout, public util::Shared<InputSetting>
          conf.set("input_player3_joypad_index", 2);
          conf.set("input_player4_joypad_index", 3);
          conf.set("input_player5_joypad_index", 4);
+
+         this->update_list();
+      }
+
+      void set_all_current_list(const string& display, const string& conf_string)
+      {
+         foreach (i, list[player.selection()])
+         {
+            if (display == "Default")
+                  i.display = {"Default", " <", i.def, ">"};
+               else
+                  i.display = display;
+
+               conf.set(i.config_base, conf_string);
+               conf.set({i.config_base, "_btn"}, conf_string);
+               conf.set({i.config_base, "_axis"}, conf_string);
+         }
 
          this->update_list();
       }
