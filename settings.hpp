@@ -399,13 +399,16 @@ class AspectSetting : public SettingLayout, public util::Shared<AspectSetting>
 
          aspect_4_3.setText("4:3");
          aspect_8_7.setText("8:7");
+         aspect_16_15.setText("16:15");
          aspect_16_9.setText("16:9");
          aspect_4_3.onTick = [this]() { this->set_aspect(1.3333); };
          aspect_8_7.onTick = [this]() { this->set_aspect(1.1429); };
+         aspect_16_15.onTick = [this]() { this->set_aspect(1.0667); };
          aspect_16_9.onTick = [this]() { this->set_aspect(1.7778); };
 
          hlayout.append(aspect_4_3, 0, 0);
          hlayout.append(aspect_8_7, 0, 0);
+         hlayout.append(aspect_16_15, 0, 0);
          hlayout.append(aspect_16_9, 0, 0);
       }
 
@@ -418,7 +421,7 @@ class AspectSetting : public SettingLayout, public util::Shared<AspectSetting>
 
    private:
       LineEdit edit;
-      Button aspect_4_3, aspect_8_7, aspect_16_9;
+      Button aspect_4_3, aspect_8_7, aspect_16_15, aspect_16_9;
       double m_default;
 
       void set_aspect(double aspect)
@@ -1065,6 +1068,7 @@ class Video : public ToggleWindow
          widgets.append(PathSetting::shared(_conf, "video_external_driver", "External video driver:", "", "Dynamic library (" DYNAMIC_EXTENSION ")"));
          widgets.append(DoubleSetting::shared(_conf, "video_xscale", "Windowed X scale:", 3.0));
          widgets.append(DoubleSetting::shared(_conf, "video_yscale", "Windowed Y scale:", 3.0));
+         widgets.append(IntSetting::shared(_conf, "video_base_size", "Windowed base size:", 224));
          widgets.append(IntSetting::shared(_conf, "video_fullscreen_x", "Fullscreen X resolution:", 0));
          widgets.append(IntSetting::shared(_conf, "video_fullscreen_y", "Fullscreen Y resolution:", 0));
          widgets.append(BoolSetting::shared(_conf, "video_fullscreen", "Start in fullscreen:", false));
