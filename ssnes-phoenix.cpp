@@ -945,6 +945,15 @@ class MainWindow : public Window
          vec_cmd.append(NULL);
          configs.gui.write();
          configs.cli.write();
+
+         log_win.clear();
+         string commandline("SSNES CMD: ");
+         commandline.append(ssnes_path);
+         for (unsigned i = 1; i < vec_cmd.size() - 1; i++)
+            commandline.append(" ", vec_cmd[i]);
+         commandline.append("\n\n");
+         log_win.push(commandline);
+
          fork_ssnes(ssnes_path, &vec_cmd[0]);
       }
 
@@ -1124,7 +1133,6 @@ set_visible:
             input.hide();
          }
 
-         log_win.clear();
          if ((Internal::child_pid = fork()))
          {
             if (can_hide)
@@ -1206,8 +1214,6 @@ set_visible:
                NULL,
                &siStartInfo,
                &piProcInfo);
-
-         log_win.clear();
 
          bool can_hide = !forked_async;
 
