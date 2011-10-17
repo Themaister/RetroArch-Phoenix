@@ -72,7 +72,7 @@ Updater::Updater()
 
    version_download.onTick = [this] {
       transfer.version_only = true;
-      start_download(latest_file);
+      start_download(latest_file());
    };
 
    download.onTick = [this] {
@@ -262,9 +262,9 @@ void Updater::download_thread(const nall::string &path)
    dl.progress_cb = {&Updater::progress_update, this};
 
    bool ret;
-   if ((ret = dl.connect(base_host)))
+   if ((ret = dl.connect(base_host())))
    {
-      ret = dl.download({base_folder, path});
+      ret = dl.download({base_folder(), path});
       dl.disconnect();
    }
 

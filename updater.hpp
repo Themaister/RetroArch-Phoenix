@@ -67,9 +67,9 @@ class Updater : public Window
 
       VerticalLayout vbox;
 
-      constexpr static const char *base_host = "themaister.net";
-      constexpr static const char *base_folder = "/ssnes-dl/";
-      constexpr static const char *latest_file = "latest";
+      static const char *base_host()   { return "themaister.net"; }
+      static const char *base_folder() { return "/ssnes-dl/"; }
+      static const char *latest_file() { return "latest"; }
 };
 
 #endif
