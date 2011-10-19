@@ -166,7 +166,7 @@ class MainWindow : public Window
 
          vbox.setMargin(5);
          auto minimum = vbox.minimumGeometry();
-         setGeometry({256, 256, max(650, minimum.width), minimum.height});
+         setGeometry({256, 256, max(750, minimum.width), minimum.height});
          append(vbox);
          setMenuVisible();
          setStatusVisible();
@@ -375,7 +375,7 @@ class MainWindow : public Window
             hlayout.append(label, 150, 0);
             hlayout.append(edit, ~0, 0, 5);
 
-            dim_label.setText("Size:");
+            dim_label.setText("Dimensions:");
             hlayout.append(dim_label, 0, 0, 3);
             hlayout.append(dim_edit, 80, 0, 5);
 
