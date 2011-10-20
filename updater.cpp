@@ -194,6 +194,8 @@ bool Updater::extract_zip(const nall::string &path)
       delete [] data;
    }
 
+   z.close();
+
    nall::string rmpath(basedir(), path);
 #ifdef _WIN32
    DeleteFile(rmpath);
