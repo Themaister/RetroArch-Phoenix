@@ -27,6 +27,9 @@ static const char KeyboardScancodeName[][64] = {
   "Shift", "Control", "Alt", "Super",
 };
 
+struct Keyboard;
+static inline Keyboard& keyboard(unsigned id = 0);
+
 struct Keyboard {
   const unsigned ID;
   enum { Base = 1 };
@@ -119,7 +122,7 @@ struct Keyboard {
   Keyboard(unsigned ID_) : ID(ID_) {}
 };
 
-static inline Keyboard& keyboard(unsigned id = 0) {
+static inline Keyboard& keyboard(unsigned id) {
   static Keyboard kb0(0), kb1(1), kb2(2), kb3(3), kb4(4), kb5(5), kb6(6), kb7(7);
   switch(id) { default:
     case 0: return kb0; case 1: return kb1; case 2: return kb2; case 3: return kb3;
@@ -136,6 +139,9 @@ static const char JoypadScancodeName[][64] = {
   "Button16", "Button17", "Button18", "Button19", "Button20", "Button21", "Button22", "Button23",
   "Button24", "Button25", "Button26", "Button27", "Button28", "Button29", "Button30", "Button31",
 };
+
+struct Joypad;
+static inline Joypad& joypad(unsigned id = 0);
 
 struct Joypad {
   const unsigned ID;
@@ -241,7 +247,7 @@ struct Joypad {
   Joypad(unsigned ID_) : ID(ID_) {}
 };
 
-static inline Joypad& joypad(unsigned id = 0) {
+static inline Joypad& joypad(unsigned id) {
   static Joypad jp0(0), jp1(1), jp2(2), jp3(3), jp4(4), jp5(5), jp6(6), jp7(7);
   switch(id) { default:
     case 0: return jp0; case 1: return jp1; case 2: return jp2; case 3: return jp3;

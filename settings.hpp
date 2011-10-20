@@ -765,9 +765,6 @@ class InputSetting : public SettingLayout, public util::Shared<InputSetting>
          {
             if (old_data[i] != new_data[i])
             {
-               if (Mouse::isAnyButton(i) || Mouse::isAnyAxis(i))
-                  continue;
-
                if (Joypad::isAnyAxis(i))
                {
                   if (!analog_enable.checked())

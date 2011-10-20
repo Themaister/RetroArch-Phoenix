@@ -26,7 +26,6 @@ struct pInputSDL {
   bool cap(const string& name) {
     if(name == Input::Handle) return true;
     if(name == Input::KeyboardSupport) return true;
-    if(name == Input::MouseSupport) return true;
     if(name == Input::JoypadSupport) return true;
     return false;
   }
