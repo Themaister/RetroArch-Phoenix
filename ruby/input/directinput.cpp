@@ -13,9 +13,7 @@ public:
   struct {
     LPDIRECTINPUT8 context;
     LPDIRECTINPUTDEVICE8 keyboard;
-    LPDIRECTINPUTDEVICE8 mouse;
     LPDIRECTINPUTDEVICE8 gamepad[Joypad::Count];
-    bool mouseacquired;
   } device;
 
   struct {
@@ -25,7 +23,6 @@ public:
   bool cap(const string& name) {
     if(name == Input::Handle) return true;
     if(name == Input::KeyboardSupport) return true;
-    if(name == Input::MouseSupport) return true;
     if(name == Input::JoypadSupport) return true;
     return false;
   }
@@ -178,33 +175,6 @@ public:
       #undef key
     }
 
-    //=====
-    //Mouse
-    //=====
-
-    if(device.mouse) {
-      DIMOUSESTATE2 state;
-      if(FAILED(device.mouse->GetDeviceState(sizeof(DIMOUSESTATE2), (void*)&state))) {
-        device.mouse->Acquire();
-        if(FAILED(device.mouse->GetDeviceState(sizeof(DIMOUSESTATE2), (void*)&state))) {
-          memset(&state, 0, sizeof(DIMOUSESTATE2));
-        }
-      }
-
-      table[mouse(0).axis(0)] = state.lX;
-      table[mouse(0).axis(1)] = state.lY;
-      table[mouse(0).axis(2)] = state.lZ / WHEEL_DELTA;
-      for(unsigned n = 0; n < Mouse::Buttons; n++) {
-        table[mouse(0).button(n)] = (bool)state.rgbButtons[n];
-      }
-
-      //on Windows, 0 = left, 1 = right, 2 = middle
-      //swap middle and right buttons for consistency with Linux
-      int16_t temp = table[mouse(0).button(1)];
-      table[mouse(0).button(1)] = table[mouse(0).button(2)];
-      table[mouse(0).button(2)] = temp;
-    }
-
     //=========
     //Joypad(s)
     //=========
@@ -287,9 +257,7 @@ public:
   bool init() {
     device.context = 0;
     device.keyboard = 0;
-    device.mouse = 0;
     for(unsigned i = 0; i < Joypad::Count; i++) device.gamepad[i] = 0;
-    device.mouseacquired = false;
 
     DirectInput8Create(GetModuleHandle(0), 0x0800, IID_IDirectInput8, (void**)&device.context, 0);
 
@@ -297,11 +265,6 @@ public:
     device.keyboard->SetDataFormat(&c_dfDIKeyboard);
     device.keyboard->SetCooperativeLevel(settings.handle, DISCL_NONEXCLUSIVE | DISCL_BACKGROUND);
     device.keyboard->Acquire();
-
-    device.context->CreateDevice(GUID_SysMouse, &device.mouse, 0);
-    device.mouse->SetDataFormat(&c_dfDIMouse2);
-    HRESULT hr = device.mouse->SetCooperativeLevel(settings.handle, DISCL_NONEXCLUSIVE | DISCL_BACKGROUND);
-    device.mouse->Acquire();
 
     device.context->EnumDevices(DI8DEVCLASS_GAMECTRL, DI_EnumJoypadsCallback, (void*)this, DIEDFL_ATTACHEDONLY);
 
@@ -313,12 +276,6 @@ public:
       device.keyboard->Unacquire();
       device.keyboard->Release();
       device.keyboard = 0;
-    }
-
-    if(device.mouse) {
-      device.mouse->Unacquire();
-      device.mouse->Release();
-      device.mouse = 0;
     }
 
     for(unsigned i = 0; i < Joypad::Count; i++) {
@@ -336,38 +293,21 @@ public:
   }
 
   bool acquire() {
-    if(!device.mouse) return false;
-    if(acquired() == false) {
-      device.mouse->Unacquire();
-      device.mouse->SetCooperativeLevel(settings.handle, DISCL_EXCLUSIVE | DISCL_FOREGROUND);
-      device.mouse->Acquire();
-      device.mouseacquired = true;
-    }
-    return true;
+    return false;
   }
 
   bool unacquire() {
-    if(!device.mouse) return false;
-    if(acquired() == true) {
-      device.mouse->Unacquire();
-      device.mouse->SetCooperativeLevel(settings.handle, DISCL_NONEXCLUSIVE | DISCL_BACKGROUND);
-      device.mouse->Acquire();
-      device.mouseacquired = false;
-    }
-    return true;
+    return false;
   }
 
   bool acquired() {
-    return device.mouseacquired;
+    return false;
   }
 
   pInputDI() {
     device.context = 0;
     device.keyboard = 0;
-    device.mouse = 0;
     for(unsigned i = 0; i < Joypad::Count; i++) device.gamepad[i] = 0;
-    device.mouseacquired = false;
-
     settings.handle = 0;
   }
 
