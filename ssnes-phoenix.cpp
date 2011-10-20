@@ -1385,6 +1385,11 @@ set_visible:
 
 #ifdef _WIN32
          updater_elems.update.onTick = [this]() { updater.show(); };
+         updater.libsnes_path_cb = [this](const nall::string &path)
+         {
+            configs.cli.set("libsnes_path", path);
+            libsnes.setPath(path);
+         };
 #endif
       }
 };

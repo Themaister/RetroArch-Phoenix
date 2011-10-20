@@ -83,11 +83,13 @@ Updater::Updater()
 
    version_download.onTick = [this] {
       transfer.version_only = true;
+      transfer.libsnes = false;
       start_download(latest_file());
    };
 
    download.onTick = [this] {
       transfer.version_only = false;
+      transfer.libsnes = false;
       
       nall::string path;
       path.append(opts_redist.checked() ? "SSNES-win" : "ssnes-win");
@@ -105,8 +107,10 @@ Updater::Updater()
 
    libsnes_listview.onActivate = [this] {
       transfer.version_only = false;
+      transfer.libsnes = true;
 
       const auto &elem = libsnes_current[libsnes_listview.selection()];
+      transfer.libsnes_path = {basedir(), elem.basename, ".dll"};
       start_download({elem.basename, ".zip"});
    };
 
@@ -163,7 +167,6 @@ void Updater::hide()
 
 bool Updater::extract_zip(const nall::string &path)
 {
-   
    nall::zip z;
    if (!z.open({basedir(), path}))
    {
@@ -190,6 +193,13 @@ bool Updater::extract_zip(const nall::string &path)
 
       delete [] data;
    }
+
+   nall::string rmpath(basedir(), path);
+#ifdef _WIN32
+   DeleteFile(rmpath);
+#else
+   ::unlink(rmpath);
+#endif
 
    return true;
 }
@@ -280,7 +290,19 @@ void Updater::end_file_transfer()
       MessageWindow::critical(*this, "Failed saving archive to disk!");
 
    if (valid && extract_zip(transfer.file_path))
-      MessageWindow::information(*this, "Extracted archive! :)");
+   {
+      if (transfer.libsnes)
+      {
+         auto response = MessageWindow::information(*this,
+               {"Extracted core to ", transfer.libsnes_path,
+               ".\nDo you want to use this core?"}, MessageWindow::Buttons::YesNo);
+
+         if (response == MessageWindow::Response::Yes && libsnes_path_cb)
+            libsnes_path_cb(transfer.libsnes_path);
+      }
+      else
+         MessageWindow::information(*this, "Extracted SSNES!");
+   }
    else if (valid)
       MessageWindow::critical(*this, "Failed opening ZIP!");
 }

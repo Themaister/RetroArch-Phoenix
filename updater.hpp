@@ -4,6 +4,7 @@
 #include <phoenix.hpp>
 #include <vector>
 #include <nall/thread.hpp>
+#include <nall/function.hpp>
 
 using namespace phoenix;
 
@@ -18,6 +19,8 @@ class Updater : public Window
 
       void update(const char *content, unsigned size);
       bool progress_update(unsigned now, unsigned total);
+
+      nall::function<void (const nall::string &path)> libsnes_path_cb;
 
    private:
       Timer timer;
@@ -41,6 +44,9 @@ class Updater : public Window
          nall::string file_path;
 
          unsigned now, total;
+
+         bool libsnes;
+         nall::string libsnes_path;
       } transfer;
 
 #if 0
