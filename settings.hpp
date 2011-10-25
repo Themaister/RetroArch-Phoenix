@@ -1018,6 +1018,7 @@ class ShaderVideo : public ToggleWindow
          widgets.append(DoubleSetting::shared(_conf, "video_fbo_scale_y", "FBO Scale Y:", 2.0));
          widgets.append(BoolSetting::shared(_conf, "video_second_pass_smooth", "Bilinear filtering (2. pass):", true));
          widgets.append(PathSetting::shared(_conf, "video_second_pass_shader", "Shader (2. pass):", "", "Cg shader, XML shader (*.cg,*.shader)"));
+         widgets.append(PathSetting::shared(_conf, "video_filter", "bSNES video filter:", "", "bSNES filter (*.filter)"));
 
          foreach(i, widgets) { vbox.append(i->layout(), 3); }
          vbox.setMargin(5);
@@ -1071,6 +1072,7 @@ class Video : public ToggleWindow
          widgets.append(IntSetting::shared(_conf, "video_base_size", "Windowed base size:", 224));
          widgets.append(IntSetting::shared(_conf, "video_fullscreen_x", "Fullscreen X resolution:", 0));
          widgets.append(IntSetting::shared(_conf, "video_fullscreen_y", "Fullscreen Y resolution:", 0));
+         widgets.append(BoolSetting::shared(_conf, "video_vsync", "VSync:", true));
          widgets.append(BoolSetting::shared(_conf, "video_fullscreen", "Start in fullscreen:", false));
          widgets.append(BoolSetting::shared(_conf, "video_force_16bit", "Force 16-bit color:", false));
          widgets.append(BoolSetting::shared(_conf, "video_disable_composition", "Disable composition (Win Vista/7):", false));
@@ -1078,8 +1080,6 @@ class Video : public ToggleWindow
          widgets.append(BoolSetting::shared(_conf, "video_force_aspect", "Lock aspect ratio:", true));
          widgets.append(BoolSetting::shared(_conf, "video_crop_overscan", "Crop overscan:", false));
          widgets.append(AspectSetting::shared(_conf, "video_aspect_ratio", "Aspect ratio:", 1.333));
-
-         widgets.append(PathSetting::shared(_conf, "video_filter", "bSNES video filter:", "", "bSNES filter (*.filter)"));
 
          foreach(i, widgets) { vbox.append(i->layout(), 3); }
 

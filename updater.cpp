@@ -31,7 +31,7 @@ Updater::Updater()
 #endif
    version_download.setText("Check version");
    dl_layout.append(version_download, 0, 0);
-   download.setText("Download");
+   download.setText("Download SSNES");
    dl_layout.append(download, 0, 0);
    cancel_download.setText("Cancel");
    dl_layout.append(cancel_download, 0, 0);
