@@ -1,8 +1,8 @@
 TARGET = ssnes-phoenix
 
 RUBYOBJ = ruby/ruby.o
-RUBYDEFINES = -DINPUT_CARBON
-RUBYLIBS = -framework Carbon
+RUBYDEFINES = -DINPUT_CARBON $(shell pkg-config sdl --cflags)
+RUBYLIBS = -framework Carbon $(shell pkg-config sdl --libs)
 
 CXXFILES = $(wildcard *.cpp)
 CFILES = $(wildcard *.c)

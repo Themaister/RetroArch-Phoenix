@@ -1,8 +1,12 @@
+#include "SDL.h"
+
 using namespace nall;
 namespace ruby {
 
-class pInputCarbon {
-public:
+struct pInputCarbon {
+
+  SDL_Joystick *gamepad[Joypad::Count];
+   
   bool cap(const string& name) {
     return false;
   }
@@ -142,14 +146,60 @@ public:
     map(0x37, Keyboard::Super);
     #undef map
 
+    //=========
+    //Joypad(s)
+    //=========
+
+    SDL_JoystickUpdate();
+    for(unsigned i = 0; i < Joypad::Count; i++) {
+      if(!gamepad[i]) continue;
+
+      //POV hats
+      unsigned hats = min((unsigned)Joypad::Hats, SDL_JoystickNumHats(gamepad[i]));
+      for(unsigned hat = 0; hat < hats; hat++) {
+        uint8_t state = SDL_JoystickGetHat(gamepad[i], hat);
+        if(state & SDL_HAT_UP   ) table[joypad(i).hat(hat)] |= Joypad::HatUp;
+        if(state & SDL_HAT_RIGHT) table[joypad(i).hat(hat)] |= Joypad::HatRight;
+        if(state & SDL_HAT_DOWN ) table[joypad(i).hat(hat)] |= Joypad::HatDown;
+        if(state & SDL_HAT_LEFT ) table[joypad(i).hat(hat)] |= Joypad::HatLeft;
+      }
+
+      //axes
+      unsigned axes = min((unsigned)Joypad::Axes, SDL_JoystickNumAxes(gamepad[i]));
+      for(unsigned axis = 0; axis < axes; axis++) {
+        table[joypad(i).axis(axis)] = (int16_t)SDL_JoystickGetAxis(gamepad[i], axis);
+      }
+
+      //buttons
+      for(unsigned button = 0; button < Joypad::Buttons; button++) {
+        table[joypad(i).button(button)] = (bool)SDL_JoystickGetButton(gamepad[i], button);
+      }
+    }
+
     return true;
   }
 
   bool init() {
+    SDL_InitSubSystem(SDL_INIT_JOYSTICK);
+    SDL_JoystickEventState(SDL_IGNORE);
+
+    unsigned joypads = min((unsigned)Joypad::Count, SDL_NumJoysticks());
+    for(unsigned i = 0; i < joypads; i++) gamepad[i] = SDL_JoystickOpen(i);
+
     return true;
   }
 
   void term() {
+    for(unsigned i = 0; i < Joypad::Count; i++) {
+      if(gamepad[i]) SDL_JoystickClose(gamepad[i]);
+      gamepad[i] = 0;
+    }
+    SDL_QuitSubSystem(SDL_INIT_JOYSTICK);
+  }
+
+  pInputCarbon() {
+    for(unsigned i = 0; i < Joypad::Count; i++) gamepad[i] = 0;
+    settings.handle = 0;
   }
 };
 
