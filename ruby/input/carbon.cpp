@@ -199,7 +199,6 @@ struct pInputCarbon {
 
   pInputCarbon() {
     for(unsigned i = 0; i < Joypad::Count; i++) gamepad[i] = 0;
-    settings.handle = 0;
   }
 };
 
