@@ -1069,7 +1069,6 @@ class Video : public ToggleWindow
          widgets.append(PathSetting::shared(_conf, "video_external_driver", "External video driver:", "", "Dynamic library (" DYNAMIC_EXTENSION ")"));
          widgets.append(DoubleSetting::shared(_conf, "video_xscale", "Windowed X scale:", 3.0));
          widgets.append(DoubleSetting::shared(_conf, "video_yscale", "Windowed Y scale:", 3.0));
-         widgets.append(IntSetting::shared(_conf, "video_base_size", "Windowed base size:", 224));
          widgets.append(IntSetting::shared(_conf, "video_fullscreen_x", "Fullscreen X resolution:", 0));
          widgets.append(IntSetting::shared(_conf, "video_fullscreen_y", "Fullscreen Y resolution:", 0));
          widgets.append(BoolSetting::shared(_conf, "video_vsync", "VSync:", true));
