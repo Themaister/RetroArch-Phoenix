@@ -397,18 +397,18 @@ class AspectSetting : public SettingLayout, public util::Shared<AspectSetting>
          edit.onChange = [this]() { conf.set(key, edit.text()); };
          hlayout.append(edit, EDIT_WIDTH / 2, 0, 5);
 
+         aspect_auto.setText("Auto");
          aspect_4_3.setText("4:3");
          aspect_8_7.setText("8:7");
-         aspect_16_15.setText("16:15");
          aspect_16_9.setText("16:9");
+         aspect_auto.onTick = [this]() { this->clear_aspect(); };
          aspect_4_3.onTick = [this]() { this->set_aspect(1.3333); };
          aspect_8_7.onTick = [this]() { this->set_aspect(1.1429); };
-         aspect_16_15.onTick = [this]() { this->set_aspect(1.0667); };
          aspect_16_9.onTick = [this]() { this->set_aspect(1.7778); };
 
+         hlayout.append(aspect_auto, 0, 0);
          hlayout.append(aspect_4_3, 0, 0);
          hlayout.append(aspect_8_7, 0, 0);
-         hlayout.append(aspect_16_15, 0, 0);
          hlayout.append(aspect_16_9, 0, 0);
       }
 
@@ -421,13 +421,19 @@ class AspectSetting : public SettingLayout, public util::Shared<AspectSetting>
 
    private:
       LineEdit edit;
-      Button aspect_4_3, aspect_8_7, aspect_16_15, aspect_16_9;
+      Button aspect_4_3, aspect_8_7, aspect_auto, aspect_16_9;
       double m_default;
 
       void set_aspect(double aspect)
       {
          conf.set(key, aspect);
          edit.setText(aspect);
+      }
+
+      void clear_aspect()
+      {
+         conf.set(key, string());
+	 edit.setText("");
       }
 };
 
