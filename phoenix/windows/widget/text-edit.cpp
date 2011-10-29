@@ -17,6 +17,7 @@ void pTextEdit::setText(const string &text) {
 
 void pTextEdit::selectAll() {
   Edit_SetSel(hwnd, 0, -1);
+  SetFocus(hwnd);
 }
 
 void pTextEdit::setWordWrap(bool wordWrap) {
