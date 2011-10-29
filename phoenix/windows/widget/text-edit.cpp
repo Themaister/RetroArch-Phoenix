@@ -15,6 +15,10 @@ void pTextEdit::setText(const string &text) {
   locked = false;
 }
 
+void pTextEdit::selectAll() {
+  Edit_SetSel(hwnd, 0, -1);
+}
+
 void pTextEdit::setWordWrap(bool wordWrap) {
   //ES_AUTOHSCROLL cannot be changed after widget creation.
   //As a result, we must destroy and re-create widget to change this setting.
@@ -42,7 +46,7 @@ void pTextEdit::setParent(Window &parent) {
   if(hwnd) DestroyWindow(hwnd);
   hwnd = CreateWindowEx(
     WS_EX_CLIENTEDGE, L"EDIT", L"",
-    WS_CHILD | WS_VISIBLE | ES_AUTOVSCROLL | ES_MULTILINE | ES_WANTRETURN | (textEdit.state.wordWrap == false ? ES_AUTOHSCROLL : 0),
+    WS_CHILD | WS_VISIBLE | ES_AUTOVSCROLL | ES_NOHIDESEL | ES_MULTILINE | ES_WANTRETURN | (textEdit.state.wordWrap == false ? ES_AUTOHSCROLL : 0),
     0, 0, 0, 0, parent.p.hwnd, (HMENU)id, GetModuleHandle(0), 0
   );
   SetWindowLongPtr(hwnd, GWLP_USERDATA, (LONG_PTR)&textEdit);

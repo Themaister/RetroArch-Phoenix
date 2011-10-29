@@ -121,6 +121,16 @@ class LogWindow : public ToggleWindow
          label.setText("SSNES output:");
          layout.append(label, 0, 0);
          layout.append(box, ~0, ~0);
+
+         select_all.setText("Select all");
+         clear_all.setText("Clear all");
+         hbox.append(select_all, 0, 0);
+         hbox.append(clear_all, 0, 0);
+         layout.append(hbox);
+
+         select_all.onTick = [this] { box.selectAll(); };
+         clear_all.onTick = [this] { log = ""; box.setText(log); };
+
          box.setEditable(false);
          layout.setMargin(5);
          append(layout);
@@ -148,6 +158,11 @@ class LogWindow : public ToggleWindow
       VerticalLayout layout;
       TextEdit box;
       Label label;
+
+      HorizontalLayout hbox;
+      Button select_all;
+      Button clear_all;
+
       string log;
 
 };

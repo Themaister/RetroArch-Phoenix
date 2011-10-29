@@ -17,6 +17,10 @@ void pTextEdit::setWordWrap(bool wordWrap) {
   qtTextEdit->setWordWrapMode(wordWrap ? QTextOption::WordWrap : QTextOption::NoWrap);
 }
 
+void pTextEdit::selectAll() {
+  qtTextEdit->selectAll();
+}
+
 string pTextEdit::text() {
   return qtTextEdit->toPlainText().toUtf8().constData();
 }

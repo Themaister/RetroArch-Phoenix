@@ -489,6 +489,7 @@ public:
   void setCursorPosition(unsigned position);
   void setEditable(bool editable);
   void setText(const string &text);
+  void selectAll();
   void setWordWrap(bool wordWrap);
   string text();
 

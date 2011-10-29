@@ -21,6 +21,13 @@ void pTextEdit::setText(const string &text) {
   locked = false;
 }
 
+void pTextEdit::selectAll() {
+  GtkTextIter start, end;
+  gtk_text_buffer_get_start_iter(textBuffer, &start);
+  gtk_text_buffer_get_end_iter(textBuffer, &end);
+  gtk_text_buffer_select_range(textBuffer, &start, &end);
+}
+
 void pTextEdit::setWordWrap(bool wordWrap) {
   gtk_text_view_set_wrap_mode(GTK_TEXT_VIEW(subWidget), wordWrap ? GTK_WRAP_WORD_CHAR : GTK_WRAP_NONE);
 }

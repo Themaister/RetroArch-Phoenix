@@ -432,6 +432,7 @@ struct TextEdit : private nall::base_from_member<pTextEdit&>, Widget {
 
   void setCursorPosition(unsigned position);
   void setEditable(bool editable = true);
+  void selectAll();
   void setText(const nall::string &text);
   void setWordWrap(bool wordWrap = true);
   nall::string text();
