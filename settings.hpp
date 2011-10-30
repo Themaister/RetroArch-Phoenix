@@ -391,8 +391,8 @@ class SliderSetting : public SettingLayout, public util::Shared<SliderSetting>
 class AspectSetting : public SettingLayout, public util::Shared<AspectSetting>
 {
    public:
-      AspectSetting(ConfigFile &_conf, const string& _key, const string& label, double _default)
-         : SettingLayout(_conf, _key, label), m_default(_default)
+      AspectSetting(ConfigFile &_conf, const string& _key, const string& label)
+         : SettingLayout(_conf, _key, label)
       {
          edit.onChange = [this]() { conf.set(key, edit.text()); };
          hlayout.append(edit, EDIT_WIDTH / 2, 0, 5);
@@ -414,15 +414,16 @@ class AspectSetting : public SettingLayout, public util::Shared<AspectSetting>
 
       void update()
       {
-         double tmp = m_default;
-         conf.get(key, tmp);
-         edit.setText(tmp);
+         double tmp;
+         if (conf.get(key, tmp))
+            edit.setText(tmp);
+	 else
+	    edit.setText("");
       }
 
    private:
       LineEdit edit;
       Button aspect_4_3, aspect_8_7, aspect_auto, aspect_16_9;
-      double m_default;
 
       void set_aspect(double aspect)
       {
@@ -1084,7 +1085,7 @@ class Video : public ToggleWindow
          widgets.append(BoolSetting::shared(_conf, "video_smooth", "Bilinear filtering:", true));
          widgets.append(BoolSetting::shared(_conf, "video_force_aspect", "Lock aspect ratio:", true));
          widgets.append(BoolSetting::shared(_conf, "video_crop_overscan", "Crop overscan:", false));
-         widgets.append(AspectSetting::shared(_conf, "video_aspect_ratio", "Aspect ratio:", 1.333));
+         widgets.append(AspectSetting::shared(_conf, "video_aspect_ratio", "Aspect ratio:"));
 
          foreach(i, widgets) { vbox.append(i->layout(), 3); }
 
