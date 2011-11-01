@@ -21,8 +21,8 @@ void pTextEdit::selectAll() {
 }
 
 void pTextEdit::copyAll() {
-  pTextEdit::selectAll();
-  SendMessage (hwnd, WM_COPY, 0, 0L);
+  selectAll();
+  SendMessage(hwnd, WM_COPY, 0, 0L);
 }
 
 void pTextEdit::setWordWrap(bool wordWrap) {

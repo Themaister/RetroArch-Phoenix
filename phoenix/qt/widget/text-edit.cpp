@@ -21,6 +21,10 @@ void pTextEdit::selectAll() {
   qtTextEdit->selectAll();
 }
 
+void pTextEdit::copyAll() {
+  // TODO:
+}
+
 string pTextEdit::text() {
   return qtTextEdit->toPlainText().toUtf8().constData();
 }

@@ -136,6 +136,9 @@ class LogWindow : public ToggleWindow
 
          box.setEditable(false);
          layout.setMargin(5);
+
+         auto minimum = layout.minimumGeometry();
+         setGeometry({128, 128, max(300, minimum.width), max(300, minimum.height)});
          append(layout);
       }
 

@@ -28,6 +28,10 @@ void pTextEdit::selectAll() {
   gtk_text_buffer_select_range(textBuffer, &start, &end);
 }
 
+void pTextEdit::copyAll() {
+  // TODO:
+}
+
 void pTextEdit::setWordWrap(bool wordWrap) {
   gtk_text_view_set_wrap_mode(GTK_TEXT_VIEW(subWidget), wordWrap ? GTK_WRAP_WORD_CHAR : GTK_WRAP_NONE);
 }
