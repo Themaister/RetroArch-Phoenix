@@ -180,6 +180,7 @@ void TextEdit::setCursorPosition(unsigned position) { state.cursorPosition = pos
 void TextEdit::setEditable(bool editable) { state.editable = editable; return p.setEditable(editable); }
 void TextEdit::setText(const string &text) { state.text = text; return p.setText(text); }
 void TextEdit::selectAll() { p.selectAll(); }
+void TextEdit::copyAll() { p.copyAll(); }
 void TextEdit::setWordWrap(bool wordWrap) { state.wordWrap = wordWrap; return p.setWordWrap(wordWrap); }
 string TextEdit::text() { return p.text(); }
 TextEdit::TextEdit() : state(*new State), base_from_member<pTextEdit&>(*new pTextEdit(*this)), Widget(base_from_member<pTextEdit&>::value), p(base_from_member<pTextEdit&>::value) { p.constructor(); }
