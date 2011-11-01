@@ -22,7 +22,8 @@ void pTextEdit::selectAll() {
 }
 
 void pTextEdit::copyAll() {
-  // TODO:
+  selectAll();
+  qtTextEdit->copy();
 }
 
 string pTextEdit::text() {

@@ -29,7 +29,8 @@ void pTextEdit::selectAll() {
 }
 
 void pTextEdit::copyAll() {
-  // TODO:
+  selectAll();
+  gtk_text_buffer_copy_clipboard(textBuffer, gtk_clipboard_get(GDK_SELECTION_CLIPBOARD));
 }
 
 void pTextEdit::setWordWrap(bool wordWrap) {
