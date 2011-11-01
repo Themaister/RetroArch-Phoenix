@@ -20,6 +20,11 @@ void pTextEdit::selectAll() {
   SetFocus(hwnd);
 }
 
+void pTextEdit::copyAll() {
+  pTextEdit::selectAll();
+  SendMessage (hwnd, WM_COPY, 0, 0L);
+}
+
 void pTextEdit::setWordWrap(bool wordWrap) {
   //ES_AUTOHSCROLL cannot be changed after widget creation.
   //As a result, we must destroy and re-create widget to change this setting.

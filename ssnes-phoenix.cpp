@@ -123,12 +123,15 @@ class LogWindow : public ToggleWindow
          layout.append(box, ~0, ~0);
 
          select_all.setText("Select all");
+         copy_all.setText("Copy all");
          clear_all.setText("Clear all");
          hbox.append(select_all, 0, 0);
+         hbox.append(copy_all, 0, 0);
          hbox.append(clear_all, 0, 0);
          layout.append(hbox);
 
          select_all.onTick = [this] { box.selectAll(); };
+         copy_all.onTick = [this] { box.copyAll(); };
          clear_all.onTick = [this] { log = ""; box.setText(log); };
 
          box.setEditable(false);
@@ -161,6 +164,7 @@ class LogWindow : public ToggleWindow
 
       HorizontalLayout hbox;
       Button select_all;
+      Button copy_all;
       Button clear_all;
 
       string log;
