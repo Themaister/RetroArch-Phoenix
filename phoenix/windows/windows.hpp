@@ -357,6 +357,7 @@ struct pTextEdit : public pWidget {
   void setEditable(bool editable);
   void setText(const string &text);
   void selectAll();
+  void copyAll();
   void setWordWrap(bool wordWrap);
   string text();
 
