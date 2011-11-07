@@ -277,6 +277,7 @@ class MainWindow : public Window
          Button button;
          Button clear;
          string filter;
+         string short_filter;
          bool save_file;
 
          ConfigFile *conf;
@@ -321,7 +322,11 @@ class MainWindow : public Window
 
                string file;
                if (save_file)
-                  file = OS::fileSave(Window::None, start_path);
+               {
+                  file = OS::fileSave(Window::None, start_path, filter);
+                  if (!strchr(file, '.'))
+                     file.append(short_filter);
+               }
                else
                   file = OS::fileLoad(Window::None, start_path, filter);
 
@@ -344,7 +349,12 @@ class MainWindow : public Window
          }
 
 
-         void setFilter(const string& _filter) { filter = _filter; }
+         void setFilter(const string& _filter, const string& _short_filter = "")
+         {
+            filter = _filter;
+            short_filter = _short_filter;
+         }
+
          void setLabel(const string& name) { label.setText(name); }
          void setPath(const string& name) { edit.setText(name.length() > 0 ? name : " "); } // Really weird bug... :v Empty strings will simply be bool and evaluate to true for some reason...
          void setConfig(ConfigFile& file, const string& key, const function<void (const string&)>& _cb = &entry::dummy) 
@@ -687,6 +697,7 @@ class MainWindow : public Window
          vbox.append(rom_type.layout(), 5);
          vbox.append(movie_play.layout(), 5);
          record.save_file = true;
+         record.setFilter("Matroska (*.mkv)", ".mkv");
          vbox.append(record.layout(), 10);
          vbox.append(config.layout(), 3);
          vbox.append(ssnes.layout(), 3);

@@ -1091,7 +1091,7 @@ class Video : public ToggleWindow
 
          shader.button.setText("Open");
          shader.button.onTick = [this]() { this->shader_setting.show(); };
-         shader.label.setText("Shader settings:");
+         shader.label.setText("Shader/filter settings:");
          shader.layout.append(shader.label, 225, 0);
          shader.layout.append(shader.button, 0, 0);
          vbox.append(shader.layout);
