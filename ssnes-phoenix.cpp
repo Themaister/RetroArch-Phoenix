@@ -733,6 +733,7 @@ class MainWindow : public Window
 
       bool check_zip(string& rom_path)
       {
+         string orig_rom_path = rom_path;
          char *ext = strrchr(rom_path(), '.');
 
          if (!ext)
@@ -754,7 +755,7 @@ class MainWindow : public Window
          string rom_extension;
 
          nall::zip z;
-         if (!z.open(rom_path))
+         if (!z.open(orig_rom_path))
          {
             MessageWindow::critical(*this, "Failed opening ZIP!");
             return false;
@@ -781,8 +782,26 @@ class MainWindow : public Window
                      continue;
 
                   bool has_extracted;
-                  has_extracted = nall::file::write({rom_dir, rom_basename, rom_extension},
-                           data, size);
+
+                  string extract_dest = {rom_dir, rom_basename, rom_extension};
+
+                  bool already_extracted = tempfiles.find(extract_dest);
+
+                  if (nall::file::exists(extract_dest) && !already_extracted)
+                  {
+                     auto response = MessageWindow::information(*this,
+                           {"Attempting to extract ROM to ",
+                           extract_dest, ", but it already exists. Do you want to overwrite it?"},
+                           MessageWindow::Buttons::YesNo);
+                     if (response == MessageWindow::Response::No)
+                     {
+                        MessageWindow::information(*this,
+                              "ROM loading aborted!");
+                        return false;
+                     }
+                  }
+
+                  has_extracted = nall::file::write(extract_dest, data, size);
 
                   delete [] data;
                   if (has_extracted)
