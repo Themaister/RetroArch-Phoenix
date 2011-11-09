@@ -770,54 +770,69 @@ class MainWindow : public Window
 
          foreach (file, z.file)
          {
+            print("Checking file: ", file.name, "\n");
             foreach (known_ext, known_exts)
             {
-               if (file.name.endswith(known_ext))
-               {
-                  rom_extension = known_ext;
+               if (!file.name.endswith(known_ext))
+                  continue;
 
-                  uint8_t *data;
-                  unsigned size;
-                  if (!z.extract(file, data, size))
+               rom_extension = known_ext;
+
+               uint8_t *data;
+               unsigned size;
+               if (!z.extract(file, data, size))
+               {
+                  MessageWindow::critical(*this,
+                        "Failed to load ROM from archive!");
+                  return false;
+               }
+
+               if (!data || !size)
+               {
+                  MessageWindow::critical(*this,
+                        "Received invalid result from nall::zip. This should not happen, but it did anyways ... ;)");
+                  return false;
+               }
+
+               bool has_extracted;
+
+               rom_path = {rom_dir, rom_basename, rom_extension};
+
+               bool already_extracted = tempfiles.find(rom_path);
+
+               if (nall::file::exists(rom_path) && !already_extracted)
+               {
+                  auto response = MessageWindow::information(*this,
+                        {"Attempting to extract ROM to ",
+                        rom_path, ", but it already exists. Do you want to overwrite it?"},
+                        MessageWindow::Buttons::YesNo);
+
+                  if (response == MessageWindow::Response::No)
                   {
-                     MessageWindow::critical(*this,
-                           "Failed to load ROM from archive!");
+                     MessageWindow::information(*this,
+                           "ROM loading aborted!");
+                     delete [] data;
                      return false;
                   }
+               }
 
-                  bool has_extracted;
+               has_extracted = nall::file::write(rom_path, data, size);
 
-                  string extract_dest = {rom_dir, rom_basename, rom_extension};
-
-                  bool already_extracted = tempfiles.find(extract_dest);
-
-                  if (nall::file::exists(extract_dest) && !already_extracted)
-                  {
-                     auto response = MessageWindow::information(*this,
-                           {"Attempting to extract ROM to ",
-                           extract_dest, ", but it already exists. Do you want to overwrite it?"},
-                           MessageWindow::Buttons::YesNo);
-                     if (response == MessageWindow::Response::No)
-                     {
-                        MessageWindow::information(*this,
-                              "ROM loading aborted!");
-                        delete [] data;
-                        return false;
-                     }
-                  }
-
-                  has_extracted = nall::file::write(extract_dest, data, size);
-
-                  delete [] data;
-                  if (has_extracted)
-                     goto extracted;
+               delete [] data;
+               if (has_extracted)
+                  goto extracted;
+               else
+               {
+                  MessageWindow::critical(*this,
+                        {"Failed extracting ROM to: ", rom_path, "!"});
+                  return false;
                }
             }
          }
          MessageWindow::critical(*this, "Failed to find valid rom in archive!");
          return false;
+
 extracted:
-         rom_path = {rom_dir, rom_basename, rom_extension};
          tempfiles.append(rom_path);
          return true;
       }
