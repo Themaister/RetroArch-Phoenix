@@ -1,5 +1,6 @@
 #include <phoenix.hpp>
 #include <cstdlib>
+#include <nall/zip.hpp>
 
 #ifndef _WIN32
 #include <unistd.h>
@@ -200,6 +201,18 @@ class MainWindow : public Window
          setVisible();
       }
 
+      ~MainWindow()
+      {
+         foreach (tempfile, tempfiles)
+         {
+#ifdef _WIN32
+            DeleteFile(tempfile);
+#else
+            ::unlink(tempfile);
+#endif
+         }
+      }
+
    private:
       VerticalLayout vbox;
       Menu file_menu, settings_menu, help_menu;
@@ -221,6 +234,8 @@ class MainWindow : public Window
 #endif
 
       string m_cli_path;
+
+      lstring tempfiles;
 
       struct netplay
       {
@@ -348,7 +363,6 @@ class MainWindow : public Window
             edit.setEditable(false);
          }
 
-
          void setFilter(const string& _filter, const string& _short_filter = "")
          {
             filter = _filter;
@@ -431,7 +445,6 @@ class MainWindow : public Window
 
       struct rom_type_box
       {
-         
          rom_type_box()
          {
             box.append("Normal ROM");
@@ -440,9 +453,13 @@ class MainWindow : public Window
             box.append("BSX");
             box.append("BSX slotted");
 
+            extract_tick.setText("Extract ZIPs");
+            extract_tick.setChecked();
+
             label.setText("ROM type:");
             hlayout.append(label, 150, 0);
-            hlayout.append(box, 200, 0);
+            hlayout.append(box, 200, 0, 30);
+            hlayout.append(extract_tick, 0, 0);
          }
 
          enum rom_type type()
@@ -451,28 +468,33 @@ class MainWindow : public Window
             return types[box.selection()];
          }
 
+         bool extract() { return extract_tick.checked(); }
+
          HorizontalLayout& layout() { return hlayout; }
 
          private:
             ComboBox box;
             Label label;
             HorizontalLayout hlayout;
+            CheckBox extract_tick;
       } rom_type;
 
-
 #ifdef _WIN32
+
+      // Windows is completely batshit retarded and the relative path might "change" by going into the file manager, so we have to manually figure out the full path. :)
+      static string basedir()
+      {
+         char dir_path[MAX_PATH];
+         GetModuleFileName(GetModuleHandle(0), dir_path, sizeof(dir_path));
+         char *split = strrchr(dir_path, '\\');
+         if (!split) split = strrchr(dir_path, '/');
+         if (split) split[1] = '\0';
+         return dir_path;
+      }
+
       static string gui_config_path()
       {
-         // Insane hack. Goddamn, Win32 file handling sucks ... :(
-         // After we have changed directoy in the file browser, this changes ...
-         // On startup this will be correct though ...
-         static bool dir_set = false;
-         static char dir[512];
-         if (!dir_set)
-         {
-            GetCurrentDirectoryA(sizeof(dir), dir);
-            dir_set = true;
-         }
+         string dir = basedir();
 
          // If we have ssnes-phoenix.cfg in same directory, use that ...
          WIN32_FIND_DATAA data;
@@ -498,13 +520,7 @@ class MainWindow : public Window
             return tmp;
          else
          {
-            static bool dir_set = false;
-            static char dir[512];
-            if (!dir_set)
-            {
-               GetCurrentDirectoryA(sizeof(dir), dir);
-               dir_set = true;
-            }
+            string dir = basedir();
 
             // If we have ssnes.cfg in same directory, use that ...
             WIN32_FIND_DATAA data;
@@ -715,9 +731,77 @@ class MainWindow : public Window
          MessageWindow::warning(Window::None, err);
       }
 
+      bool check_zip(string& rom_path)
+      {
+         char *ext = strrchr(rom_path(), '.');
+
+         if (!ext)
+            return true;
+         if (strcasecmp(ext, ".zip") != 0)
+            return true;
+         if (!rom_type.extract())
+            return true;
+
+         *ext = '\0';
+
+         ext = strrchr(rom_path(), '/');
+         if (!ext)
+            ext = strrchr(rom_path(), '\\');
+
+         *ext = '\0';
+         string rom_dir = {rom_path, "/"};
+         string rom_basename = ext + 1;
+         string rom_extension;
+
+         nall::zip z;
+         if (!z.open(rom_path))
+         {
+            MessageWindow::critical(*this, "Failed opening ZIP!");
+            return false;
+         }
+
+         static const char *known_exts[] = {
+            ".smc", ".sfc",
+            ".nes",
+            ".gba", ".gb", ".gbc",
+            ".bin", ".smd", ".gen",
+         };
+
+         foreach (file, z.file)
+         {
+            foreach (known_ext, known_exts)
+            {
+               if (file.name.endswith(known_ext))
+               {
+                  rom_extension = known_ext;
+
+                  uint8_t *data;
+                  unsigned size;
+                  if (!z.extract(file, data, size))
+                     continue;
+
+                  bool has_extracted;
+                  has_extracted = nall::file::write({rom_dir, rom_basename, rom_extension},
+                           data, size);
+
+                  delete [] data;
+                  if (has_extracted)
+                     goto extracted;
+               }
+            }
+         }
+         MessageWindow::critical(*this, "Failed to find valid rom in archive!");
+         return false;
+extracted:
+         rom_path = {rom_dir, rom_basename, rom_extension};
+         tempfiles.append(rom_path);
+         return true;
+      }
+
       bool append_rom(string& rom_path, linear_vector<const char*>& vec_cmd)
       {
-         // Need static since we're referencing a const char*. If destructor hits we're screwed.
+         // Need static since we're referencing a const char*.
+         // If destructor hits we're screwed.
          static string rom_path_slot1;
          static string rom_path_slot2;
 
@@ -733,7 +817,8 @@ class MainWindow : public Window
                   show_error("No ROM selected :(");
                   return false;
                }
-               rom_path = rom.getPath();
+               if (!check_zip(rom_path))
+                  return false;
                vec_cmd.append(rom_path);
                return true;
 
