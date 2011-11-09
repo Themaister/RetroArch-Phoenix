@@ -706,7 +706,7 @@ class MainWindow : public Window
          record.setLabel("FFmpeg movie output:");
          config.setLabel("SSNES config file:");
          ssnes.setLabel("SSNES path:");
-         libsnes.setLabel("libsnes path:");
+         libsnes.setLabel("Emulator core path:");
 
          start_btn.setText("Start SSNES");
          vbox.append(rom.layout(), 3);
