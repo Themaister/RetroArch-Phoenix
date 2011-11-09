@@ -1084,7 +1084,7 @@ class Video : public ToggleWindow
          widgets.append(BoolSetting::shared(_conf, "video_disable_composition", "Disable composition (Win Vista/7):", false));
          widgets.append(BoolSetting::shared(_conf, "video_smooth", "Bilinear filtering:", true));
          widgets.append(BoolSetting::shared(_conf, "video_force_aspect", "Lock aspect ratio:", true));
-         widgets.append(BoolSetting::shared(_conf, "video_crop_overscan", "Crop overscan:", false));
+         widgets.append(BoolSetting::shared(_conf, "video_crop_overscan", "Crop overscan:", true));
          widgets.append(AspectSetting::shared(_conf, "video_aspect_ratio", "Aspect ratio:"));
 
          foreach(i, widgets) { vbox.append(i->layout(), 3); }
