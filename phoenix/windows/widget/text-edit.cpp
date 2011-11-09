@@ -52,7 +52,7 @@ void pTextEdit::setParent(Window &parent) {
   if(hwnd) DestroyWindow(hwnd);
   hwnd = CreateWindowEx(
     WS_EX_CLIENTEDGE, L"EDIT", L"",
-    WS_CHILD | WS_VISIBLE | ES_AUTOVSCROLL | ES_NOHIDESEL | ES_MULTILINE | ES_WANTRETURN | (textEdit.state.wordWrap == false ? ES_AUTOHSCROLL : 0),
+    WS_CHILD | WS_VISIBLE | WS_HSCROLL | WS_VSCROLL | ES_AUTOVSCROLL | ES_NOHIDESEL | ES_MULTILINE | ES_WANTRETURN | (textEdit.state.wordWrap == false ? ES_AUTOHSCROLL : 0),
     0, 0, 0, 0, parent.p.hwnd, (HMENU)id, GetModuleHandle(0), 0
   );
   SetWindowLongPtr(hwnd, GWLP_USERDATA, (LONG_PTR)&textEdit);
