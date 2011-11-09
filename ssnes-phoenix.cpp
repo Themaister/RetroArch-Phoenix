@@ -779,7 +779,11 @@ class MainWindow : public Window
                   uint8_t *data;
                   unsigned size;
                   if (!z.extract(file, data, size))
-                     continue;
+                  {
+                     MessageWindow::critical(*this,
+                           "Failed to load ROM from archive!");
+                     return false;
+                  }
 
                   bool has_extracted;
 
@@ -797,6 +801,7 @@ class MainWindow : public Window
                      {
                         MessageWindow::information(*this,
                               "ROM loading aborted!");
+                        delete [] data;
                         return false;
                      }
                   }
