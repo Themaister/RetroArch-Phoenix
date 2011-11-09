@@ -339,7 +339,7 @@ class MainWindow : public Window
                if (save_file)
                {
                   file = OS::fileSave(Window::None, start_path, filter);
-                  if (!strchr(file, '.'))
+                  if (file.length() > 0 && !strchr(file, '.'))
                      file.append(short_filter);
                }
                else
