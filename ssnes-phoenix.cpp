@@ -206,7 +206,7 @@ class MainWindow : public Window
          foreach (tempfile, tempfiles)
          {
 #ifdef _WIN32
-            DeleteFile(tempfile);
+            DeleteFileA(tempfile);
 #else
             ::unlink(tempfile);
 #endif
@@ -485,7 +485,7 @@ class MainWindow : public Window
       static string basedir()
       {
          char dir_path[MAX_PATH];
-         GetModuleFileName(GetModuleHandle(0), dir_path, sizeof(dir_path));
+         GetModuleFileNameA(GetModuleHandle(0), dir_path, sizeof(dir_path));
          char *split = strrchr(dir_path, '\\');
          if (!split) split = strrchr(dir_path, '/');
          if (split) split[1] = '\0';
