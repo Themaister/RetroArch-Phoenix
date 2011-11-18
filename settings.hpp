@@ -1079,6 +1079,7 @@ class Video : public ToggleWindow
          widgets.append(DoubleSetting::shared(_conf, "video_yscale", "Windowed Y scale:", 3.0));
          widgets.append(IntSetting::shared(_conf, "video_fullscreen_x", "Fullscreen X resolution:", 0));
          widgets.append(IntSetting::shared(_conf, "video_fullscreen_y", "Fullscreen Y resolution:", 0));
+         widgets.append(DoubleSetting::shared(_conf, "video_refresh_rate", "Monitor refresh rate (Hz):", 59.95));
          widgets.append(BoolSetting::shared(_conf, "video_vsync", "VSync:", true));
          widgets.append(BoolSetting::shared(_conf, "video_fullscreen", "Start in fullscreen:", false));
          widgets.append(BoolSetting::shared(_conf, "video_force_16bit", "Force 16-bit color:", false));
@@ -1256,8 +1257,6 @@ class Audio : public ToggleWindow
          widgets.append(PathSetting::shared(_conf, "audio_external_driver", "External audio driver:", string(""), "Dynamic library (" DYNAMIC_EXTENSION ")"));
          widgets.append(PathSetting::shared(_conf, "audio_dsp_plugin", "Audio DSP plugin:", string(""), "Dynamic library (" DYNAMIC_EXTENSION ")"));
          widgets.append(IntSetting::shared(_conf, "audio_out_rate", "Audio sample rate:", 48000));
-         widgets.append(DoubleSetting::shared(_conf, "audio_in_rate", "Audio input rate:", 31980.0));
-         widgets.append(DoubleSetting::shared(_conf, "audio_rate_step", "Audio rate step:", 0.25));
          widgets.append(StringSetting::shared(_conf, "audio_device", "Audio device:", ""));
          widgets.append(BoolSetting::shared(_conf, "audio_sync", "Audio sync:", true));
          widgets.append(IntSetting::shared(_conf, "audio_latency", "Audio latency (ms):", 64));
