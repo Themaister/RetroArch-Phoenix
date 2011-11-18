@@ -413,6 +413,29 @@ class MainWindow : public Window
          CheckBox enable_tick;
       } movie_play;
 
+      struct bsv_record_entry : enable_entry
+      {
+         bsv_record_entry(bool enable = true) : enable_entry(false)
+         {
+            if (enable)
+            {
+               enable_tick.setText("Enable");
+               enable_load.setText("Load SRAM");
+               enable_save.setText("Save SRAM");
+               hlayout.append(label, 150, 0);
+               hlayout.append(enable_tick, 0, 0);
+               hlayout.append(enable_load, 0, 0);
+               hlayout.append(enable_save, 0, 0);
+            }
+         }
+
+         bool load_sram() { return enable_load.checked(); }
+         bool save_sram() { return enable_save.checked(); }
+
+         CheckBox enable_load;
+         CheckBox enable_save;
+      } movie_record;
+
       struct record_entry : enable_entry
       {
          record_entry() : enable_entry(false)
@@ -702,7 +725,8 @@ class MainWindow : public Window
 #endif
 
          rom.setLabel("Normal ROM path:");
-         movie_play.setLabel("BSV movie:");
+         movie_play.setLabel("BSV movie playback:");
+         movie_record.setLabel("BSV movie record:");
          record.setLabel("FFmpeg movie output:");
          config.setLabel("SSNES config file:");
          ssnes.setLabel("SSNES path:");
@@ -712,6 +736,7 @@ class MainWindow : public Window
          vbox.append(rom.layout(), 3);
          vbox.append(rom_type.layout(), 5);
          vbox.append(movie_play.layout(), 5);
+         vbox.append(movie_record.layout(), 5);
          record.save_file = true;
          record.setFilter("Matroska (*.mkv)", ".mkv");
          vbox.append(record.layout(), 10);
@@ -979,6 +1004,20 @@ extracted:
             vec_cmd.append("-P");
             movie_path = movie_play.getPath();
             vec_cmd.append(movie_path);
+         }
+
+         if (movie_record.is_enabled())
+         {
+            vec_cmd.append("-R");
+            unsigned val = ((unsigned)movie_record.load_sram() << 1) | movie_record.save_sram();
+            static const char *lut[] = {
+               "noload-nosave",
+               "noload-save",
+               "load-nosave",
+               "load-save",
+            };
+
+            vec_cmd.append(lut[val]);
          }
 
          if (record.is_enabled())
