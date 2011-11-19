@@ -936,7 +936,7 @@ class General : public ToggleWindow
 
          widgets.append(PathSetting::shared(_conf, "cheat_database_path", "XML cheat database:", string(""), "XML files (*.xml)"));
          widgets.append(PathSetting::shared(_conf, "cheat_settings_path", "XML cheat settings:", string(""), "Config files (*.cfg)"));
-         savefile_dir = DirSetting::shared(_pconf, "savefile_dir", "Savefile directory:", string(""));
+         savefile_dir = DirSetting::shared(_pconf, "savefile_dir", "Savefile/movie directory:", string(""));
          savestate_dir = DirSetting::shared(_pconf, "savestate_dir", "Savestate directory:", string(""));
          widgets.append(DirSetting::shared(_conf, "screenshot_directory", "Screenshot directory:", string("")));
          async_fork = BoolSetting::shared(_pconf, "async_fork", "Keep UI visible:", false);

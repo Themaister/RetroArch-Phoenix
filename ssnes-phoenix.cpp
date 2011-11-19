@@ -422,10 +422,12 @@ class MainWindow : public Window
                enable_tick.setText("Enable");
                enable_load.setText("Load SRAM");
                enable_save.setText("Save SRAM");
+               path_hint.setText("Path is inferred from state slot and save file directory.");
                hlayout.append(label, 150, 0);
                hlayout.append(enable_tick, 0, 0);
                hlayout.append(enable_load, 0, 0);
                hlayout.append(enable_save, 0, 0);
+               hlayout.append(path_hint, 0, 0);
             }
          }
 
@@ -434,6 +436,7 @@ class MainWindow : public Window
 
          CheckBox enable_load;
          CheckBox enable_save;
+         Label path_hint;
       } movie_record;
 
       struct record_entry : enable_entry
