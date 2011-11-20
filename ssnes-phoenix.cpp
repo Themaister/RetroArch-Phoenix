@@ -414,10 +414,10 @@ class MainWindow : public Window
 
                opts_label.setText("BSV options:");
                hlayout_opt.append(opts_label, 150, 0);
-               hlayout_opt.append(disabled, 0, 0);
-               hlayout_opt.append(enable_playback, 0, 0);
-               hlayout_opt.append(enable_record, 0, 0, 30);
-               hlayout_opt.append(enable_load, 0, 0);
+               hlayout_opt.append(disabled, 0, 0, 8);
+               hlayout_opt.append(enable_playback, 0, 0, 8);
+               hlayout_opt.append(enable_record, 0, 0, 38);
+               hlayout_opt.append(enable_load, 0, 0, 8);
                hlayout_opt.append(enable_save, 0, 0);
 
                disabled.onTick        = [this] { this->save_file = false; };
