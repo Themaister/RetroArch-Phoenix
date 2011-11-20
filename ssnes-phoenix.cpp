@@ -407,26 +407,22 @@ class MainWindow : public Window
                enable_load.setText("Load SRAM");
                enable_save.setText("Save SRAM");
 
-               hbox[0].append(label, 150, 0);
-               hbox[0].append(edit, ~0, 0);
-               hbox[0].append(clear, 0, 0);
-               hbox[0].append(button, 0, 0);
+               hlayout.append(label, 150, 0);
+               hlayout.append(edit, ~0, 0);
+               hlayout.append(clear, 0, 0);
+               hlayout.append(button, 0, 0);
 
                opts_label.setText("BSV options:");
-               hbox[1].append(opts_label, 150, 0);
-               hbox[1].append(disabled, 0, 0);
-               hbox[1].append(enable_playback, 0, 0);
-               hbox[1].append(enable_record, 0, 0, 30);
-               hbox[1].append(enable_load, 0, 0);
-               hbox[1].append(enable_save, 0, 0);
+               hlayout_opt.append(opts_label, 150, 0);
+               hlayout_opt.append(disabled, 0, 0);
+               hlayout_opt.append(enable_playback, 0, 0);
+               hlayout_opt.append(enable_record, 0, 0, 30);
+               hlayout_opt.append(enable_load, 0, 0);
+               hlayout_opt.append(enable_save, 0, 0);
 
                disabled.onTick        = [this] { this->save_file = false; };
                enable_playback.onTick = [this] { this->save_file = false; };
                enable_record.onTick   = [this] { this->save_file = true; };
-
-               vbox.append(hbox[0]);
-               vbox.append(hbox[1]);
-               hlayout.append(vbox);
             }
          }
 
@@ -435,8 +431,8 @@ class MainWindow : public Window
          bool load_sram() { return enable_load.checked(); }
          bool save_sram() { return enable_save.checked(); }
 
-         VerticalLayout vbox;
-         HorizontalLayout hbox[2];
+         HorizontalLayout hlayout_opt;
+         HorizontalLayout& layout_opt() { return hlayout_opt; }
 
          RadioBox disabled;
          RadioBox enable_playback;
@@ -748,7 +744,8 @@ class MainWindow : public Window
          start_btn.setText("Start SSNES");
          vbox.append(rom.layout(), 3);
          vbox.append(rom_type.layout(), 5);
-         vbox.append(bsv_movie.layout(), 5);
+         vbox.append(bsv_movie.layout(), 3);
+         vbox.append(bsv_movie.layout_opt(), 8);
          record.save_file = true;
          record.setFilter("Matroska (*.mkv)", ".mkv");
          vbox.append(record.layout(), 10);
