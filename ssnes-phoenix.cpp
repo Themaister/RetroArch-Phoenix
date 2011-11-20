@@ -393,55 +393,63 @@ class MainWindow : public Window
             }
       } rom, config, ssnes, libsnes;
 
-      struct enable_entry : entry
+      struct bsv_entry : entry
       {
-         enable_entry(bool enable = true) : entry(false)
+         bsv_entry(bool enable = true) : entry(false)
          {
             if (enable)
             {
-               enable_tick.setText("Enable");
-               hlayout.append(label, 150, 0);
-               hlayout.append(edit, ~0, 0, 5);
-               hlayout.append(enable_tick, 80, 0);
-               hlayout.append(clear, 0, 0);
-               hlayout.append(button, 0, 0);
-            }
-         }
+               disabled.setText("Disabled");
+               enable_playback.setText("Playback");
+               enable_record.setText("Record");
+               RadioBox::group(disabled, enable_playback, enable_record);
 
-         bool is_enabled() { return enable_tick.checked(); }
-
-         CheckBox enable_tick;
-      } movie_play;
-
-      struct bsv_record_entry : enable_entry
-      {
-         bsv_record_entry(bool enable = true) : enable_entry(false)
-         {
-            if (enable)
-            {
-               enable_tick.setText("Enable");
                enable_load.setText("Load SRAM");
                enable_save.setText("Save SRAM");
-               path_hint.setText("Path is inferred.");
-               hlayout.append(label, 150, 0);
-               hlayout.append(enable_tick, 0, 0);
-               hlayout.append(enable_load, 0, 0);
-               hlayout.append(enable_save, 0, 0);
-               hlayout.append(path_hint, 0, 0);
+
+               hbox[0].append(label, 150, 0);
+               hbox[0].append(edit, ~0, 0);
+               hbox[0].append(clear, 0, 0);
+               hbox[0].append(button, 0, 0);
+
+               opts_label.setText("BSV options:");
+               hbox[1].append(opts_label, 150, 0);
+               hbox[1].append(disabled, 0, 0);
+               hbox[1].append(enable_playback, 0, 0);
+               hbox[1].append(enable_record, 0, 0, 30);
+               hbox[1].append(enable_load, 0, 0);
+               hbox[1].append(enable_save, 0, 0);
+
+               disabled.onTick        = [this] { this->save_file = false; };
+               enable_playback.onTick = [this] { this->save_file = false; };
+               enable_record.onTick   = [this] { this->save_file = true; };
+
+               vbox.append(hbox[0]);
+               vbox.append(hbox[1]);
+               hlayout.append(vbox);
             }
          }
 
+         bool is_playback() { return enable_playback.checked(); }
+         bool is_record() { return enable_record.checked(); }
          bool load_sram() { return enable_load.checked(); }
          bool save_sram() { return enable_save.checked(); }
 
+         VerticalLayout vbox;
+         HorizontalLayout hbox[2];
+
+         RadioBox disabled;
+         RadioBox enable_playback;
+         RadioBox enable_record;
+
          CheckBox enable_load;
          CheckBox enable_save;
-         Label path_hint;
-      } movie_record;
+         Label opts_label;
+      } bsv_movie;
 
-      struct record_entry : enable_entry
+      struct record_entry : entry
       {
-         record_entry() : enable_entry(false)
+         record_entry() : entry(false)
          {
             enable_tick.setText("Enable");
             hlayout.append(label, 150, 0);
@@ -455,6 +463,9 @@ class MainWindow : public Window
             hlayout.append(clear, 0, 0);
             hlayout.append(button, 0, 0);
          }
+
+         bool is_enabled() { return enable_tick.checked(); }
+         CheckBox enable_tick;
 
          Label dim_label;
          LineEdit dim_edit;
@@ -672,8 +683,8 @@ class MainWindow : public Window
          ssnes.setConfig(configs.gui, "ssnes_path");
          if (configs.gui.get("last_rom", tmp)) rom.setPath(tmp);
          rom.setConfig(configs.gui, "last_rom");
-         if (configs.gui.get("last_movie", tmp)) movie_play.setPath(tmp);
-         movie_play.setConfig(configs.gui, "last_movie");
+         if (configs.gui.get("last_movie", tmp)) bsv_movie.setPath(tmp);
+         bsv_movie.setConfig(configs.gui, "last_movie");
          if (configs.gui.get("record_path", tmp)) record.setPath(tmp);
          record.setConfig(configs.gui, "record_path");
 
@@ -718,7 +729,7 @@ class MainWindow : public Window
       void init_main_frame()
       {
          rom.setFilter("Game ROM (*)");
-         movie_play.setFilter("BSNES Movie (*.bsv)");
+         bsv_movie.setFilter("BSNES Movie (*.bsv)", ".bsv");
          config.setFilter("Config file (*.cfg)");
          libsnes.setFilter("Dynamic library (" DYNAMIC_EXTENSION ")");
 #ifdef _WIN32
@@ -728,8 +739,7 @@ class MainWindow : public Window
 #endif
 
          rom.setLabel("Normal ROM path:");
-         movie_play.setLabel("BSV movie playback:");
-         movie_record.setLabel("BSV movie record:");
+         bsv_movie.setLabel("BSV movie:");
          record.setLabel("FFmpeg movie output:");
          config.setLabel("SSNES config file:");
          ssnes.setLabel("SSNES path:");
@@ -738,8 +748,7 @@ class MainWindow : public Window
          start_btn.setText("Start SSNES");
          vbox.append(rom.layout(), 3);
          vbox.append(rom_type.layout(), 5);
-         vbox.append(movie_play.layout(), 5);
-         vbox.append(movie_record.layout(), 5);
+         vbox.append(bsv_movie.layout(), 5);
          record.save_file = true;
          record.setFilter("Matroska (*.mkv)", ".mkv");
          vbox.append(record.layout(), 10);
@@ -1002,17 +1011,22 @@ extracted:
             vec_cmd.append(frames);
          }
 
-         if (movie_play.is_enabled())
+         if (bsv_movie.is_playback())
          {
             vec_cmd.append("-P");
-            movie_path = movie_play.getPath();
+            movie_path = bsv_movie.getPath();
+            vec_cmd.append(movie_path);
+         }
+         else if (bsv_movie.is_record())
+         {
+            vec_cmd.append("-R");
+            movie_path = bsv_movie.getPath();
             vec_cmd.append(movie_path);
          }
 
-         if (movie_record.is_enabled())
+         if (bsv_movie.is_playback() || bsv_movie.is_record())
          {
-            vec_cmd.append("-R");
-            unsigned val = ((unsigned)movie_record.load_sram() << 1) | movie_record.save_sram();
+            unsigned val = ((unsigned)bsv_movie.load_sram() << 1) | bsv_movie.save_sram();
             static const char *lut[] = {
                "noload-nosave",
                "noload-save",
@@ -1020,6 +1034,7 @@ extracted:
                "load-save",
             };
 
+            vec_cmd.append("-M");
             vec_cmd.append(lut[val]);
          }
 
