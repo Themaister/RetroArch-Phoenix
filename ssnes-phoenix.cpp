@@ -420,9 +420,11 @@ class MainWindow : public Window
                hlayout_opt.append(enable_load, 0, 0, 8);
                hlayout_opt.append(enable_save, 0, 0);
 
-               disabled.onTick        = [this] { this->save_file = false; };
+               save_file = true;
+               disabled.onTick        = [this] { this->save_file = true; };
                enable_playback.onTick = [this] { this->save_file = false; };
                enable_record.onTick   = [this] { this->save_file = true; };
+               disabled.setChecked();
             }
          }
 
