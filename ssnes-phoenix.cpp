@@ -346,7 +346,16 @@ class MainWindow : public Window
                   file = OS::fileLoad(Window::None, start_path, filter);
 
                if (file.length() > 0)
+               {
                   edit.setText(file);
+
+                  if (short_filter.length() > 0 && !file.endswith(short_filter))
+                  {
+                     MessageWindow::warning(Window::None,
+                           {"Filename extension does not match with the expected extension: \"",
+                           short_filter, "\""});
+                  }
+               }
 
                if (conf)
                   conf->set(config_key, this->getPath());
