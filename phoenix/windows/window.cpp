@@ -172,3 +172,7 @@ void pWindow::updateMenu() {
 
   SetMenu(hwnd, window.state.menuVisible ? hmenu : 0);
 }
+
+void pWindow::setIcon(const nall::string &) {
+}
+

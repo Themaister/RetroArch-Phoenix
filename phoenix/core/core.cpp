@@ -66,6 +66,7 @@ void Window::setStatusVisible(bool visible) { state.statusVisible = visible; ret
 void Window::setTitle(const string &text) { state.title = text; return p.setTitle(text); }
 void Window::setVisible(bool visible) { state.visible = visible; return p.setVisible(visible); }
 void Window::setWidgetFont(Font &font) { state.widgetFont = &font; return p.setWidgetFont(font); }
+void Window::setIcon(const nall::string &path) { p.setIcon(path); }
 Window::Window() : state(*new State), p(*new pWindow(*this)) { p.constructor(); }
 
 void Action::setEnabled(bool enabled) { state.enabled = enabled; return p.setEnabled(enabled); }

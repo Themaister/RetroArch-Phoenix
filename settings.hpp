@@ -25,6 +25,7 @@ struct ToggleWindow : public Window
    ToggleWindow(const string& title) 
    { 
       setTitle(title); 
+      setIcon("/usr/share/icons/ssnes-phoenix.png");
       onClose = [this]() { this->hide(); if (cb) cb(); }; 
    }
    void show() { setVisible(); }

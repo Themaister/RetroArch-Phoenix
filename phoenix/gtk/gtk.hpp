@@ -104,6 +104,7 @@ struct pWindow : public pObject {
   void setTitle(const string &text);
   void setVisible(bool visible);
   void setWidgetFont(Font &font);
+  void setIcon(const nall::string &path);
 
   pWindow(Window &window) : window(window) {}
   void constructor();

@@ -152,6 +152,7 @@ struct Window : Object {
   void setTitle(const nall::string &text);
   void setVisible(bool visible = true);
   void setWidgetFont(Font &font);
+  void setIcon(const nall::string &path);
 
   Window();
   struct State;

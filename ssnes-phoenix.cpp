@@ -181,6 +181,7 @@ class MainWindow : public Window
       MainWindow() : input(configs.cli), general(configs.gui, configs.cli), video(configs.cli), audio(configs.cli), ext_rom(configs.gui)
       {
          setTitle("SSNES || Phoenix");
+         setIcon("/usr/share/icons/ssnes-phoenix.png");
 
          init_menu();
          onClose = []() { OS::quit(); };

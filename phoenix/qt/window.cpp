@@ -226,3 +226,10 @@ QSize pWindow::QtWindow::sizeHint() const {
   if(self.window.state.statusVisible) height += self.qtStatus->height();
   return QSize(width, height);
 }
+
+void pWindow::setIcon(const nall::string &path) {
+#ifndef __APPLE__
+  qtWindow->setWindowIcon(QIcon(QString::fromUtf8(path)));
+#endif
+}
+

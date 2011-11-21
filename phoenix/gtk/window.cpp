@@ -256,3 +256,8 @@ unsigned pWindow::menuHeight() {
 unsigned pWindow::statusHeight() {
   return window.state.statusVisible ? settings.statusGeometryHeight : 0;
 }
+
+void pWindow::setIcon(const nall::string &path) {
+  gtk_window_set_icon_from_file(GTK_WINDOW(widget), path, 0);
+}
+
