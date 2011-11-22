@@ -81,7 +81,7 @@ class PathSetting : public SettingLayout, public util::Shared<PathSetting>
    public:
       PathSetting(ConfigFile &_conf, const string& _key, const string& label, const string& _default, const string& _filter) : SettingLayout(_conf, _key, label), m_default(_default), filter(_filter)
       {
-         button.setText("Open ...");
+         button.setText("Browse ...");
          clear.setText("Clear");
          edit.onChange = [this]() { conf.set(key, edit.text()); };
          hlayout.append(edit, EDIT_WIDTH, 0); 
@@ -139,7 +139,7 @@ class DirSetting : public SettingLayout, public util::Shared<DirSetting>
    public:
       DirSetting(ConfigFile &_conf, const string& _key, const string& label, const string& _default) : SettingLayout(_conf, _key, label), m_default(_default)
       {
-         button.setText("Open ...");
+         button.setText("Browse ...");
          clear.setText("Clear");
          edit.onChange = [this]() { conf.set(key, edit.text()); };
          hlayout.append(edit, EDIT_WIDTH, 0); 

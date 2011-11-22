@@ -303,7 +303,7 @@ class MainWindow : public Window
 
          entry(bool preapply = true) : conf(NULL), cb(&entry::dummy)
          {
-            button.setText("Open ...");
+            button.setText("Browse ...");
             clear.setText("Clear");
             save_file = false;
 
