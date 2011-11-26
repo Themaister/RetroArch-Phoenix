@@ -1241,6 +1241,7 @@ namespace Internal
       { "input_cheat_toggle", "Toggle cheat ON/OFF", "", "u" },
       { "input_screenshot", "Take screenshot", "", "print_screen" },
       { "input_dsp_config", "Open DSP plugin config", "", "c" },
+      { "input_audio_mute", "Mute/unmute audio", "", "f9" },
    };
 
    static const linear_vector<linear_vector<input_selection>> binds = { 
