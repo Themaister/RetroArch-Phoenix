@@ -21,14 +21,6 @@ Updater::Updater()
    timer.setInterval(50);
    timer.setEnabled(false);
 
-#if 0
-   server_label.setText("URL:");
-   server_hbox.append(server_label, 100, 0, 10);
-   server_url.setText(base_url);"http://themaister.net/ssnes-dl/latest");
-   server_hbox.append(server_url, 300, 0);
-
-   vbox.append(server_hbox);
-#endif
    version_download.setText("Check version");
    dl_layout.append(version_download, 0, 0);
    download.setText("Download SSNES");
@@ -62,7 +54,11 @@ Updater::Updater()
    opts_layout.append(opts_redist, 0, 0);
    vbox.append(opts_layout, 3);
 
+#if _WIN64
+   opts_64bit.setChecked();
+#else
    opts_32bit.setChecked();
+#endif
 
    update_ssnes_version();
    opts_slim.setChecked();
