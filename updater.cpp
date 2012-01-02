@@ -54,14 +54,14 @@ Updater::Updater()
    opts_layout.append(opts_redist, 0, 0);
    vbox.append(opts_layout, 3);
 
-#if _WIN64
+#ifdef _WIN64
    opts_64bit.setChecked();
 #else
    opts_32bit.setChecked();
 #endif
 
    update_ssnes_version();
-   opts_slim.setChecked();
+   opts_full.setChecked();
 
    latest_label.setText("Latest release: N/A");
    current_label.setText("Downloaded release: N/A");
