@@ -1233,6 +1233,8 @@ set_visible:
             setVisible();
             if (exit_status == 255)
                setStatusText("Something unexpected happened ...");
+            else if (exit_status == 2)
+               setStatusText("SSNES failed with assertion. Check log!");
             else if (exit_status == 0)
                setStatusText("SSNES returned successfully!");
             else
@@ -1293,6 +1295,8 @@ set_visible:
                setStatusText("SSNES exited abnormally!");
             else if (Internal::status == 255)
                setStatusText("Could not find SSNES!");
+            else if (Internal::status == 2)
+               setStatusText("SSNES failed with assertion. Check log!");
             else if (Internal::status != 0)
                setStatusText("Failed to open ROM!");
             else
