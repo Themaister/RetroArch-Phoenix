@@ -248,6 +248,7 @@ class MainWindow : public Window
             enable.setText("Enable");
             server.setText("Server");
             client.setText("Client");
+            spectate.setText("Spectate mode");
             host_label.setText("Host IP:");
             port_label.setText("TCP/UDP Port:");
             frames_label.setText("Delay frames:");
@@ -258,6 +259,7 @@ class MainWindow : public Window
             hlayout[0].append(enable, 80, 0, 0);
             hlayout[0].append(server, 70, 20);
             hlayout[0].append(client, 70, 20);
+            hlayout[0].append(spectate, 150, 20);
 
             hlayout[1].append(host_label, 80, 0, 20);
             hlayout[1].append(host, 200, 0, 20);
@@ -275,6 +277,7 @@ class MainWindow : public Window
          LineEdit host;
          LineEdit frames;
          CheckBox enable;
+         CheckBox spectate;
          Label enable_label;
       } net;
 
@@ -1010,6 +1013,9 @@ extracted:
                host = net.host.text();
                vec_cmd.append(host);
             }
+
+            if (net.spectate.checked())
+               vec_cmd.append("--spectate");
 
             vec_cmd.append("--port");
             port = net.port.text();
