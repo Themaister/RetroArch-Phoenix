@@ -1050,6 +1050,7 @@ class FontVideo : public ToggleWindow
       {
          widgets.append(PathSetting::shared(_conf, "video_font_path", "On-screen message font:", "", "TTF font (*.ttf)"));
          widgets.append(IntSetting::shared(_conf, "video_font_size", "On-screen font size:", 48));
+         widgets.append(BoolSetting::shared(_conf, "video_font_scale", "Scale font to window", true));
          widgets.append(BoolSetting::shared(_conf, "video_font_enable", "Enable on-screen messages:", true));
          widgets.append(DoubleSetting::shared(_conf, "video_message_pos_x", "On-screen message pos X:", 0.05));
          widgets.append(DoubleSetting::shared(_conf, "video_message_pos_y", "On-screen message pos Y:", 0.05));
