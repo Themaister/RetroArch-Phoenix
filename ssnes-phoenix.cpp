@@ -1614,7 +1614,7 @@ set_visible:
          file.log.onTick = [this]() { if (file.log.checked()) log_win.show(); else log_win.hide(); };
          log_win.setCloseCallback([this]() { file.log.setChecked(false); });
          file.quit.onTick = []() { OS::quit(); };
-         help.about.onTick = [this]() { MessageWindow::information(*this, "SSNES/Phoenix\nHans-Kristian Arntzen (Themaister) (C) - 2011\nThis is free software released under GNU GPLv3\nPhoenix (C) byuu - 2011"); };
+         help.about.onTick = [this]() { MessageWindow::information(*this, "SSNES/Phoenix\nHans-Kristian Arntzen (Themaister) (C) - 2011-2012\nThis is free software released under GNU GPLv3\nPhoenix (C) byuu - 2011"); };
 
          settings.general.onTick = [this]() { general.show(); };
          settings.video.onTick = [this]() { video.show(); };
