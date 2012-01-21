@@ -240,7 +240,7 @@ class MainWindow : public Window
 
       struct netplay
       {
-         netplay() 
+         netplay() : file(0)
          {
             port.setText("55435");
             frames.setText("0");
@@ -270,6 +270,17 @@ class MainWindow : public Window
             hlayout[2].append(frames, 60, 0, 160);
             hlayout[2].append(nick_label, 120, 0, 20);
             hlayout[2].append(nick, 150, 0);
+
+            nick.onChange = [this] {
+               if (file)
+                  file->set(file_key, nick.text());
+            };
+         }
+
+         void setConfig(ConfigFile &config_file, const string &opt)
+         {
+            file = &config_file;
+            file_key = opt;
          }
 
          HorizontalLayout hlayout[3];
@@ -283,6 +294,9 @@ class MainWindow : public Window
          CheckBox enable;
          CheckBox spectate;
          Label enable_label;
+
+         ConfigFile *file;
+         string file_key;
       } net;
 
       struct
@@ -702,6 +716,9 @@ class MainWindow : public Window
          bsv_movie.setConfig(configs.gui, "last_movie");
          if (configs.gui.get("record_path", tmp)) record.setPath(tmp);
          record.setConfig(configs.gui, "record_path");
+
+         if (configs.gui.get("nickname", tmp)) net.nick.setText(tmp);
+         net.setConfig(configs.gui, "nickname");
 
          if (configs.gui.get("config_path", tmp)) config.setPath(tmp);
          config.setConfig(configs.gui, "config_path", {&MainWindow::reload_cli_config, this});
