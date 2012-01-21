@@ -1243,6 +1243,7 @@ namespace Internal
       { "input_screenshot", "Take screenshot", "", "print_screen" },
       { "input_dsp_config", "Open DSP plugin config", "", "c" },
       { "input_audio_mute", "Mute/unmute audio", "", "f9" },
+      { "input_netplay_flip_players", "Netplay flip players", "", "i" },
    };
 
    static const linear_vector<linear_vector<input_selection>> binds = { 
