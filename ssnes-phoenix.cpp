@@ -252,6 +252,7 @@ class MainWindow : public Window
             host_label.setText("Host IP:");
             port_label.setText("TCP/UDP Port:");
             frames_label.setText("Delay frames:");
+            nick_label.setText("Nickname:");
             server.setChecked();
             RadioBox::group(server, client);
 
@@ -266,16 +267,19 @@ class MainWindow : public Window
             hlayout[1].append(port_label, 120, 0, 20);
             hlayout[1].append(port, 100, 0);
             hlayout[2].append(frames_label, 80, 0, 20);
-            hlayout[2].append(frames, 60, 0);
+            hlayout[2].append(frames, 60, 0, 160);
+            hlayout[2].append(nick_label, 120, 0, 20);
+            hlayout[2].append(nick, 150, 0);
          }
 
          HorizontalLayout hlayout[3];
          RadioBox server, client;
 
-         Label port_label, host_label, frames_label;
+         Label port_label, host_label, frames_label, nick_label;
          LineEdit port;
          LineEdit host;
          LineEdit frames;
+         LineEdit nick;
          CheckBox enable;
          CheckBox spectate;
          Label enable_label;
@@ -989,6 +993,7 @@ extracted:
          string movie_path;
          string record_path;
          string record_size;
+         string nickname;
 
          vec_cmd.append(ssnes_path);
 
@@ -1024,6 +1029,13 @@ extracted:
             vec_cmd.append("-F");
             frames = net.frames.text();
             vec_cmd.append(frames);
+
+            nickname = net.nick.text();
+            if (nickname.length() > 0)
+            {
+               vec_cmd.append("--nick");
+               vec_cmd.append(nickname);
+            }
          }
 
          if (bsv_movie.is_playback())
