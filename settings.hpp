@@ -1265,6 +1265,8 @@ class Audio : public ToggleWindow
          widgets.append(StringSetting::shared(_conf, "audio_device", "Audio device:", ""));
          widgets.append(BoolSetting::shared(_conf, "audio_sync", "Audio sync:", true));
          widgets.append(IntSetting::shared(_conf, "audio_latency", "Audio latency (ms):", 64));
+         widgets.append(BoolSetting::shared(_conf, "audio_rate_control", "Dynamic rate control:", false));
+         widgets.append(DoubleSetting::shared(_conf, "audio_rate_control_delta", "Rate control pitch delta:", 0.005));
 
          foreach(i, widgets) { vbox.append(i->layout(), 3); }
          vbox.setMargin(5);
