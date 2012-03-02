@@ -933,6 +933,7 @@ class General : public ToggleWindow
          widgets.append(BoolSetting::shared(_conf, "block_sram_overwrite", "Block SRAM overwrite:", false));
          widgets.append(BoolSetting::shared(_conf, "savestate_auto_index", "Auto-increment save state slots:", false));
          widgets.append(BoolSetting::shared(_conf, "video_hires_record", "Record in hi-res", false));
+         widgets.append(BoolSetting::shared(_conf, "video_h264_record", "Enable H.264 recording", true));
          widgets.append(BoolSetting::shared(_conf, "video_post_filter_record", "Records filtered output", false));
 
          widgets.append(PathSetting::shared(_conf, "cheat_database_path", "XML cheat database:", string(""), "XML files (*.xml)"));
