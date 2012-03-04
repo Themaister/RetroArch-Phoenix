@@ -928,6 +928,7 @@ class General : public ToggleWindow
          widgets.append(BoolSetting::shared(_conf, "rewind_enable", "Enable rewind:", false));
          widgets.append(IntSetting::shared(_conf, "rewind_buffer_size", "Rewind buffer size (MB):", 20));
          widgets.append(IntSetting::shared(_conf, "rewind_granularity", "Rewind frames granularity:", 1));
+         widgets.append(DoubleSetting::shared(_conf, "slowmotion_ratio", "Slow motion ratio:", 3.0));
          widgets.append(BoolSetting::shared(_conf, "pause_nonactive", "Pause when window loses focus:", false));
          widgets.append(IntSetting::shared(_conf, "autosave_interval", "Autosave interval (seconds):", 0));
          widgets.append(BoolSetting::shared(_conf, "block_sram_overwrite", "Block SRAM overwrite:", false));
