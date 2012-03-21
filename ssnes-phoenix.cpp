@@ -522,10 +522,14 @@ class MainWindow : public Window
             extract_tick.setText("Extract ZIPs");
             extract_tick.setChecked();
 
+            allow_patches.setText("Check for ROM patches");
+            allow_patches.setChecked();
+
             label.setText("ROM type:");
             hlayout.append(label, 150, 0);
             hlayout.append(box, 200, 0, 30);
             hlayout.append(extract_tick, 0, 0);
+            hlayout.append(allow_patches, 0, 0);
          }
 
          enum rom_type type()
@@ -535,6 +539,7 @@ class MainWindow : public Window
          }
 
          bool extract() { return extract_tick.checked(); }
+         bool allow_patch() { return allow_patches.checked(); }
 
          HorizontalLayout& layout() { return hlayout; }
 
@@ -543,6 +548,7 @@ class MainWindow : public Window
             Label label;
             HorizontalLayout hlayout;
             CheckBox extract_tick;
+            CheckBox allow_patches;
       } rom_type;
 
 #ifdef _WIN32
@@ -1154,6 +1160,8 @@ extracted:
             vec_cmd.append("2");
          }
 
+         if (!rom_type.allow_patch())
+            vec_cmd.append("--no-patch");
 
          string savefile_dir, savestate_dir;
          char basename_buf[1024];
