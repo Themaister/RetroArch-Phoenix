@@ -55,10 +55,7 @@ struct zip {
     if (!footer)
       return false;
 
-    unsigned dir_offset = read(footer + 16, 4);
-    if (dir_offset + 20 > size)
-      return false;
-    const uint8_t *directory = data + dir_offset;
+    const uint8_t *directory = data + read(footer + 16, 4);
 
     while(true) {
       unsigned signature = read(directory + 0, 4);
