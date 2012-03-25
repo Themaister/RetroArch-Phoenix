@@ -841,7 +841,7 @@ class MainWindow : public Window
             ".smc", ".sfc",
             ".nes",
             ".gba", ".gb", ".gbc",
-            ".bin", ".smd", ".gen",
+            ".bin", ".smd", ".gen", ".md",
          };
 
          foreach (file, z.file)
