@@ -13,23 +13,24 @@ GTK_CFLAGS = $(shell pkg-config --cflags gtk+-2.0)
 GTK_LIBS = $(shell pkg-config --libs gtk+-2.0)
 
 INCLUDES = -Iphoenix -I.
+CXXFLAGS += -O3 -std=gnu++0x
+CFLAGS += -O3 -std=gnu99
 
 PREFIX = /usr/local
 
 all: $(TARGET)
 
 %.o: %.cpp $(HEADERS)
-	$(CXX) $(CXXFLAGS) $(INCLUDES) -O3 -std=gnu++0x -c -o $@ $<
+	$(CXX) $(CXXFLAGS) $(INCLUDES) -c -o $@ $<
 
 %.o: %.c $(HEADERS)
-	$(CC) $(CFLAGS) -O3 -std=gnu99 -c -o $@ $<
+	$(CC) $(CFLAGS) -c -o $@ $<
 
 phoenix/phoenix.o: $(wildcard phoenix/**/*.cpp) $(wildcard phoenix/**/*.hpp)
-	$(CXX) $(CXXFLAGS) $(INCLUDES) -O3 -std=gnu++0x -DPHOENIX_GTK $(GTK_CFLAGS) -c -o $@ phoenix/phoenix.cpp
+	$(CXX) $(CXXFLAGS) $(INCLUDES) -DPHOENIX_GTK $(GTK_CFLAGS) -c -o $@ phoenix/phoenix.cpp
 
 ruby/ruby.o: $(wildcard ruby/**/*.hpp) $(wildcard ruby/**/*.cpp)
-	$(CXX) $(CXXFLAGS) $(INCLUDES) $(RUBYDEFINES) -O3 -std=gnu++0x -c -o $@ ruby/ruby.cpp
-
+	$(CXX) $(CXXFLAGS) $(INCLUDES) $(RUBYDEFINES) -c -o $@ ruby/ruby.cpp
 
 $(TARGET): $(OBJ)
 	$(CXX) -o $@ $(OBJ) $(GTK_LIBS) $(RUBYLIBS)
