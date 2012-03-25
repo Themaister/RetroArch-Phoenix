@@ -13,26 +13,27 @@ HEADERS = $(wildcard *.h) $(wildcard *.hpp)
 
 QT_CFLAGS = $(shell pkg-config --cflags QtCore QtGui)
 QT_LIBS = $(shell pkg-config --libs QtCore QtGui)
+CXXFLAGS += -O3 -std=gnu++0x
+CFLAGS += -O3 -std=gnu99
 
 INCLUDES = -Iphoenix -I.
 
 all: $(TARGET)
 
 %.o: %.cpp $(HEADERS)
-	$(CXX) $(CXXFLAGS) $(INCLUDES) -O3 -std=gnu++0x -c -o $@ $<
+	$(CXX) $(CXXFLAGS) $(INCLUDES) -c -o $@ $<
 
 %.o: %.c $(HEADERS)
-	$(CC) $(CFLAGS) -O3 -std=gnu99 -c -o $@ $<
+	$(CC) $(CFLAGS) -c -o $@ $<
 
 phoenix/phoenix.o: $(wildcard phoenix/**/*.cpp) $(wildcard phoenix/**/*.hpp) phoenix/qt/qt.moc
-	$(CXX) $(CXXFLAGS) $(INCLUDES) -O3 -std=gnu++0x -DPHOENIX_QT $(QT_CFLAGS) -c -o $@ phoenix/phoenix.cpp
+	$(CXX) $(CXXFLAGS) $(INCLUDES) -DPHOENIX_QT $(QT_CFLAGS) -c -o $@ phoenix/phoenix.cpp
 
 ruby/ruby.o: $(wildcard ruby/**/*.hpp) $(wildcard ruby/**/*.cpp)
-	$(CXX) $(CXXFLAGS) $(INCLUDES) $(RUBYDEFINES) -O3 -std=gnu++0x -c -o $@ ruby/ruby.cpp
+	$(CXX) $(CXXFLAGS) $(INCLUDES) $(RUBYDEFINES) -c -o $@ ruby/ruby.cpp
 
 %.moc: %.moc.hpp
 	moc -i -o $@ $<
-
 
 $(TARGET): $(OBJ)
 	$(CXX) -o $@ $(OBJ) $(QT_LIBS) $(RUBYLIBS) -s
