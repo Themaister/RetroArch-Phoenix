@@ -36,8 +36,29 @@ struct zip {
 
     file.reset();
 
-    const uint8_t *footer = data + size - 22;
-    const uint8_t *directory = data + read(footer + 16, 4);
+    const uint8_t *footer = 0;
+    
+    for (unsigned eocd_size = 22;
+        eocd_size < 256 && eocd_size < size; // Somewhat arbitrary maximum.
+        eocd_size++) {
+      const uint8_t *tmp = data + size - eocd_size;
+      unsigned eocd_magic = read(tmp + 0, 4);
+      if (eocd_magic == 0x06054b50) {
+        unsigned comment_length = read(tmp + 20, 2);
+        if (comment_length + 22 == eocd_size) {
+          footer = tmp;
+          break;
+        }
+      }
+    }
+
+    if (!footer)
+      return false;
+
+    unsigned dir_offset = read(footer + 16, 4);
+    if (dir_offset + 20 > size)
+      return false;
+    const uint8_t *directory = data + dir_offset;
 
     while(true) {
       unsigned signature = read(directory + 0, 4);
