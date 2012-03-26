@@ -68,15 +68,49 @@ Updater::Updater()
    vbox.append(latest_label, ~0, 0);
    vbox.append(current_label, ~0, 0, 20);
 
-   libsnes_label.setText("Cores:");
-   vbox.append(libsnes_label, 0, 0);
+   libsnes_download.setText("Download core");
+   libsnes_use.setText("Use core");
+   libsnes_download.onTick = [this] {
+      if (!libsnes_listview.selected())
+      {
+         MessageWindow::warning(*this, "Select core to download first.");
+         return;
+      }
+
+      initiate_download();
+   };
+
+   libsnes_use.onTick = [this] {
+      if (!libsnes_listview.selected())
+      {
+         MessageWindow::warning(*this, "Select core to use first.");
+         return;
+      }
+
+      const auto &elem = libsnes_current[libsnes_listview.selection()];
+      string path = {basedir(), elem.basename, ".dll"};
+      if (!nall::file::exists(path))
+      {
+         auto response = MessageWindow::information(*this,
+               "This core is not downloaded yet.\n"
+               "Would you like to download it now?",
+               MessageWindow::Buttons::YesNo);
+
+         if (response == MessageWindow::Response::Yes)
+            initiate_download();
+      }
+      else
+         libsnes_path_cb(path);
+   };
+
+   libsnes_buttons.append(libsnes_download, 0, 0);
+   libsnes_buttons.append(libsnes_use, 0, 0);
+   vbox.append(libsnes_buttons, 5);
 
    libsnes_listview.setHeaderText("System", "Core", "Version", "Architecture", "Library", "Downloaded");
    libsnes_listview.setHeaderVisible();
    libsnes_listview.autoSizeColumns();
    vbox.append(libsnes_listview, 550, 250);
-   libsnes_dlhint.setText("Double-click core to download. Use core by setting libsnes path to desired library.");
-   vbox.append(libsnes_dlhint, 0, 0);
 
    vbox.setMargin(5);
 
@@ -109,37 +143,7 @@ Updater::Updater()
       start_download(path);
    };
 
-   libsnes_listview.onActivate = [this] {
-      transfer.version_only = false;
-      transfer.libsnes = true;
-
-      const auto &elem = libsnes_current[libsnes_listview.selection()];
-      transfer.libsnes_path = {basedir(), elem.basename, ".dll"};
-
-      if (elem.downloaded)
-      {
-         auto response = MessageWindow::information(*this,
-               "This core is already downloaded.\nWould you like to use it?",
-               MessageWindow::Buttons::YesNo);
-
-         if (response == MessageWindow::Response::Yes)
-         {
-            if (response == MessageWindow::Response::Yes && libsnes_path_cb)
-               libsnes_path_cb(transfer.libsnes_path);
-         }
-         else
-         {
-            response = MessageWindow::information(*this,
-                  "Would you like to redownload it (in case there was a hotfix)?",
-                  MessageWindow::Buttons::YesNo);
-
-            if (response == MessageWindow::Response::Yes)
-               start_download({elem.basename, ".zip"});
-         }
-      }
-      else
-         start_download({elem.basename, ".zip"});
-   };
+   libsnes_listview.onActivate = {&Updater::initiate_download, this};
 
    cancel_download.onTick = [this] {
       nall::scoped_lock lock(transfer.lock);
@@ -153,6 +157,39 @@ Updater::Updater()
 
    disable_downloads();
    cancel_download.setEnabled(false);
+}
+
+void Updater::initiate_download()
+{
+   transfer.version_only = false;
+   transfer.libsnes = true;
+
+   const auto &elem = libsnes_current[libsnes_listview.selection()];
+   transfer.libsnes_path = {basedir(), elem.basename, ".dll"};
+
+   if (elem.downloaded)
+   {
+      auto response = MessageWindow::information(*this,
+            "This core is already downloaded.\nWould you like to use it?",
+            MessageWindow::Buttons::YesNo);
+
+      if (response == MessageWindow::Response::Yes)
+      {
+         if (response == MessageWindow::Response::Yes && libsnes_path_cb)
+            libsnes_path_cb(transfer.libsnes_path);
+      }
+      else
+      {
+         response = MessageWindow::information(*this,
+               "Would you like to redownload it (in case there was a hotfix)?",
+               MessageWindow::Buttons::YesNo);
+
+         if (response == MessageWindow::Response::Yes)
+            start_download({elem.basename, ".zip"});
+      }
+   }
+   else
+      start_download({elem.basename, ".zip"});
 }
 
 void Updater::start_download(const string &path)

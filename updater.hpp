@@ -79,8 +79,10 @@ class Updater : public Window
       RadioBox opts_slim, opts_full, opts_redist;
       HorizontalLayout opts_layout;
 
-      Label libsnes_label;
-      Label libsnes_dlhint;
+      HorizontalLayout libsnes_buttons;
+      Button libsnes_download;
+      Button libsnes_use;
+
       ListView libsnes_listview;
       struct libsnes_desc
       {
@@ -97,6 +99,7 @@ class Updater : public Window
       void update_listview();
       void update_ssnes_version();
 
+      void initiate_download();
       void enable_downloads();
       void disable_downloads();
       void end_transfer_list();
