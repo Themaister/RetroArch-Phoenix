@@ -422,7 +422,7 @@ class MainWindow : public Window
                hlayout.append(clear, 0, 0);
                hlayout.append(button, 0, 0);
             }
-      } rom, config, ssnes, libsnes;
+      } rom, config, ssnes, libretro;
 
       struct bsv_entry : entry
       {
@@ -728,7 +728,7 @@ class MainWindow : public Window
 
          if (configs.gui.get("config_path", tmp)) config.setPath(tmp);
          config.setConfig(configs.gui, "config_path", {&MainWindow::reload_cli_config, this});
-         libsnes.setConfig(configs.cli, "libsnes_path");
+         libretro.setConfig(configs.cli, "libretro_path");
 
          m_cli_path = cli_config_path();
          configs.cli = ConfigFile(m_cli_path);
@@ -755,7 +755,7 @@ class MainWindow : public Window
       void init_cli_config()
       {
          string tmp;
-         if (configs.cli.get("libsnes_path", tmp)) libsnes.setPath(tmp); else libsnes.setPath("");
+         if (configs.cli.get("libretro_path", tmp)) libretro.setPath(tmp); else libretro.setPath("");
 
          general.update();
          video.update();
@@ -769,7 +769,7 @@ class MainWindow : public Window
          rom.setFilter("Game ROM (*)");
          bsv_movie.setFilter("BSNES Movie (*.bsv)", ".bsv");
          config.setFilter("Config file (*.cfg)");
-         libsnes.setFilter("Dynamic library (" DYNAMIC_EXTENSION ")");
+         libretro.setFilter("Dynamic library (" DYNAMIC_EXTENSION ")");
 #ifdef _WIN32
          ssnes.setFilter("Executable file (*.exe)");
 #else
@@ -781,7 +781,7 @@ class MainWindow : public Window
          record.setLabel("FFmpeg movie output:");
          config.setLabel("SSNES config file:");
          ssnes.setLabel("SSNES path:");
-         libsnes.setLabel("Emulator core path:");
+         libretro.setLabel("Emulator core path:");
 
          start_btn.setText("Start SSNES");
          vbox.append(rom.layout(), 3);
@@ -793,7 +793,7 @@ class MainWindow : public Window
          vbox.append(record.layout(), 10);
          vbox.append(config.layout(), 3);
          vbox.append(ssnes.layout(), 3);
-         vbox.append(libsnes.layout(), 3);
+         vbox.append(libretro.layout(), 3);
          vbox.append(start_btn, ~0, 0, 15);
          vbox.append(net.hlayout[0]);
          vbox.append(net.hlayout[1]);
@@ -842,7 +842,7 @@ class MainWindow : public Window
             ".nes",
             ".gba", ".gb", ".gbc",
             // full list of pre-dreamcast sega rom file extensions: .bin, .gen, .md, .smd, .mdx, .sms, .gg, .sg
-            // Genesis-next-libsnes extensions are below.  Genplus-gx supports the full list above, so they should probably be added at some point.
+            // Genesis-next-libretro extensions are below.  Genplus-gx supports the full list above, so they should probably be added at some point.
             // Perhaps it would be prudent to add them now so that ROM load failure is up to the emulator core rather than this unzipping list.
             ".bin", ".gen", ".md", ".smd", ".sms", ".gg"
          };
@@ -1664,12 +1664,12 @@ set_visible:
 
 #ifdef _WIN32
          updater_elems.update.onTick = [this]() { updater.show(); };
-         updater.libsnes_path_cb = [this](const nall::string &path_)
+         updater.libretro_path_cb = [this](const nall::string &path_)
          {
             auto path = path_;
             path.transform("\\", "/");
-            configs.cli.set("libsnes_path", path);
-            libsnes.setPath(path);
+            configs.cli.set("libretro_path", path);
+            libretro.setPath(path);
          };
 
          // Might use config later.
