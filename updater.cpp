@@ -68,10 +68,10 @@ Updater::Updater()
    vbox.append(latest_label, ~0, 0);
    vbox.append(current_label, ~0, 0, 20);
 
-   libsnes_download.setText("Download core");
-   libsnes_use.setText("Use core");
-   libsnes_download.onTick = [this] {
-      if (!libsnes_listview.selected())
+   libretro_download.setText("Download core");
+   libretro_use.setText("Use core");
+   libretro_download.onTick = [this] {
+      if (!libretro_listview.selected())
       {
          MessageWindow::warning(*this, "Select core to download first.");
          return;
@@ -80,14 +80,14 @@ Updater::Updater()
       initiate_download();
    };
 
-   libsnes_use.onTick = [this] {
-      if (!libsnes_listview.selected())
+   libretro_use.onTick = [this] {
+      if (!libretro_listview.selected())
       {
          MessageWindow::warning(*this, "Select core to use first.");
          return;
       }
 
-      const auto &elem = libsnes_current[libsnes_listview.selection()];
+      const auto &elem = libretro_current[libretro_listview.selection()];
       string path = {basedir(), elem.basename, ".dll"};
       if (!nall::file::exists(path))
       {
@@ -100,17 +100,17 @@ Updater::Updater()
             initiate_download();
       }
       else
-         libsnes_path_cb(path);
+         libretro_path_cb(path);
    };
 
-   libsnes_buttons.append(libsnes_download, 0, 0);
-   libsnes_buttons.append(libsnes_use, 0, 0);
-   vbox.append(libsnes_buttons, 5);
+   libretro_buttons.append(libretro_download, 0, 0);
+   libretro_buttons.append(libretro_use, 0, 0);
+   vbox.append(libretro_buttons, 5);
 
-   libsnes_listview.setHeaderText("System", "Core", "Version", "Architecture", "Library", "Downloaded");
-   libsnes_listview.setHeaderVisible();
-   libsnes_listview.autoSizeColumns();
-   vbox.append(libsnes_listview, 550, 250);
+   libretro_listview.setHeaderText("System", "Core", "Version", "Architecture", "Library", "Downloaded");
+   libretro_listview.setHeaderVisible();
+   libretro_listview.autoSizeColumns();
+   vbox.append(libretro_listview, 550, 250);
 
    vbox.setMargin(5);
 
@@ -120,14 +120,14 @@ Updater::Updater()
 
    version_download.onTick = [this] {
       transfer.version_only = true;
-      transfer.libsnes = false;
+      transfer.libretro = false;
       start_download(latest_file());
    };
 
    download.onTick = [this] {
 
       transfer.version_only = false;
-      transfer.libsnes = false;
+      transfer.libretro = false;
       
       nall::string path;
       path.append(opts_redist.checked() ? "SSNES-win" : "ssnes-win");
@@ -143,7 +143,7 @@ Updater::Updater()
       start_download(path);
    };
 
-   libsnes_listview.onActivate = {&Updater::initiate_download, this};
+   libretro_listview.onActivate = {&Updater::initiate_download, this};
 
    cancel_download.onTick = [this] {
       nall::scoped_lock lock(transfer.lock);
@@ -162,10 +162,10 @@ Updater::Updater()
 void Updater::initiate_download()
 {
    transfer.version_only = false;
-   transfer.libsnes = true;
+   transfer.libretro = true;
 
-   const auto &elem = libsnes_current[libsnes_listview.selection()];
-   transfer.libsnes_path = {basedir(), elem.basename, ".dll"};
+   const auto &elem = libretro_current[libretro_listview.selection()];
+   transfer.libretro_path = {basedir(), elem.basename, ".dll"};
 
    if (elem.downloaded)
    {
@@ -175,8 +175,8 @@ void Updater::initiate_download()
 
       if (response == MessageWindow::Response::Yes)
       {
-         if (response == MessageWindow::Response::Yes && libsnes_path_cb)
-            libsnes_path_cb(transfer.libsnes_path);
+         if (response == MessageWindow::Response::Yes && libretro_path_cb)
+            libretro_path_cb(transfer.libretro_path);
       }
       else
       {
@@ -292,7 +292,7 @@ bool Updater::extract_zip(const nall::string &path)
    return true;
 }
 
-Updater::libsnes_desc Updater::line2desc(const nall::string &line)
+Updater::libretro_desc Updater::line2desc(const nall::string &line)
 {
    nall::lstring list;
    list.split(",", line);
@@ -337,7 +337,7 @@ void Updater::end_transfer_list()
       if (elem_.length() > 0)
       {
          const auto &elem = line2desc(elem_);
-         libsnes_list.append(elem);
+         libretro_list.append(elem);
       }
    }
 
@@ -350,26 +350,26 @@ void Updater::end_transfer_list()
 
 void Updater::update_listview()
 {
-   libsnes_listview.reset();
-   libsnes_current.reset();
+   libretro_listview.reset();
+   libretro_current.reset();
 
    bool x86 = opts_32bit.checked();
-   foreach (elem, libsnes_list)
+   foreach (elem, libretro_list)
    {
       if (opts_32bit.checked() && elem.arch == "x86")
-         libsnes_current.append(elem);
+         libretro_current.append(elem);
       else if (opts_64bit.checked() && elem.arch == "x86_64")
-         libsnes_current.append(elem);
+         libretro_current.append(elem);
    }
 
    auto dir = basedir();
-   foreach (elem, libsnes_current)
+   foreach (elem, libretro_current)
    {
       elem.downloaded = nall::file::exists({dir, elem.basename, ".dll"});
-      libsnes_listview.append(elem.system, elem.core, elem.version, elem.arch, nall::string(elem.basename, ".dll"), nall::string(elem.downloaded ? "Yes" : "No"));
+      libretro_listview.append(elem.system, elem.core, elem.version, elem.arch, nall::string(elem.basename, ".dll"), nall::string(elem.downloaded ? "Yes" : "No"));
    }
 
-   libsnes_listview.autoSizeColumns();
+   libretro_listview.autoSizeColumns();
 }
 
 bool Updater::end_file_transfer()
@@ -386,14 +386,14 @@ bool Updater::end_file_transfer()
 
    if (valid && extract_zip(transfer.file_path))
    {
-      if (transfer.libsnes)
+      if (transfer.libretro)
       {
          auto response = MessageWindow::information(*this,
-               {"Extracted core to ", transfer.libsnes_path,
+               {"Extracted core to ", transfer.libretro_path,
                ".\nDo you want to use this core?"}, MessageWindow::Buttons::YesNo);
 
-         if (response == MessageWindow::Response::Yes && libsnes_path_cb)
-            libsnes_path_cb(transfer.libsnes_path);
+         if (response == MessageWindow::Response::Yes && libretro_path_cb)
+            libretro_path_cb(transfer.libretro_path);
 
          update_listview();
       }
@@ -442,7 +442,7 @@ void Updater::timer_event()
 
                   if (response == MessageWindow::Response::Yes)
                   {
-                     transfer.libsnes = false;
+                     transfer.libretro = false;
                      transfer.version_only = false;
                      nall::string arch(opts_32bit.checked() ? "32-" : "64-");
                      start_download({"SSNES-win", arch, "libs.zip"});
@@ -450,7 +450,7 @@ void Updater::timer_event()
                   }
                }
 
-               if (!transfer.libsnes && !opts_redist.checked())
+               if (!transfer.libretro && !opts_redist.checked())
                {
                   MessageWindow::information(*this,
                         "SSNES-Phoenix is updated. Restart the program to complete the update.");
@@ -568,13 +568,13 @@ nall::string Updater::basedir()
 void Updater::enable_downloads()
 {
    download.setEnabled(true);
-   libsnes_listview.setEnabled(true);
+   libretro_listview.setEnabled(true);
 }
 
 void Updater::disable_downloads()
 {
    download.setEnabled(false);
-   libsnes_listview.setEnabled(false);
+   libretro_listview.setEnabled(false);
 }
 
 void Updater::update_ssnes_version()

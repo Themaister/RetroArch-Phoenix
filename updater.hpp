@@ -20,7 +20,7 @@ class Updater : public Window
       void update(const char *content, unsigned size);
       bool progress_update(unsigned now, unsigned total);
 
-      nall::function<void (const nall::string &path)> libsnes_path_cb;
+      nall::function<void (const nall::string &path)> libretro_path_cb;
       nall::function<nall::string()> ssnes_path_cb;
 
    private:
@@ -52,8 +52,8 @@ class Updater : public Window
 
          unsigned now, total;
 
-         bool libsnes;
-         nall::string libsnes_path;
+         bool libretro;
+         nall::string libretro_path;
       } transfer;
 
 #if 0
@@ -79,12 +79,12 @@ class Updater : public Window
       RadioBox opts_slim, opts_full, opts_redist;
       HorizontalLayout opts_layout;
 
-      HorizontalLayout libsnes_buttons;
-      Button libsnes_download;
-      Button libsnes_use;
+      HorizontalLayout libretro_buttons;
+      Button libretro_download;
+      Button libretro_use;
 
-      ListView libsnes_listview;
-      struct libsnes_desc
+      ListView libretro_listview;
+      struct libretro_desc
       {
          nall::string system;
          nall::string core;
@@ -93,9 +93,9 @@ class Updater : public Window
          nall::string basename;
          bool downloaded;
       };
-      nall::linear_vector<libsnes_desc> libsnes_list;
-      nall::linear_vector<libsnes_desc> libsnes_current;
-      static libsnes_desc line2desc(const nall::string &line);
+      nall::linear_vector<libretro_desc> libretro_list;
+      nall::linear_vector<libretro_desc> libretro_current;
+      static libretro_desc line2desc(const nall::string &line);
       void update_listview();
       void update_ssnes_version();
 
