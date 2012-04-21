@@ -594,9 +594,9 @@ class MainWindow : public Window
          {
             string dir = basedir();
 
-            // If we have ssnes.cfg in same directory, use that ...
+            // If we have retroarch.cfg in same directory, use that ...
             WIN32_FIND_DATAA data;
-            string cli_path = {dir, "\\ssnes.cfg"};
+            string cli_path = {dir, "\\retroarch.cfg"};
             HANDLE find_file = FindFirstFileA(cli_path, &data);
             if (find_file != INVALID_HANDLE_VALUE)
             {
@@ -606,12 +606,12 @@ class MainWindow : public Window
 
             const char *path = std::getenv("APPDATA");
             if (path)
-               return {path, "\\ssnes.cfg"};
+               return {path, "\\retroarch.cfg"};
             else
             {
                char dir[256];
                GetCurrentDirectoryA(sizeof(dir), dir);
-               return {dir, "\\ssnes.cfg"};
+               return {dir, "\\retroarch.cfg"};
             }
          }
       }
@@ -643,10 +643,10 @@ class MainWindow : public Window
             if (path)
             {
                cli_path = path;
-               cli_path.append("/.ssnes.cfg");
+               cli_path.append("/.retroarch.cfg");
             }
             else
-               cli_path = "/etc/ssnes.cfg";
+               cli_path = "/etc/retroarch.cfg";
          }
          return cli_path;
       }
@@ -692,15 +692,15 @@ class MainWindow : public Window
                string dir = {path, "/ssnes"};
                mkdir(dir, 0644);
                cli_path = path;
-               cli_path.append("/ssnes/ssnes.cfg");
+               cli_path.append("/ssnes/retroarch.cfg");
             }
             else if (home_path)
             {
                cli_path = home_path;
-               cli_path.append("/.ssnes.cfg");
+               cli_path.append("/.retroarch.cfg");
             }
             else
-               cli_path = "/etc/ssnes.cfg";
+               cli_path = "/etc/retroarch.cfg";
          }
 
          return cli_path;
