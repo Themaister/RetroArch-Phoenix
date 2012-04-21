@@ -1,4 +1,4 @@
-TARGET = ssnes-phoenix
+TARGET = retroarch-phoenix
 
 RUBYOBJ = ruby/ruby.o
 RUBYDEFINES = -DINPUT_SDL
@@ -43,8 +43,8 @@ clean:
 
 install: $(TARGET)
 	install -m755 $(TARGET) $(DESTDIR)$(PREFIX)/bin
-	install -m644 ssnes-phoenix.png $(DESTDIR)/usr/share/icons
-	install -m644 ssnes-phoenix.desktop $(DESTDIR)/usr/share/applications
+	install -m644 retroarch-phoenix.png $(DESTDIR)/usr/share/icons
+	install -m644 retroarch-phoenix.desktop $(DESTDIR)/usr/share/applications
 
 uninstall:
 	rm -f $(DESTDIR)$(PREFIX)/bin/$(TARGET)

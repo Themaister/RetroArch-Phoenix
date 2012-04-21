@@ -1,10 +1,10 @@
 [Desktop Entry]
 Version=1.0
 Type=Application
-Name=SSNES-Phoenix
+Name=RetroArch-Phoenix
 Categories=Game;Emulator
-GenericName=Phoenix frontend for SSNES
+GenericName=Phoenix frontend for RetroArch
 Exec=ssnes-phoenix
 Icon=/usr/share/icons/ssnes-phoenix.png
 StartupNotify=false
-Name[en_US]=SSNES-Phoenix
+Name[en_US]=RetroArch-Phoenix

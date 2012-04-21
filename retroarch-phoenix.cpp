@@ -117,9 +117,9 @@ namespace Internal
 class LogWindow : public ToggleWindow
 {
    public:
-      LogWindow() : ToggleWindow("SSNES || Log window")
+      LogWindow() : ToggleWindow("RetroArch || Log window")
       {
-         label.setText("SSNES output:");
+         label.setText("RetroArch output:");
          layout.append(label, 0, 0);
          layout.append(box, ~0, ~0);
 
@@ -180,8 +180,8 @@ class MainWindow : public Window
    public:
       MainWindow() : input(configs.cli), general(configs.gui, configs.cli), video(configs.cli), audio(configs.cli), ext_rom(configs.gui)
       {
-         setTitle("SSNES || Phoenix");
-         setIcon("/usr/share/icons/ssnes-phoenix.png");
+         setTitle("RetroArch || Phoenix");
+         setIcon("/usr/share/icons/retroarch-phoenix.png");
 
          init_menu();
          onClose = []() { OS::quit(); };
@@ -422,7 +422,7 @@ class MainWindow : public Window
                hlayout.append(clear, 0, 0);
                hlayout.append(button, 0, 0);
             }
-      } rom, config, ssnes, libretro;
+      } rom, config, retroarch, libretro;
 
       struct bsv_entry : entry
       {
@@ -568,9 +568,9 @@ class MainWindow : public Window
       {
          string dir = basedir();
 
-         // If we have ssnes-phoenix.cfg in same directory, use that ...
+         // If we have retroarch-phoenix.cfg in same directory, use that ...
          WIN32_FIND_DATAA data;
-         string gui_path = {dir, "\\ssnes-phoenix.cfg"};
+         string gui_path = {dir, "\\retroarch-phoenix.cfg"};
          HANDLE find_file = FindFirstFileA(gui_path, &data);
          if (find_file != INVALID_HANDLE_VALUE)
          {
@@ -623,10 +623,10 @@ class MainWindow : public Window
          if (home)
          {
             gui_path = home;
-            gui_path.append("/.ssnes_phoenix.cfg");
+            gui_path.append("/.retroarch_phoenix.cfg");
          }
          else
-            gui_path = "/etc/ssnes_phoenix.cfg";
+            gui_path = "/etc/retroarch_phoenix.cfg";
 
          return gui_path;
       }
@@ -658,19 +658,19 @@ class MainWindow : public Window
          const char *home_path = std::getenv("HOME");
          if (path)
          {
-            string dir = {path, "/ssnes"};
+            string dir = {path, "/retroarch"};
             mkdir(dir, 0755);
 
             gui_path = path;
-            gui_path.append("/ssnes/phoenix.cfg");
+            gui_path.append("/retroarch/phoenix.cfg");
          }
          else if (home_path)
          {
             gui_path = home_path;
-            gui_path.append("/.ssnes_phoenix.cfg");
+            gui_path.append("/.retroarch_phoenix.cfg");
          }
          else
-            gui_path = "/etc/ssnes_phoenix.cfg";
+            gui_path = "/etc/retroarch_phoenix.cfg";
 
          return gui_path;
       }
@@ -689,10 +689,10 @@ class MainWindow : public Window
          {
             if (path)
             {
-               string dir = {path, "/ssnes"};
+               string dir = {path, "/retroarch"};
                mkdir(dir, 0644);
                cli_path = path;
-               cli_path.append("/ssnes/retroarch.cfg");
+               cli_path.append("/retroarch/retroarch.cfg");
             }
             else if (home_path)
             {
@@ -714,8 +714,8 @@ class MainWindow : public Window
 
          configs.gui = ConfigFile(gui_path);
 
-         if (configs.gui.get("ssnes_path", tmp)) ssnes.setPath(tmp);
-         ssnes.setConfig(configs.gui, "ssnes_path");
+         if (configs.gui.get("retroarch_path", tmp)) retroarch.setPath(tmp);
+         retroarch.setConfig(configs.gui, "retroarch_path");
          if (configs.gui.get("last_rom", tmp)) rom.setPath(tmp);
          rom.setConfig(configs.gui, "last_rom");
          if (configs.gui.get("last_movie", tmp)) bsv_movie.setPath(tmp);
@@ -771,19 +771,19 @@ class MainWindow : public Window
          config.setFilter("Config file (*.cfg)");
          libretro.setFilter("Dynamic library (" DYNAMIC_EXTENSION ")");
 #ifdef _WIN32
-         ssnes.setFilter("Executable file (*.exe)");
+         retroarch.setFilter("Executable file (*.exe)");
 #else
-         ssnes.setFilter("Any file (*)");
+         retroarch.setFilter("Any file (*)");
 #endif
 
          rom.setLabel("Normal ROM path:");
          bsv_movie.setLabel("BSV movie:");
          record.setLabel("FFmpeg movie output:");
-         config.setLabel("SSNES config file:");
-         ssnes.setLabel("SSNES path:");
+         config.setLabel("RetroArch config file:");
+         retroarch.setLabel("RetroArch path:");
          libretro.setLabel("Emulator core path:");
 
-         start_btn.setText("Start SSNES");
+         start_btn.setText("Start RetroArch");
          vbox.append(rom.layout(), 3);
          vbox.append(rom_type.layout(), 5);
          vbox.append(bsv_movie.layout(), 3);
@@ -792,14 +792,14 @@ class MainWindow : public Window
          record.setFilter("Matroska (*.mkv)", ".mkv");
          vbox.append(record.layout(), 10);
          vbox.append(config.layout(), 3);
-         vbox.append(ssnes.layout(), 3);
+         vbox.append(retroarch.layout(), 3);
          vbox.append(libretro.layout(), 3);
          vbox.append(start_btn, ~0, 0, 15);
          vbox.append(net.hlayout[0]);
          vbox.append(net.hlayout[1]);
          vbox.append(net.hlayout[2], 20);
 
-         start_btn.onTick = [this]() { this->start_ssnes(); };
+         start_btn.onTick = [this]() { this->start_retroarch(); };
       }
 
       void show_error(const string& err)
@@ -1002,15 +1002,15 @@ extracted:
          return false;
       }
 
-      void start_ssnes()
+      void start_retroarch()
       {
 #ifdef _WIN32
          updater.cancel();
 #endif
 
          linear_vector<const char*> vec_cmd;
-         string ssnes_path = ssnes.getPath();
-         if (ssnes_path.length() == 0) ssnes_path = "ssnes";
+         string retroarch_path = retroarch.getPath();
+         if (retroarch_path.length() == 0) retroarch_path = "retroarch";
          string rom_path;
          string config_path = config.getPath();
          string host;
@@ -1021,7 +1021,7 @@ extracted:
          string record_size;
          string nickname;
 
-         vec_cmd.append(ssnes_path);
+         vec_cmd.append(retroarch_path);
 
          if (!append_rom(rom_path, vec_cmd))
             return;
@@ -1216,14 +1216,14 @@ extracted:
          configs.cli.write();
 
          log_win.clear();
-         string commandline("SSNES CMD: ");
-         commandline.append(ssnes_path);
+         string commandline("RetroArch CMD: ");
+         commandline.append(retroarch_path);
          for (unsigned i = 1; i < vec_cmd.size() - 1; i++)
             commandline.append(" ", vec_cmd[i]);
          commandline.append("\n\n");
          log_win.push(commandline);
 
-         fork_ssnes(ssnes_path, &vec_cmd[0]);
+         fork_retroarch(retroarch_path, &vec_cmd[0]);
       }
 
       static void print_cmd(const string& str, const char **cmd)
@@ -1280,11 +1280,11 @@ set_visible:
             if (exit_status == 255)
                setStatusText("Something unexpected happened ...");
             else if (exit_status == 2)
-               setStatusText("SSNES failed with assertion. Check log!");
+               setStatusText("RetroArch failed with assertion. Check log!");
             else if (exit_status == 0)
-               setStatusText("SSNES returned successfully!");
+               setStatusText("RetroArch returned successfully!");
             else
-               setStatusText({"SSNES returned with an error! Code: ", (unsigned)exit_status});
+               setStatusText({"RetroArch returned with an error! Code: ", (unsigned)exit_status});
          }
 
          forked_timer.setEnabled(false);
@@ -1338,15 +1338,15 @@ set_visible:
             close(fork_fd);
 
             if (Internal::abnormal_quit)
-               setStatusText("SSNES exited abnormally!");
+               setStatusText("RetroArch exited abnormally!");
             else if (Internal::status == 255)
-               setStatusText("Could not find SSNES!");
+               setStatusText("Could not find RetroArch!");
             else if (Internal::status == 2)
-               setStatusText("SSNES failed with assertion. Check log!");
+               setStatusText("RetroArch failed with assertion. Check log!");
             else if (Internal::status != 0)
                setStatusText("Failed to open ROM!");
             else
-               setStatusText("SSNES exited successfully.");
+               setStatusText("RetroArch exited successfully.");
 
             setVisible();
          }
@@ -1377,7 +1377,7 @@ set_visible:
 #endif
 
 #ifndef _WIN32
-      void fork_ssnes(const string& path, const char **cmd)
+      void fork_retroarch(const string& path, const char **cmd)
       {
          Internal::async = general.getAsyncFork();
          bool can_hide = !Internal::async;
@@ -1431,7 +1431,7 @@ set_visible:
          }
       }
 #else
-      void fork_ssnes(const string& path, const char **cmd)
+      void fork_retroarch(const string& path, const char **cmd)
       {
          print_cmd(path, cmd);
 
@@ -1512,7 +1512,7 @@ set_visible:
                forked_timer.setEnabled();
             }
             else
-               setStatusText("Failed to start SSNES");
+               setStatusText("Failed to start RetroArch");
          }
          else
             fork_file = NULL;
@@ -1574,7 +1574,7 @@ set_visible:
          file_menu.setText("File");
          settings_menu.setText("Settings");
 #ifdef _WIN32
-         updater_menu.setText("SSNES");
+         updater_menu.setText("RetroArch");
 #endif
          help_menu.setText("Help");
          append(file_menu);
@@ -1641,7 +1641,7 @@ set_visible:
          RadioItem::group(settings.gamepad_2, settings.multitap_2, settings.mouse_2, settings.scope_2, settings.justifier_2, settings.justifiers_2, settings.none_2);
 
 #ifdef _WIN32
-         updater_elems.update.setText("Update SSNES");
+         updater_elems.update.setText("Update RetroArch");
          updater_menu.append(updater_elems.update);
 #endif
 
@@ -1654,7 +1654,7 @@ set_visible:
          file.log.onTick = [this]() { if (file.log.checked()) log_win.show(); else log_win.hide(); };
          log_win.setCloseCallback([this]() { file.log.setChecked(false); });
          file.quit.onTick = []() { OS::quit(); };
-         help.about.onTick = [this]() { MessageWindow::information(*this, "SSNES/Phoenix\nHans-Kristian Arntzen (Themaister) (C) - 2011-2012\nThis is free software released under GNU GPLv3\nPhoenix (C) byuu - 2011"); };
+         help.about.onTick = [this]() { MessageWindow::information(*this, "RetroArch/Phoenix\nHans-Kristian Arntzen (Themaister) (C) - 2011-2012\nThis is free software released under GNU GPLv3\nPhoenix (C) byuu - 2011"); };
 
          settings.general.onTick = [this]() { general.show(); };
          settings.video.onTick = [this]() { video.show(); };
@@ -1673,7 +1673,7 @@ set_visible:
          };
 
          // Might use config later.
-         updater.ssnes_path_cb = [this]() -> nall::string { return "ssnes"; };
+         updater.retroarch_path_cb = [this]() -> nall::string { return "retroarch"; };
 #endif
       }
 };

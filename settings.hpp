@@ -1,5 +1,5 @@
-#ifndef __SSNES_SETTINGS_HPP
-#define __SSNES_SETTINGS_HPP
+#ifndef __RetroArch_SETTINGS_HPP
+#define __RetroArch_SETTINGS_HPP
 
 #include "config_file.hpp"
 #include <phoenix.hpp>
@@ -25,7 +25,7 @@ struct ToggleWindow : public Window
    ToggleWindow(const string& title) 
    { 
       setTitle(title); 
-      setIcon("/usr/share/icons/ssnes-phoenix.png");
+      setIcon("/usr/share/icons/retroarch-phoenix.png");
       onClose = [this]() { this->hide(); if (cb) cb(); }; 
    }
    void show() { setVisible(); }
@@ -567,7 +567,7 @@ class InputSetting : public SettingLayout, public util::Shared<InputSetting>
                this->set_all_current_list("None", "nul");
          };
 
-         list_view.setHeaderText(string("SSNES Bind"), string("Bind"));
+         list_view.setHeaderText(string("RetroArch Bind"), string("Bind"));
          list_view.setHeaderVisible();
          list_view.onActivate = [this]() { this->update_bind(); };
 
@@ -923,7 +923,7 @@ class InputSetting : public SettingLayout, public util::Shared<InputSetting>
 class General : public ToggleWindow
 {
    public:
-      General(ConfigFile &_pconf, ConfigFile &_conf) : ToggleWindow("SSNES || General settings")
+      General(ConfigFile &_pconf, ConfigFile &_conf) : ToggleWindow("RetroArch || General settings")
       {
          widgets.append(BoolSetting::shared(_conf, "rewind_enable", "Enable rewind:", false));
          widgets.append(IntSetting::shared(_conf, "rewind_buffer_size", "Rewind buffer size (MB):", 20));
@@ -1016,7 +1016,7 @@ namespace Internal
 class ShaderVideo : public ToggleWindow
 {
    public:
-      ShaderVideo(ConfigFile &_conf) : ToggleWindow("SSNES || Shader settings")
+      ShaderVideo(ConfigFile &_conf) : ToggleWindow("RetroArch || Shader settings")
       {
          paths.append(PathSetting::shared(_conf, "video_cg_shader", "Cg pixel shader:", "", "Cg shader, Cg meta-shader (*.cg,*.cgp)"));
          paths.append(PathSetting::shared(_conf, "video_bsnes_shader", "bSNES XML shader:", "", "XML shader (*.shader)"));
@@ -1049,7 +1049,7 @@ class ShaderVideo : public ToggleWindow
 class FontVideo : public ToggleWindow
 {
    public:
-      FontVideo(ConfigFile &_conf) : ToggleWindow("SSNES || Font settings")
+      FontVideo(ConfigFile &_conf) : ToggleWindow("RetroArch || Font settings")
       {
          widgets.append(PathSetting::shared(_conf, "video_font_path", "On-screen message font:", "", "TTF font (*.ttf)"));
          widgets.append(IntSetting::shared(_conf, "video_font_size", "On-screen font size:", 48));
@@ -1076,7 +1076,7 @@ class FontVideo : public ToggleWindow
 class Video : public ToggleWindow
 {
    public:
-      Video(ConfigFile &_conf) : ToggleWindow("SSNES || Video settings"), shader_setting(_conf), font_setting(_conf)
+      Video(ConfigFile &_conf) : ToggleWindow("RetroArch || Video settings"), shader_setting(_conf), font_setting(_conf)
       {
          widgets.append(ComboSetting::shared(_conf, "video_driver", "Video driver:", Internal::video_drivers, 0));
          widgets.append(PathSetting::shared(_conf, "video_external_driver", "External video driver:", "", "Dynamic library (" DYNAMIC_EXTENSION ")"));
@@ -1258,7 +1258,7 @@ namespace Internal
 class Audio : public ToggleWindow
 {
    public:
-      Audio(ConfigFile &_conf) : ToggleWindow("SSNES || Audio settings")
+      Audio(ConfigFile &_conf) : ToggleWindow("RetroArch || Audio settings")
       {
          widgets.append(BoolSetting::shared(_conf, "audio_enable", "Enable audio:", true));
          widgets.append(ComboSetting::shared(_conf, "audio_driver", "Audio driver:", Internal::audio_drivers, 0));
@@ -1290,7 +1290,7 @@ class Audio : public ToggleWindow
 class Input : public ToggleWindow
 {
    public:
-      Input(ConfigFile &_conf) : ToggleWindow("SSNES || Input settings")
+      Input(ConfigFile &_conf) : ToggleWindow("RetroArch || Input settings")
       {
          widgets.append(SliderSetting::shared(_conf, "input_axis_threshold", "Input axis threshold:", 0.5, 0.0, 1.0));
          widgets.append(BoolSetting::shared(_conf, "netplay_client_swap_input", "Use Player 1 binds as netplay client:", true));
@@ -1333,7 +1333,7 @@ class Input : public ToggleWindow
 class ExtROM : public ToggleWindow
 {
    public:
-      ExtROM(ConfigFile &_conf) : ToggleWindow("SSNES || Special ROM")
+      ExtROM(ConfigFile &_conf) : ToggleWindow("RetroArch || Special ROM")
       {
          sgb_bios = PathSetting::shared(_conf, "sgb_bios_path", "Super Gameboy BIOS:", string(""), "Super Famicom, Super Magicom (*.sfc,*.smc)");
          sgb_rom = PathSetting::shared(_conf, "gameboy_path", "Gameboy ROM:", string(""), "Gameboy (*.gb)");

@@ -1,5 +1,5 @@
-#ifndef __SSNES_UPDATER_HPP
-#define __SSNES_UPDATER_HPP
+#ifndef __RetroArch_UPDATER_HPP
+#define __RetroArch_UPDATER_HPP
 
 #include <phoenix.hpp>
 #include <vector>
@@ -21,7 +21,7 @@ class Updater : public Window
       bool progress_update(unsigned now, unsigned total);
 
       nall::function<void (const nall::string &path)> libretro_path_cb;
-      nall::function<nall::string()> ssnes_path_cb;
+      nall::function<nall::string()> retroarch_path_cb;
 
    private:
       Timer timer;
@@ -43,7 +43,7 @@ class Updater : public Window
          nall::mutex lock;
 
          nall::string version;
-         nall::string ssnes_version;
+         nall::string retroarch_version;
          unsigned redist_version;
 
          bool version_only;
@@ -97,7 +97,7 @@ class Updater : public Window
       nall::linear_vector<libretro_desc> libretro_current;
       static libretro_desc line2desc(const nall::string &line);
       void update_listview();
-      void update_ssnes_version();
+      void update_retroarch_version();
 
       void initiate_download();
       void enable_downloads();
@@ -108,7 +108,7 @@ class Updater : public Window
       VerticalLayout vbox;
 
       static const char *base_host()   { return "themaister.net"; }
-      static const char *base_folder() { return "/ssnes-dl/"; }
+      static const char *base_folder() { return "/retroarch-dl/"; }
       static const char *latest_file() { return "latest"; }
 
       static nall::string basedir();

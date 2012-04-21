@@ -14,7 +14,7 @@ Updater::Updater()
    // After an update, killit! :D
    delete_old_exe();
 
-   setTitle("SSNES || Updater");
+   setTitle("RetroArch || Updater");
    onClose = [this]{ this->hide(); };
 
    timer.onTimeout = {&Updater::timer_event, this};
@@ -23,7 +23,7 @@ Updater::Updater()
 
    version_download.setText("Check version");
    dl_layout.append(version_download, 0, 0);
-   download.setText("Download SSNES");
+   download.setText("Download RetroArch");
    dl_layout.append(download, 0, 0);
    cancel_download.setText("Cancel");
    dl_layout.append(cancel_download, 0, 0);
@@ -60,7 +60,7 @@ Updater::Updater()
    opts_32bit.setChecked();
 #endif
 
-   update_ssnes_version();
+   update_retroarch_version();
    opts_full.setChecked();
 
    latest_label.setText("Latest release: N/A");
@@ -130,7 +130,7 @@ Updater::Updater()
       transfer.libretro = false;
       
       nall::string path;
-      path.append(opts_redist.checked() ? "SSNES-win" : "ssnes-win");
+      path.append(opts_redist.checked() ? "RetroArch-win" : "retroarch-win");
       path.append(opts_32bit.checked() ? "32-" : "64-");
       if (opts_redist.checked())
          path.append("libs.zip");
@@ -221,7 +221,7 @@ void Updater::cancel()
 
 void Updater::show()
 {
-   update_ssnes_version();
+   update_retroarch_version();
    setVisible();
 }
 
@@ -230,7 +230,7 @@ void Updater::hide()
    setVisible(false);
 }
 
-// This is awkward as shit. We can't overwrite ourselves (ssnes-phoenix.exe),
+// This is awkward as shit. We can't overwrite ourselves (retroarch-phoenix.exe),
 // but we can rename ourselves and overwrite ... :D
 void Updater::move_self_exe()
 {
@@ -268,7 +268,7 @@ bool Updater::extract_zip(const nall::string &path)
       if (!z.extract(file, data, size))
          continue;
 
-      if (file.name == "ssnes-phoenix.exe") // Oh snap, we have to do magic trickery! :D
+      if (file.name == "retroarch-phoenix.exe") // Oh snap, we have to do magic trickery! :D
          move_self_exe();
 
       if (!nall::file::write({basedir(), file.name}, data, size))
@@ -343,9 +343,9 @@ void Updater::end_transfer_list()
 
    update_listview();
 
-   if (transfer.version == transfer.ssnes_version)
+   if (transfer.version == transfer.retroarch_version)
       MessageWindow::information(*this,
-            "SSNES is up to date!");
+            "RetroArch is up to date!");
 }
 
 void Updater::update_listview()
@@ -400,7 +400,7 @@ bool Updater::end_file_transfer()
       else
       {
          MessageWindow::information(*this, "Extracted archive!");
-         update_ssnes_version();
+         update_retroarch_version();
       }
    }
    else if (valid)
@@ -445,7 +445,7 @@ void Updater::timer_event()
                      transfer.libretro = false;
                      transfer.version_only = false;
                      nall::string arch(opts_32bit.checked() ? "32-" : "64-");
-                     start_download({"SSNES-win", arch, "libs.zip"});
+                     start_download({"RetroArch-win", arch, "libs.zip"});
                      return;
                   }
                }
@@ -453,7 +453,7 @@ void Updater::timer_event()
                if (!transfer.libretro && !opts_redist.checked())
                {
                   MessageWindow::information(*this,
-                        "SSNES-Phoenix is updated. Restart the program to complete the update.");
+                        "RetroArch-Phoenix is updated. Restart the program to complete the update.");
                }
             }
          }
@@ -478,7 +478,7 @@ void Updater::timer_event()
 
 unsigned Updater::current_redist_version()
 {
-   nall::string path = {basedir(), "ssnes-redist-version"};
+   nall::string path = {basedir(), "retroarch-redist-version"};
    uint8_t *data;
    unsigned size;
    if (nall::file::read(path, data, size))
@@ -577,12 +577,12 @@ void Updater::disable_downloads()
    libretro_listview.setEnabled(false);
 }
 
-void Updater::update_ssnes_version()
+void Updater::update_retroarch_version()
 {
-   if (!ssnes_path_cb)
+   if (!retroarch_path_cb)
       return;
 
-   FILE *file = popen(nall::string(ssnes_path_cb(), " --help"), "r");
+   FILE *file = popen(nall::string(retroarch_path_cb(), " --help"), "r");
    if (!file)
    {
       current_label.setText("Downloaded release: N/A");
@@ -609,7 +609,7 @@ void Updater::update_ssnes_version()
 
    current_label.setText({"Downloaded release: ", version});
    fclose(file);
-   transfer.ssnes_version = version;
+   transfer.retroarch_version = version;
 }
 
 #endif

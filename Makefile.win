@@ -1,4 +1,4 @@
-TARGET = ssnes-phoenix.exe
+TARGET = retroarch-phoenix.exe
 
 RUBYOBJ = ruby/ruby.o
 RUBYDEFINES = -DINPUT_DIRECTINPUT
@@ -6,7 +6,7 @@ RUBYLIBS = -ldinput8 -ldxguid
 
 CXXFILES = $(wildcard *.cpp)
 CFILES = $(wildcard *.c)
-OBJ = phoenix/phoenix.o $(CXXFILES:.cpp=.o) $(CFILES:.c=.o) $(RUBYOBJ) ssnes-resource.o
+OBJ = phoenix/phoenix.o $(CXXFILES:.cpp=.o) $(CFILES:.c=.o) $(RUBYOBJ) retroarch-resource.o
 HEADERS = $(wildcard *.h) $(wildcard *.hpp)
 
 CC = gcc
