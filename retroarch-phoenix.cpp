@@ -401,7 +401,7 @@ class MainWindow : public Window
          }
 
          void setLabel(const string& name) { label.setText(name); }
-         void setPath(const string& name) { edit.setText(name.length() > 0 ? name : " "); } // Really weird bug... :v Empty strings will simply be bool and evaluate to true for some reason...
+         void setPath(const string& name) { edit.setText(name.length() > 0 ? name : string("")); }
          void setConfig(ConfigFile& file, const string& key, const function<void (const string&)>& _cb = &entry::dummy) 
          { 
             conf = &file;
@@ -755,7 +755,10 @@ class MainWindow : public Window
       void init_cli_config()
       {
          string tmp;
-         if (configs.cli.get("libretro_path", tmp)) libretro.setPath(tmp); else libretro.setPath("");
+         if (configs.cli.get("libretro_path", tmp))
+            libretro.setPath(tmp);
+         else
+            libretro.setPath("");
 
          general.update();
          video.update();
@@ -781,7 +784,7 @@ class MainWindow : public Window
          record.setLabel("FFmpeg movie output:");
          config.setLabel("RetroArch config file:");
          retroarch.setLabel("RetroArch path:");
-         libretro.setLabel("Emulator core path:");
+         libretro.setLabel("libretro core path:");
 
          start_btn.setText("Start RetroArch");
          vbox.append(rom.layout(), 3);
@@ -1006,7 +1009,21 @@ extracted:
       {
 #ifdef _WIN32
          updater.cancel();
+
+         if (libretro.getPath() == "")
+         {
+            MessageWindow::warning(*this, "No libretro core is selected.\n"
+                  "You can download a core from the RetroArch updater\n(RetroArch -> Update RetroArch).");
+            return;
+         }
+#else
+         if (libretro.getPath() == "")
+         {
+            MessageWindow::warning(*this, "No libretro core is selected. Cannot continue.\n");
+            return;
+         }
 #endif
+
 
          linear_vector<const char*> vec_cmd;
          string retroarch_path = retroarch.getPath();
