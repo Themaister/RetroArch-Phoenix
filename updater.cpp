@@ -117,7 +117,6 @@ Updater::Updater()
    auto minimum = vbox.minimumGeometry();
    setGeometry({128, 128, minimum.width, minimum.height});
 
-
    version_download.onTick = [this] {
       transfer.version_only = true;
       transfer.libretro = false;
@@ -569,12 +568,16 @@ void Updater::enable_downloads()
 {
    download.setEnabled(true);
    libretro_listview.setEnabled(true);
+   libretro_download.setEnabled(true);
+   libretro_use.setEnabled(true);
 }
 
 void Updater::disable_downloads()
 {
    download.setEnabled(false);
    libretro_listview.setEnabled(false);
+   libretro_download.setEnabled(false);
+   libretro_use.setEnabled(false);
 }
 
 void Updater::update_retroarch_version()
