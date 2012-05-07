@@ -1185,7 +1185,11 @@ namespace Internal
       { "input_player" #n_player "_left", "D-pad Left", "", "left" }, \
       { "input_player" #n_player "_right", "D-pad Right", "", "right" }, \
       { "input_player" #n_player "_up", "D-pad Up", "", "up" }, \
-      { "input_player" #n_player "_down", "D-pad Down", "", "down" },
+      { "input_player" #n_player "_down", "D-pad Down", "", "down" }, \
+      { "input_player" #n_player "_l2", "L2", "", "" }, \
+      { "input_player" #n_player "_r2", "R2", "", "" }, \
+      { "input_player" #n_player "_l3", "L3", "", "" }, \
+      { "input_player" #n_player "_r3", "R3", "", "" },
  
 #define DEFINE_BINDS_OTHER(n_player) \
       { "input_player" #n_player "_a", "A (right)", "", "" }, \
@@ -1199,7 +1203,11 @@ namespace Internal
       { "input_player" #n_player "_left", "D-pad Left", "", "" }, \
       { "input_player" #n_player "_right", "D-pad Right", "", "" }, \
       { "input_player" #n_player "_up", "D-pad Up", "", "" }, \
-      { "input_player" #n_player "_down", "D-pad Down", "", "" },
+      { "input_player" #n_player "_down", "D-pad Down", "", "" }, \
+      { "input_player" #n_player "_l2", "L2", "", "" }, \
+      { "input_player" #n_player "_r2", "R2", "", "" }, \
+      { "input_player" #n_player "_l3", "L3", "", "" }, \
+      { "input_player" #n_player "_r3", "R3", "", "" },
  
 
    static const linear_vector<input_selection> player1 = {
