@@ -521,15 +521,22 @@ class MainWindow : public Window
 
             extract_tick.setText("Extract ZIPs");
             extract_tick.setChecked();
+            extract_tick.onTick = [this] { file->set("extract_zip", extract_tick.checked()); };
 
             allow_patches.setText("Check for ROM patches");
             allow_patches.setChecked();
+            allow_patches.onTick = [this] { file->set("allow_patches", allow_patches.checked()); };
 
             label.setText("ROM type:");
             hlayout.append(label, 150, 0);
             hlayout.append(box, 200, 0, 30);
             hlayout.append(extract_tick, 0, 0);
             hlayout.append(allow_patches, 0, 0);
+         }
+
+         void setConfig(ConfigFile &conf)
+         {
+            file = &conf;
          }
 
          enum rom_type type()
@@ -540,6 +547,8 @@ class MainWindow : public Window
 
          bool extract() { return extract_tick.checked(); }
          bool allow_patch() { return allow_patches.checked(); }
+         void extract(bool allow) { extract_tick.setChecked(allow); }
+         void allow_patch(bool allow) { allow_patches.setChecked(allow); }
 
          HorizontalLayout& layout() { return hlayout; }
 
@@ -549,6 +558,7 @@ class MainWindow : public Window
             HorizontalLayout hlayout;
             CheckBox extract_tick;
             CheckBox allow_patches;
+            ConfigFile *file;
       } rom_type;
 
 #ifdef _WIN32
@@ -729,6 +739,14 @@ class MainWindow : public Window
          if (configs.gui.get("config_path", tmp)) config.setPath(tmp);
          config.setConfig(configs.gui, "config_path", {&MainWindow::reload_cli_config, this});
          libretro.setConfig(configs.cli, "libretro_path");
+
+         bool zip;
+         if (configs.gui.get("extract_zip", zip))
+            rom_type.extract(zip);
+         bool patches;
+         if (configs.gui.get("allow_patches", patches))
+            rom_type.allow_patch(patches);
+         rom_type.setConfig(configs.gui);
 
          m_cli_path = cli_config_path();
          configs.cli = ConfigFile(m_cli_path);
