@@ -5,6 +5,6 @@ Name=RetroArch-Phoenix
 Categories=Game;Emulator
 GenericName=Phoenix frontend for RetroArch
 Exec=ssnes-phoenix
-Icon=/usr/share/icons/ssnes-phoenix.png
+Icon=/usr/share/icons/retroarch-phoenix.png
 StartupNotify=false
 Name[en_US]=RetroArch-Phoenix
