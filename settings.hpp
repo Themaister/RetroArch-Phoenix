@@ -933,9 +933,11 @@ class General : public ToggleWindow
          widgets.append(IntSetting::shared(_conf, "autosave_interval", "Autosave interval (seconds):", 0));
          widgets.append(BoolSetting::shared(_conf, "block_sram_overwrite", "Block SRAM overwrite:", false));
          widgets.append(BoolSetting::shared(_conf, "savestate_auto_index", "Auto-increment save state slots:", false));
-         widgets.append(BoolSetting::shared(_conf, "video_hires_record", "Record in hi-res", false));
-         widgets.append(BoolSetting::shared(_conf, "video_h264_record", "Enable H.264 recording", true));
-         widgets.append(BoolSetting::shared(_conf, "video_post_filter_record", "Records filtered output", false));
+         widgets.append(BoolSetting::shared(_conf, "savestate_auto_save", "Autosave state on exit:", false));
+         widgets.append(BoolSetting::shared(_conf, "video_hires_record", "Record in hi-res:", false));
+         widgets.append(BoolSetting::shared(_conf, "video_h264_record", "Enable H.264 recording:", true));
+         widgets.append(BoolSetting::shared(_conf, "video_post_filter_record", "Records filtered output:", false));
+         widgets.append(BoolSetting::shared(_conf, "network_cmd_enable", "Enable external command interface:", false));
 
          widgets.append(PathSetting::shared(_conf, "cheat_database_path", "XML cheat database:", string(""), "XML files (*.xml)"));
          widgets.append(PathSetting::shared(_conf, "cheat_settings_path", "XML cheat settings:", string(""), "Config files (*.cfg)"));
@@ -1093,6 +1095,7 @@ class Video : public ToggleWindow
          widgets.append(BoolSetting::shared(_conf, "video_force_aspect", "Lock aspect ratio:", true));
          widgets.append(BoolSetting::shared(_conf, "video_crop_overscan", "Crop overscan:", true));
          widgets.append(AspectSetting::shared(_conf, "video_aspect_ratio", "Aspect ratio:"));
+         widgets.append(BoolSetting::shared(_conf, "video_aspect_ratio_auto", "Prefer game aspect over 1:1 PAR:", false));
 
          foreach(i, widgets) { vbox.append(i->layout(), 3); }
 
