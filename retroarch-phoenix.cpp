@@ -865,7 +865,8 @@ class MainWindow : public Window
             // full list of pre-dreamcast sega rom file extensions: .bin, .gen, .md, .smd, .mdx, .sms, .gg, .sg
             // Genesis-next-libretro extensions are below.  Genplus-gx supports the full list above, so they should probably be added at some point.
             // Perhaps it would be prudent to add them now so that ROM load failure is up to the emulator core rather than this unzipping list.
-            ".bin", ".gen", ".md", ".smd", ".sms", ".gg"
+            ".bin", ".gen", ".md", ".smd", ".sms", ".gg",
+            ".cue",
          };
 
          foreach (file, z.file)
