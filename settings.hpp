@@ -1254,7 +1254,7 @@ namespace Internal
       { "input_cheat_index_minus", "Previous cheat index", "", "y" },
       { "input_cheat_index_plus", "Next cheat index", "", "t" },
       { "input_cheat_toggle", "Toggle cheat ON/OFF", "", "u" },
-      { "input_screenshot", "Take screenshot", "", "print_screen" },
+      { "input_screenshot", "Take screenshot", "", "f8" },
       { "input_dsp_config", "Open DSP plugin config", "", "c" },
       { "input_audio_mute", "Mute/unmute audio", "", "f9" },
       { "input_netplay_flip_players", "Netplay flip players", "", "i" },
