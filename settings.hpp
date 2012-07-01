@@ -531,6 +531,9 @@ class InputSetting : public SettingLayout, public util::Shared<InputSetting>
          player.append("Player 3");
          player.append("Player 4");
          player.append("Player 5");
+         player.append("Player 6");
+         player.append("Player 7");
+         player.append("Player 8");
          player.append("Misc");
          hbox.append(player, 120, 0, 10);
          hbox.append(def, 0, 0);
@@ -678,6 +681,9 @@ class InputSetting : public SettingLayout, public util::Shared<InputSetting>
          conf.set("input_player3_joypad_index", 2);
          conf.set("input_player4_joypad_index", 3);
          conf.set("input_player5_joypad_index", 4);
+         conf.set("input_player6_joypad_index", 4);
+         conf.set("input_player7_joypad_index", 4);
+         conf.set("input_player8_joypad_index", 4);
 
          this->update_list();
       }
@@ -917,7 +923,7 @@ class InputSetting : public SettingLayout, public util::Shared<InputSetting>
             return "(unimplemented, pick something else)";
       }
 
-      static const unsigned max_players = 5;
+      static const unsigned max_players = 8;
 };
 
 class General : public ToggleWindow
@@ -1177,6 +1183,16 @@ namespace Internal
 #endif
    };
 
+#define ANALOG_BINDS(n_player) \
+      { "input_player" #n_player "_l_x_plus", "Left analog X+ (right)", "", "" }, \
+      { "input_player" #n_player "_l_y_plus", "Left analog Y+ (down)", "", "" }, \
+      { "input_player" #n_player "_l_x_minus", "Left analog X- (left)", "", "" }, \
+      { "input_player" #n_player "_l_y_minus", "Left analog Y- (up)", "", "" }, \
+      { "input_player" #n_player "_r_x_plus", "Right analog X+ (right)", "", "" }, \
+      { "input_player" #n_player "_r_y_plus", "Right analog Y+ (down)", "", "" }, \
+      { "input_player" #n_player "_r_x_minus", "Right analog X- (left)", "", "" }, \
+      { "input_player" #n_player "_r_y_minus", "Right analog Y- (up)", "", "" }
+
 #define DEFINE_BINDS(n_player) \
       { "input_player" #n_player "_a", "A (right)", "", "x" }, \
       { "input_player" #n_player "_b", "B (down)", "", "z" }, \
@@ -1193,8 +1209,9 @@ namespace Internal
       { "input_player" #n_player "_l2", "L2", "", "" }, \
       { "input_player" #n_player "_r2", "R2", "", "" }, \
       { "input_player" #n_player "_l3", "L3", "", "" }, \
-      { "input_player" #n_player "_r3", "R3", "", "" },
- 
+      { "input_player" #n_player "_r3", "R3", "", "" }, \
+      ANALOG_BINDS(n_player)
+
 #define DEFINE_BINDS_OTHER(n_player) \
       { "input_player" #n_player "_a", "A (right)", "", "" }, \
       { "input_player" #n_player "_b", "B (down)", "", "" }, \
@@ -1211,7 +1228,8 @@ namespace Internal
       { "input_player" #n_player "_l2", "L2", "", "" }, \
       { "input_player" #n_player "_r2", "R2", "", "" }, \
       { "input_player" #n_player "_l3", "L3", "", "" }, \
-      { "input_player" #n_player "_r3", "R3", "", "" },
+      { "input_player" #n_player "_r3", "R3", "", "" }, \
+      ANALOG_BINDS(n_player)
  
 
    static const linear_vector<input_selection> player1 = {
@@ -1232,6 +1250,18 @@ namespace Internal
 
    static const linear_vector<input_selection> player5 = {
       DEFINE_BINDS_OTHER(5)
+   };
+
+   static const linear_vector<input_selection> player6 = {
+      DEFINE_BINDS_OTHER(6)
+   };
+
+   static const linear_vector<input_selection> player7 = {
+      DEFINE_BINDS_OTHER(7)
+   };
+
+   static const linear_vector<input_selection> player8 = {
+      DEFINE_BINDS_OTHER(8)
    };
 
    static const linear_vector<input_selection> misc = {
@@ -1263,7 +1293,7 @@ namespace Internal
    };
 
    static const linear_vector<linear_vector<input_selection>> binds = { 
-      player1, player2, player3, player4, player5, misc 
+      player1, player2, player3, player4, player5, player6, player7, player8, misc 
    };
 }
 
