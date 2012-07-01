@@ -77,40 +77,6 @@ namespace Internal
          abnormal_quit = !WIFEXITED(pstatus);
       }
    }
-#else
-
-   // Windows is stupid, and doesn't even have something as basic as pollable non-blocking files.
-   // So here we go with threading ...
-   static lstring log_strings;
-   static CRITICAL_SECTION crit;
-   static volatile bool thread_alive;
-
-   static DWORD CALLBACK read_thread(void *data)
-   {
-      HANDLE read_handle = (HANDLE)data;
-      log_strings.reset();
-      DWORD read_bytes;
-
-      while (thread_alive)
-      {
-         char tmp_buf[2048];
-
-         if (ReadFile(read_handle, tmp_buf, sizeof(tmp_buf) - 1, &read_bytes, NULL) && read_bytes > 0)
-         {
-            tmp_buf[read_bytes] = '\0';
-            auto list = split_strings(tmp_buf, read_bytes);
-
-            EnterCriticalSection(&crit);
-            foreach (str, list)
-               log_strings.append(str);
-            LeaveCriticalSection(&crit);
-         }
-         else
-            break;
-      }
-
-      ExitThread(0);
-   }
 #endif
 }
 
@@ -1282,12 +1248,11 @@ extracted:
       PROCESS_INFORMATION forked_pinfo;
       bool forked_async;
 
-      HANDLE forked_read_thread;
-
       void forked_event()
       {
          bool should_restore = false;
          DWORD exit_status = 255;
+
          if (WaitForSingleObject(forked_pinfo.hProcess, 0) == WAIT_OBJECT_0)
          {
             GetExitCodeProcess(forked_pinfo.hProcess, &exit_status);
@@ -1299,17 +1264,25 @@ extracted:
 
          if (!forked_async)
          {
-            EnterCriticalSection(&Internal::crit);
+            char buffer[1024];
+            DWORD has_read;
+            DWORD can_read;
+            while (PeekNamedPipe(fork_file, NULL, 0, NULL, &can_read, NULL) && can_read > 0)
+            {
+               if (can_read >= sizeof(buffer))
+                  can_read = sizeof(buffer) - 1;
 
-            log_win.push(Internal::log_strings);
-            Internal::log_strings.reset();
-            LeaveCriticalSection(&Internal::crit);
+               if (ReadFile(fork_file, buffer, can_read, &has_read, NULL) && has_read > 0)
+               {
+                  buffer[has_read] = '\0';
+                  log_win.push(buffer);
+               }
+            }
          }
 
          if (!should_restore)
             return;
 
-set_visible:
          if (!forked_async)
          {
             setVisible();
@@ -1331,23 +1304,23 @@ set_visible:
             CloseHandle(forked_pinfo.hProcess);
          memset(&forked_pinfo, 0, sizeof(forked_pinfo));
 
-         if (!forked_async)
-         {
-            Internal::thread_alive = false;
-            WaitForSingleObject(forked_read_thread, INFINITE);
-            CloseHandle(forked_read_thread);
-            DeleteCriticalSection(&Internal::crit);
-         }
-
          if (fork_file)
          {
             // Drain out the remaining data in the FIFO.
-            char final_buf[512];
-            DWORD read_bytes;
-            while (ReadFile(fork_file, final_buf, sizeof(final_buf) - 1, &read_bytes, NULL) && read_bytes > 0)
+            char final_buf[1024];
+            DWORD has_read;
+            DWORD can_read;
+
+            while (PeekNamedPipe(fork_file, NULL, 0, NULL, &can_read, NULL) && can_read > 0)
             {
-               final_buf[read_bytes] = '\0';
-               log_win.push(final_buf, read_bytes);
+               if (can_read >= sizeof(final_buf))
+                  can_read = sizeof(final_buf) - 1;
+
+               if (ReadFile(fork_file, final_buf, can_read, &has_read, NULL) && has_read > 0)
+               {
+                  final_buf[has_read] = '\0';
+                  log_win.push(final_buf);
+               }
             }
 
             CloseHandle(fork_file);
@@ -1374,7 +1347,7 @@ set_visible:
             close(fork_fd);
 
             if (Internal::abnormal_quit)
-               setStatusText("RetroArch exited abnormally!");
+               setStatusText("RetroArch exited abnormally! Check log!");
             else if (Internal::status == 255)
                setStatusText("Could not find RetroArch!");
             else if (Internal::status == 2)
@@ -1542,9 +1515,6 @@ set_visible:
                fork_file = reader;
                forked_pinfo = piProcInfo;
 
-               InitializeCriticalSection(&Internal::crit);
-               Internal::thread_alive = true;
-               forked_read_thread = CreateThread(NULL, 0, Internal::read_thread, reader, 0, NULL);
                forked_timer.setEnabled();
             }
             else
