@@ -36,7 +36,7 @@ ruby/ruby.o: $(wildcard ruby/**/*.hpp) $(wildcard ruby/**/*.cpp)
 	moc -i -o $@ $<
 
 $(TARGET): $(OBJ)
-	$(CXX) -o $@ $(OBJ) $(QT_LIBS) $(RUBYLIBS) -s
+	$(CXX) -o $@ $(OBJ) $(QT_LIBS) $(RUBYLIBS) -s -ldl
 
 clean:
 	rm -f *.o

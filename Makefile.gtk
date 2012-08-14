@@ -33,7 +33,7 @@ ruby/ruby.o: $(wildcard ruby/**/*.hpp) $(wildcard ruby/**/*.cpp)
 	$(CXX) $(CXXFLAGS) $(INCLUDES) $(RUBYDEFINES) -c -o $@ ruby/ruby.cpp
 
 $(TARGET): $(OBJ)
-	$(CXX) -o $@ $(OBJ) $(GTK_LIBS) $(RUBYLIBS)
+	$(CXX) -o $@ $(OBJ) $(GTK_LIBS) $(RUBYLIBS) -s -ldl
 
 clean:
 	rm -f *.o

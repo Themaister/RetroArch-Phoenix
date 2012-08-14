@@ -41,7 +41,7 @@ ruby/ruby.o: $(wildcard ruby/**/*.hpp) $(wildcard ruby/**/*.cpp)
 
 $(TARGET): $(OBJ)
 	test -d RetroArch-Phoenix.app || mkdir -p RetroArch-Phoenix.app/Contents/MacOS
-	$(CXX) -o RetroArch-Phoenix.app/Contents/MacOS/$@ $(OBJ) $(QT_LIBS) $(RUBYLIBS)
+	$(CXX) -o RetroArch-Phoenix.app/Contents/MacOS/$@ $(OBJ) $(QT_LIBS) $(RUBYLIBS) -ldl
 
 clean:
 	rm -f *.o

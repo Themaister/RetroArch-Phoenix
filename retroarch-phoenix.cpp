@@ -19,6 +19,8 @@
 #include <utility>
 #include <functional>
 #include "settings.hpp"
+#include "dynamic.h"
+#include "libretro.h"
 
 #ifdef _WIN32
 #include "updater.hpp"
@@ -794,8 +796,39 @@ class MainWindow : public Window
          MessageWindow::warning(Window::None, err);
       }
 
+      void get_system_info(struct retro_system_info &sys_info, const string &path)
+      {
+         dylib_t lib = dylib_load(path);
+         if (!lib)
+            return;
+
+         unsigned (*pver)() = NULL;
+         void (*pgetinfo)(struct retro_system_info*) = NULL;
+
+         pver = (unsigned (*)())dylib_proc(lib, "retro_api_version");
+         if (!pver)
+            goto end;
+
+         if (pver() != RETRO_API_VERSION)
+            goto end;
+
+         pgetinfo = (void (*)(struct retro_system_info*))dylib_proc(lib, "retro_get_system_info");
+         if (!pgetinfo)
+            goto end;
+
+         pgetinfo(&sys_info);
+
+end:
+         dylib_close(lib);
+      }
+
       bool check_zip(string& rom_path)
       {
+         struct retro_system_info sys_info = {0};
+         get_system_info(sys_info, libretro.getPath());
+         if (sys_info.block_extract)
+            return true;
+
          string orig_rom_path = rom_path;
          char *ext = strrchr(rom_path(), '.');
 
