@@ -26,10 +26,7 @@
 dylib_t dylib_load(const char *path)
 {
 #ifdef _WIN32
-   dylib_t lib = LoadLibrary(path);
-   if (!lib)
-      RARCH_ERR("Failed to load library, error code: 0x%x\n", (unsigned)GetLastError());
-   return lib;
+   return LoadLibrary(path);
 #else
    return dlopen(path, RTLD_LAZY);
 #endif
