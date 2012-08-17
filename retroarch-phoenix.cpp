@@ -107,7 +107,7 @@ class LogWindow : public ToggleWindow
          layout.setMargin(5);
 
          auto minimum = layout.minimumGeometry();
-         setGeometry({128, 128, max(300, minimum.width), max(300, minimum.height)});
+         setGeometry({128, 128, max(300u, minimum.width), max(300u, minimum.height)});
          append(layout);
       }
 
@@ -158,7 +158,7 @@ class MainWindow : public Window
 
          vbox.setMargin(5);
          auto minimum = vbox.minimumGeometry();
-         setGeometry({256, 256, max(750, minimum.width), minimum.height});
+         setGeometry({256, 256, max(750u, minimum.width), minimum.height});
          append(vbox);
          setMenuVisible();
          setStatusVisible();
@@ -1027,21 +1027,29 @@ extracted:
       {
 #ifdef _WIN32
          updater.cancel();
-
-         if (libretro.getPath() == "")
-         {
-            MessageWindow::warning(*this, "No libretro core is selected.\n"
-                  "You can download a core from the RetroArch updater\n(RetroArch -> Update RetroArch).");
-            return;
-         }
-#else
-         if (libretro.getPath() == "")
-         {
-            MessageWindow::warning(*this, "No libretro core is selected. Cannot continue.\n");
-            return;
-         }
 #endif
 
+         if (libretro.getPath() == "")
+         {
+            MessageWindow::warning(*this,
+#ifdef _WIN32
+                  "No libretro core is selected.\n"
+                  "You can download a core from the RetroArch updater\n(RetroArch -> Update RetroArch)."
+#else
+                  "No libretro core is selected. Cannot continue.\n"
+#endif
+            );
+
+            return;
+         }
+
+         string sysdir;
+         if (!configs.cli.get("system_directory", sysdir) || sysdir.length() == 0)
+         {
+            MessageWindow::warning(*this,
+                  "System directory (Settings -> General -> System directory) is not set.\n"
+                  "Some libretro cores that rely on this might not work as intended.");
+         }
 
          linear_vector<const char*> vec_cmd;
          string retroarch_path = retroarch.getPath();
