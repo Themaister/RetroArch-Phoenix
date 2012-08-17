@@ -1178,6 +1178,11 @@ extracted:
             vec_cmd.append("-N");
             vec_cmd.append("1");
          }
+         else if (settings.dualanalog_1.checked())
+         {
+            vec_cmd.append("-A");
+            vec_cmd.append("1");
+         }
 
          if (settings.multitap_2.checked())
             vec_cmd.append("--multitap");
@@ -1195,6 +1200,11 @@ extracted:
          else if (settings.none_2.checked())
          {
             vec_cmd.append("-N");
+            vec_cmd.append("2");
+         }
+         else if (settings.dualanalog_2.checked())
+         {
+            vec_cmd.append("-A");
             vec_cmd.append("2");
          }
 
@@ -1586,6 +1596,7 @@ extracted:
          RadioItem gamepad_1;
          RadioItem mouse_1;
          RadioItem none_1;
+         RadioItem dualanalog_1;
 
          RadioItem gamepad_2;
          RadioItem multitap_2;
@@ -1594,6 +1605,7 @@ extracted:
          RadioItem justifier_2;
          RadioItem justifiers_2;
          RadioItem none_2;
+         RadioItem dualanalog_2;
       } settings;
 
 #ifdef _WIN32
@@ -1652,23 +1664,27 @@ extracted:
          settings.gamepad_1.setText("Gamepad");
          settings.mouse_1.setText("Mouse");
          settings.none_1.setText("None");
+         settings.dualanalog_1.setText("DualAnalog");
 
          settings.gamepad_2.setText("Gamepad");
-         settings.multitap_2.setText("Multitap");
+         settings.multitap_2.setText("Multitap (SNES)");
          settings.mouse_2.setText("Mouse");
-         settings.scope_2.setText("SuperScope");
-         settings.justifier_2.setText("Justifier");
-         settings.justifiers_2.setText("Two Justifiers");
+         settings.scope_2.setText("SuperScope (SNES)");
+         settings.justifier_2.setText("Justifier (SNES)");
+         settings.justifiers_2.setText("Two Justifiers (SNES)");
          settings.none_2.setText("None");
+         settings.dualanalog_2.setText("DualAnalog");
 
          settings_menu.append(settings.controllers);
          settings.controllers.append(settings.port_1);
          settings.controllers.append(settings.port_2);
          settings.port_1.append(settings.gamepad_1);
+         settings.port_1.append(settings.dualanalog_1);
          settings.port_1.append(settings.mouse_1);
          settings.port_1.append(settings.none_1);
 
          settings.port_2.append(settings.gamepad_2);
+         settings.port_2.append(settings.dualanalog_2);
          settings.port_2.append(settings.multitap_2);
          settings.port_2.append(settings.mouse_2);
          settings.port_2.append(settings.scope_2);
@@ -1676,8 +1692,8 @@ extracted:
          settings.port_2.append(settings.justifiers_2);
          settings.port_2.append(settings.none_2);
 
-         RadioItem::group(settings.gamepad_1, settings.mouse_1, settings.none_1);
-         RadioItem::group(settings.gamepad_2, settings.multitap_2, settings.mouse_2, settings.scope_2, settings.justifier_2, settings.justifiers_2, settings.none_2);
+         RadioItem::group(settings.gamepad_1, settings.dualanalog_1, settings.mouse_1, settings.none_1);
+         RadioItem::group(settings.gamepad_2, settings.dualanalog_2, settings.multitap_2, settings.mouse_2, settings.scope_2, settings.justifier_2, settings.justifiers_2, settings.none_2);
 
 #ifdef _WIN32
          updater_elems.update.setText("Update RetroArch");
