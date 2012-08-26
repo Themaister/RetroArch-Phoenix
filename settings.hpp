@@ -26,7 +26,7 @@ struct ToggleWindow : public Window
    { 
       setTitle(title); 
       setIcon("/usr/share/icons/retroarch-phoenix.png");
-      onClose = [this]() { this->hide(); if (cb) cb(); }; 
+      onClose = [this]() { if (cb) cb(); }; 
    }
    void show() { setVisible(); }
    void hide() { setVisible(false); }

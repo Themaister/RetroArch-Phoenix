@@ -82,6 +82,47 @@ namespace Internal
 #endif
 }
 
+class Remote : public ToggleWindow
+{
+   public:
+      Remote() : ToggleWindow("RetroArch || Remote")
+      {
+         save_state.setText("Save state");
+         load_state.setText("Load state");
+
+         save_state.onTick = [this] { send_cmd("SAVE_STATE\n"); };
+         load_state.onTick = [this] { send_cmd("LOAD_STATE\n"); };
+
+         layout.append(save_state, 0, 0);
+         layout.append(load_state, 0, 0);
+
+         auto minimum = layout.minimumGeometry();
+         setGeometry({100, 100, minimum.width, minimum.height});
+         append(layout);
+      }
+
+      // Comment out to test "remote".
+      void show() {}
+
+#ifdef _WIN32
+      void set_handle(HANDLE file) { this->handle = file; }
+      void send_cmd(const char *cmd) { DWORD written; WriteFile(handle, cmd, strlen(cmd), &written, NULL); }
+#else
+      void set_fd(int fd) { this->fd = fd; }
+      void send_cmd(const char *cmd) { write(fd, cmd, strlen(cmd)); }
+#endif
+
+   private:
+#ifdef _WIN32
+      HANDLE handle;
+#else
+      int fd;
+#endif
+      VerticalLayout layout;
+      Button save_state;
+      Button load_state;
+};
+
 class LogWindow : public ToggleWindow
 {
    public:
@@ -197,6 +238,7 @@ class MainWindow : public Window
       General general;
       Video video;
       Audio audio;
+      Remote remote;
       ExtROM ext_rom;
 
 #ifdef _WIN32
@@ -1107,6 +1149,8 @@ extracted:
             return;
          }
 
+         configs.cli.set("stdin_cmd_enable", true);
+
          string sysdir;
          if (!configs.cli.get("system_directory", sysdir) || sysdir.length() == 0)
          {
@@ -1358,8 +1402,10 @@ extracted:
       }
 
       Timer forked_timer;
+
 #ifdef _WIN32
       HANDLE fork_file;
+      HANDLE fork_stdin_file;
       PROCESS_INFORMATION forked_pinfo;
       bool forked_async;
 
@@ -1439,11 +1485,16 @@ extracted:
             }
 
             CloseHandle(fork_file);
-            fork_file = NULL;
+            CloseHandle(fork_stdin_file);
+            fork_file       = NULL;
+            fork_stdin_file = NULL;
+
+            remote.hide();
          }
       }
 #else
       int fork_fd;
+      int fork_stdin_fd;
       void forked_event()
       {
          if (Internal::child_quit)
@@ -1460,6 +1511,9 @@ extracted:
             }
 
             close(fork_fd);
+            close(fork_stdin_fd);
+            fork_fd       = -1;
+            fork_stdin_fd = -1;
 
             if (Internal::abnormal_quit)
                setStatusText("RetroArch exited abnormally! Check log!");
@@ -1473,6 +1527,7 @@ extracted:
                setStatusText("RetroArch exited successfully.");
 
             setVisible();
+            remote.hide();
          }
 
          char line[2048];
@@ -1508,26 +1563,42 @@ extracted:
 
          // Gotta love Unix :)
          int fds[2];
+         int stdin_fds[2];
 
          Internal::status = 0;
          Internal::child_quit = 0;
          Internal::abnormal_quit = 0;
-         signal(SIGCHLD, Internal::sigchld_handle);
+
+         struct sigaction sa;
+         sa.sa_handler = Internal::sigchld_handle;
+         sa.sa_flags   = SA_RESTART;
+         sigemptyset(&sa.sa_mask);
+         sigaction(SIGCHLD, &sa, NULL);
 
          if (can_hide)
          {
             if (pipe(fds) < 0)
                return;
+            if (pipe(stdin_fds) < 0)
+               return;
 
-            fork_fd = fds[0];
+            fork_fd       = fds[0];
+            fork_stdin_fd = stdin_fds[1];
+
             for (unsigned i = 0; i < 2; i++)
+            {
                fcntl(fds[i], F_SETFL, fcntl(fds[i], F_GETFL) | O_NONBLOCK);
+               fcntl(stdin_fds[i], F_SETFL, fcntl(stdin_fds[i], F_GETFL) | O_NONBLOCK);
+            }
 
             setVisible(false);
             general.hide();
             video.hide();
             audio.hide();
             input.hide();
+
+            remote.show();
+            remote.set_fd(fork_stdin_fd);
          }
 
          if ((Internal::child_pid = fork()))
@@ -1535,6 +1606,7 @@ extracted:
             if (can_hide)
             {
                close(fds[1]);
+               close(stdin_fds[0]);
                forked_timer.setEnabled();
             }
          }
@@ -1542,6 +1614,11 @@ extracted:
          {
             if (can_hide)
             {
+               // Redirect GUI to stdin.
+               close(0);
+               if (dup(stdin_fds[0]) < 0)
+                  exit(255);
+
                // Redirect stderr to GUI reader.
                close(2);
                if (dup(fds[1]) < 0)
@@ -1559,13 +1636,14 @@ extracted:
       {
          print_cmd(path, cmd);
 
-         HANDLE reader, writer;
+         HANDLE reader, writer, reader_stdin, writer_stdin;
          SECURITY_ATTRIBUTES saAttr;
          ZeroMemory(&saAttr, sizeof(saAttr));
          saAttr.nLength = sizeof(saAttr);
          saAttr.bInheritHandle = TRUE;
          saAttr.lpSecurityDescriptor = NULL;
          CreatePipe(&reader, &writer, &saAttr, 0);
+         CreatePipe(&reader_stdin, &writer_stdin, &saAttr, 0);
          SetHandleInformation(reader, HANDLE_FLAG_INHERIT, 0);
 
          string cmdline = {"\"", path, "\" "};
@@ -1588,7 +1666,7 @@ extracted:
          siStartInfo.cb = sizeof(siStartInfo);
          siStartInfo.hStdError = writer;
          siStartInfo.hStdOutput = NULL;
-         siStartInfo.hStdInput = NULL;
+         siStartInfo.hStdInput = reader_stdin;
          siStartInfo.dwFlags |= forked_async ? 0 : STARTF_USESTDHANDLES;
 
          WCHAR wcmdline[1024];
@@ -1596,8 +1674,12 @@ extracted:
          {
             if (reader)
                CloseHandle(reader);
+            if (reader_stdin)
+               CloseHandle(reader_stdin);
             if (writer)
                CloseHandle(writer);
+            if (writer_stdin)
+               CloseHandle(writer_stdin);
             return;
          }
 
@@ -1623,12 +1705,17 @@ extracted:
                video.hide();
                audio.hide();
                input.hide();
+               remote.show();
+               remote.set_handle(writer_stdin);
 
                CloseHandle(writer);
-               writer = NULL;
+               CloseHandle(reader_stdin);
+               writer       = NULL;
+               reader_stdin = NULL;
 
-               fork_file = reader;
-               forked_pinfo = piProcInfo;
+               fork_file       = reader;
+               fork_stdin_file = writer_stdin;
+               forked_pinfo    = piProcInfo;
 
                forked_timer.setEnabled();
             }
@@ -1636,10 +1723,15 @@ extracted:
                setStatusText("Failed to start RetroArch");
          }
          else
+         {
             fork_file = NULL;
+            fork_stdin_file = NULL;
+         }
 
          if (writer)
             CloseHandle(writer);
+         if (reader_stdin)
+            CloseHandle(reader_stdin);
       }
 #endif
 
@@ -1807,6 +1899,14 @@ extracted:
 
 int main()
 {
+#ifndef _WIN32
+   struct sigaction sa;
+   sa.sa_handler = SIG_IGN;
+   sa.sa_flags = SA_RESTART;
+   sigemptyset(&sa.sa_mask);
+   sigaction(SIGPIPE, &sa, NULL);
+#endif
+
    MainWindow win;
    OS::main();
 }
