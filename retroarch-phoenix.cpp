@@ -172,6 +172,7 @@ class MainWindow : public Window
 
       ~MainWindow()
       {
+         save_controllers();
          foreach (tempfile, tempfiles)
          {
 #ifdef _WIN32
@@ -685,6 +686,67 @@ class MainWindow : public Window
       }
 #endif
 
+      void init_controllers()
+      {
+         string tmp;
+         if (configs.gui.get("controller_1", tmp))
+         {
+            if (tmp == "gamepad")
+               settings.gamepad_1.setChecked();
+            else if (tmp == "dualanalog")
+               settings.dualanalog_1.setChecked();
+            else if (tmp == "mouse")
+               settings.mouse_1.setChecked();
+            else if (tmp == "none")
+               settings.none_1.setChecked();
+         }
+
+         if (configs.gui.get("controller_2", tmp))
+         {
+            if (tmp == "gamepad")
+               settings.gamepad_2.setChecked();
+            else if (tmp == "dualanalog")
+               settings.dualanalog_2.setChecked();
+            else if (tmp == "mouse")
+               settings.mouse_2.setChecked();
+            else if (tmp == "scope")
+               settings.scope_2.setChecked();
+            else if (tmp == "justifier")
+               settings.justifier_2.setChecked();
+            else if (tmp == "justifiers")
+               settings.justifiers_2.setChecked();
+            else if (tmp == "none")
+               settings.none_2.setChecked();
+         }
+      }
+
+      void save_controllers()
+      {
+         if (settings.gamepad_1.checked())
+            configs.gui.set("controller_1", string("gamepad"));
+         else if (settings.mouse_1.checked())
+            configs.gui.set("controller_1", string("mouse"));
+         else if (settings.none_1.checked())
+            configs.gui.set("controller_1", string("none"));
+         else if (settings.dualanalog_1.checked())
+            configs.gui.set("controller_1", string("dualanalog"));
+
+         if (settings.gamepad_2.checked())
+            configs.gui.set("controller_2", string("gamepad"));
+         else if (settings.mouse_2.checked())
+            configs.gui.set("controller_2", string("mouse"));
+         else if (settings.none_2.checked())
+            configs.gui.set("controller_2", string("none"));
+         else if (settings.dualanalog_2.checked())
+            configs.gui.set("controller_2", string("dualanalog"));
+         else if (settings.scope_2.checked())
+            configs.gui.set("controller_2", string("scope"));
+         else if (settings.justifier_2.checked())
+            configs.gui.set("controller_2", string("justifier"));
+         else if (settings.justifiers_2.checked())
+            configs.gui.set("controller_2", string("justifiers"));
+      }
+
       void init_config()
       {
          string tmp;
@@ -707,6 +769,8 @@ class MainWindow : public Window
          if (configs.gui.get("config_path", tmp)) config.setPath(tmp);
          config.setConfig(configs.gui, "config_path", {&MainWindow::reload_cli_config, this});
          libretro.setConfig(configs.cli, "libretro_path");
+
+         init_controllers();
 
          bool zip;
          if (configs.gui.get("extract_zip", zip))
