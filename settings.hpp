@@ -734,6 +734,7 @@ class InputSetting : public SettingLayout, public util::Shared<InputSetting>
       void update_list(unsigned p, unsigned i)
       {
          list_view.modify(i, list[p][i].base, list[p][i].display);
+         list_view.autoSizeColumns();
          update_input_player();
       }
       
