@@ -655,7 +655,7 @@ class InputSetting : public SettingLayout, public util::Shared<InputSetting>
             conf.set(list[i][j].config_base, conf_string);
             conf.set({list[i][j].config_base, "_btn"}, conf_string);
             conf.set({list[i][j].config_base, "_axis"}, conf_string);
-            this->update_list();
+            this->update_list(i, j);
          }
       }
 
@@ -713,17 +713,9 @@ class InputSetting : public SettingLayout, public util::Shared<InputSetting>
          JoyHat,
          None
       };
-      
-      void update_list()
+
+      void update_input_player()
       {
-         list_view.reset();
-
-         foreach(i, list[player.selection()])
-         {
-            list_view.append(i.base, i.display);
-         }
-         list_view.autoSizeColumns();
-
          if (player.selection() == max_players) // Misc, only player 1
          {
             index_show.setText("0");
@@ -737,6 +729,23 @@ class InputSetting : public SettingLayout, public util::Shared<InputSetting>
             else
                index_show.setText((unsigned)player.selection());
          }
+      }
+
+      void update_list(unsigned p, unsigned i)
+      {
+         list_view.modify(i, list[p][i].base, list[p][i].display);
+         update_input_player();
+      }
+      
+      void update_list()
+      {
+         list_view.reset();
+
+         foreach(i, list[player.selection()])
+            list_view.append(i.base, i.display);
+         list_view.autoSizeColumns();
+
+         update_input_player();
       }
 
       void update_bind_event()
@@ -788,7 +797,7 @@ class InputSetting : public SettingLayout, public util::Shared<InputSetting>
             poll_elem->display.append(ext);
 
          msg_cb("");
-         update_list();
+         update_list(player.selection(), list_view.selection());
       }
 
       void update_bind()
@@ -943,6 +952,7 @@ class General : public ToggleWindow
          widgets.append(BoolSetting::shared(_conf, "video_hires_record", "Record in hi-res:", false));
          widgets.append(BoolSetting::shared(_conf, "video_h264_record", "Enable H.264 recording:", true));
          widgets.append(BoolSetting::shared(_conf, "video_post_filter_record", "Records filtered output:", false));
+         widgets.append(BoolSetting::shared(_conf, "video_gpu_record", "Records post-shaded output:", false));
          widgets.append(BoolSetting::shared(_conf, "network_cmd_enable", "Enable external command interface:", false));
 
          widgets.append(DirSetting::shared(_conf, "system_directory", "System directory:", string("")));
