@@ -13,7 +13,7 @@ HEADERS = $(wildcard *.h) $(wildcard *.hpp)
 
 QT_CFLAGS = $(shell pkg-config --cflags QtCore QtGui)
 QT_LIBS = $(shell pkg-config --libs QtCore QtGui)
-CXXFLAGS += -O3 -std=gnu++0x
+CXXFLAGS += -O3 -std=gnu++0x -Wno-narrowing
 CFLAGS += -O3 -std=gnu99
 
 INCLUDES = -Iphoenix -I.
