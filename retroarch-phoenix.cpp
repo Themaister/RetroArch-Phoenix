@@ -89,12 +89,65 @@ class Remote : public ToggleWindow
       {
          save_state.setText("Save state");
          load_state.setText("Load state");
+         fast_forward.setText("Fast forward toggle");
+         fullscreen_toggle.setText("Fullscreen toggle");
+         quit.setText("Quit");
+         state_slot_plus.setText("State/movie slot (+)");
+         state_slot_minus.setText("State/movie slot (-)");
+         movie_record_toggle.setText("Movie record toggle");
+         pause_toggle.setText("Pause toggle");
+         frameadvance.setText("Frame advance");
+         reset.setText("Reset");
+         cheat_index_plus.setText("Cheat index (+)");
+         cheat_index_minus.setText("Cheat index (-)");
+         cheat_toggle.setText("Cheat toggle");
+         screenshot.setText("Screenshot");
+         dsp_config.setText("DSP config");
+         mute.setText("Mute audio");
 
-         save_state.onTick = [this] { send_cmd("SAVE_STATE\n"); };
-         load_state.onTick = [this] { send_cmd("LOAD_STATE\n"); };
+         save_state.onTick          = [this] { send_cmd("SAVE_STATE\n"); };
+         load_state.onTick          = [this] { send_cmd("LOAD_STATE\n"); };
+         fast_forward.onTick        = [this] { send_cmd("FAST_FORWARD\n"); };
+         fullscreen_toggle.onTick   = [this] { send_cmd("FULLSCREEN_TOGGLE\n"); };
+         quit.onTick                = [this] { send_cmd("QUIT\n"); };
+         state_slot_plus.onTick     = [this] { send_cmd("STATE_SLOT_PLUS\n"); };
+         state_slot_minus.onTick    = [this] { send_cmd("STATE_SLOT_MINUS\n"); };
+         movie_record_toggle.onTick = [this] { send_cmd("MOVIE_RECORD_TOGGLE\n"); };
+         pause_toggle.onTick        = [this] { send_cmd("PAUSE_TOGGLE\n"); };
+         frameadvance.onTick        = [this] { send_cmd("FRAMEADVANCE\n"); };
+         reset.onTick               = [this] { send_cmd("RESET\n"); };
+         cheat_index_plus.onTick    = [this] { send_cmd("CHEAT_INDEX_PLUS\n"); };
+         cheat_index_minus.onTick   = [this] { send_cmd("CHEAT_INDEX_MINUS\n"); };
+         cheat_toggle.onTick        = [this] { send_cmd("CHEAT_TOGGLE\n"); };
+         screenshot.onTick          = [this] { send_cmd("SCREENSHOT\n"); };
+         dsp_config.onTick          = [this] { send_cmd("DSP_CONFIG\n"); };
+         mute.onTick                = [this] { send_cmd("MUTE\n"); };
 
-         layout.append(save_state, 0, 0);
-         layout.append(load_state, 0, 0);
+         const int remote_button_w = 180;
+
+         vbox[0].append(quit, remote_button_w, 0);
+
+         vbox[1].append(load_state, remote_button_w, 0);
+         vbox[1].append(save_state, remote_button_w, 0);
+         vbox[1].append(state_slot_plus, remote_button_w, 0);
+         vbox[1].append(state_slot_minus, remote_button_w, 0);
+         vbox[1].append(reset, remote_button_w, 0);
+
+         vbox[2].append(pause_toggle, remote_button_w, 0);
+         vbox[2].append(frameadvance, remote_button_w, 0);
+         vbox[2].append(fast_forward, remote_button_w, 0);
+         vbox[2].append(fullscreen_toggle, remote_button_w, 0);
+
+         vbox[3].append(cheat_index_plus, remote_button_w, 0);
+         vbox[3].append(cheat_index_minus, remote_button_w, 0);
+         vbox[3].append(cheat_toggle, remote_button_w, 0);
+         vbox[3].append(movie_record_toggle, remote_button_w, 0);
+         vbox[3].append(screenshot, remote_button_w, 0);
+         vbox[3].append(dsp_config, remote_button_w, 0);
+         vbox[3].append(mute, remote_button_w, 0);
+
+         foreach(v, vbox)
+            layout.append(v);
 
          auto minimum = layout.minimumGeometry();
          setGeometry({100, 100, minimum.width, minimum.height});
@@ -102,7 +155,7 @@ class Remote : public ToggleWindow
       }
 
       // Comment out to test "remote".
-      void show() {}
+      //void show() {}
 
 #ifdef _WIN32
       void set_handle(HANDLE file) { this->handle = file; }
@@ -118,9 +171,13 @@ class Remote : public ToggleWindow
 #else
       int fd;
 #endif
-      VerticalLayout layout;
-      Button save_state;
-      Button load_state;
+      VerticalLayout vbox[4];
+      HorizontalLayout layout;
+      Button save_state, load_state;
+      Button fast_forward, fullscreen_toggle, quit, state_slot_plus, state_slot_minus;
+      Button movie_record_toggle, pause_toggle, frameadvance, reset;
+      Button cheat_index_plus, cheat_index_minus, cheat_toggle, screenshot, dsp_config;
+      Button mute;
 };
 
 class LogWindow : public ToggleWindow
