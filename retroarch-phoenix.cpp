@@ -1029,6 +1029,9 @@ end:
             return false;
          }
 
+         foreach (known_ext, exts)
+            print("Known extension: ", known_ext, "\n");
+
          foreach (file, z.file)
          {
             print("Checking file: ", file.name, "\n");
