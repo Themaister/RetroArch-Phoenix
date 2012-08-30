@@ -959,11 +959,14 @@ class MainWindow : public Window
          MessageWindow::warning(Window::None, err);
       }
 
-      void get_system_info(struct retro_system_info &sys_info, const string &path)
+      lstring get_system_info(struct retro_system_info &sys_info, const string &path)
       {
+         lstring ret;
+         string roms;
+
          dylib_t lib = dylib_load(path);
          if (!lib)
-            return;
+            return ret;
 
          unsigned (*pver)() = NULL;
          void (*pgetinfo)(struct retro_system_info*) = NULL;
@@ -981,14 +984,20 @@ class MainWindow : public Window
 
          pgetinfo(&sys_info);
 
+         if (sys_info.valid_extensions)
+            roms = sys_info.valid_extensions;
+
 end:
          dylib_close(lib);
+
+         ret.split("|", roms);
+         return ret;
       }
 
       bool check_zip(string& rom_path)
       {
          struct retro_system_info sys_info = {0};
-         get_system_info(sys_info, libretro.getPath());
+         lstring exts = get_system_info(sys_info, libretro.getPath());
          if (sys_info.block_extract)
             return true;
 
@@ -1020,21 +1029,10 @@ end:
             return false;
          }
 
-         static const char *known_exts[] = {
-            ".smc", ".sfc",
-            ".nes",
-            ".gba", ".gb", ".gbc",
-            // full list of pre-dreamcast sega rom file extensions: .bin, .gen, .md, .smd, .mdx, .sms, .gg, .sg
-            // Genesis-next-libretro extensions are below.  Genplus-gx supports the full list above, so they should probably be added at some point.
-            // Perhaps it would be prudent to add them now so that ROM load failure is up to the emulator core rather than this unzipping list.
-            ".bin", ".gen", ".md", ".smd", ".sms", ".gg",
-            ".cue",
-         };
-
          foreach (file, z.file)
          {
             print("Checking file: ", file.name, "\n");
-            foreach (known_ext, known_exts)
+            foreach (known_ext, exts)
             {
                if (!file.name.endswith(known_ext))
                   continue;
@@ -1059,7 +1057,7 @@ end:
 
                bool has_extracted;
 
-               rom_path = {rom_dir, rom_basename, rom_extension};
+               rom_path = {rom_dir, rom_basename, ".", rom_extension};
 
                bool already_extracted = tempfiles.find(rom_path);
 
