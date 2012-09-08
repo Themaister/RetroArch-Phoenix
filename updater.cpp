@@ -110,7 +110,7 @@ Updater::Updater()
    libretro_listview.setHeaderText("System", "Core", "Version", "Architecture", "Library", "Downloaded");
    libretro_listview.setHeaderVisible();
    libretro_listview.autoSizeColumns();
-   vbox.append(libretro_listview, 550, 250);
+   vbox.append(libretro_listview, 650, 350);
 
    vbox.setMargin(5);
 
