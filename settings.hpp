@@ -1043,7 +1043,7 @@ class ShaderVideo : public ToggleWindow
          widgets.append(ShaderSetting::shared(_conf, "video_shader_type", 
                   linear_vector<string>({"Automatic", "Cg", "bSNES XML", "None"}), 
                   linear_vector<string>({"auto", "cg", "bsnes", "none"}), paths));
-         widgets.append(DirSetting::shared(_conf, "video_shader_dir", "XML shader directory:", ""));
+         widgets.append(DirSetting::shared(_conf, "video_shader_dir", "Shader directory:", ""));
          widgets.append(BoolSetting::shared(_conf, "video_render_to_texture", "Render-to-texture (2-pass rendering):", false));
          widgets.append(DoubleSetting::shared(_conf, "video_fbo_scale_x", "FBO Scale X:", 2.0));
          widgets.append(DoubleSetting::shared(_conf, "video_fbo_scale_y", "FBO Scale Y:", 2.0));
