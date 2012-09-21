@@ -104,6 +104,7 @@ class Remote : public ToggleWindow
          screenshot.setText("Screenshot");
          dsp_config.setText("DSP config");
          mute.setText("Mute audio");
+         shader.setText("Set shader ...");
 
          save_state.onTick          = [this] { send_cmd("SAVE_STATE\n"); };
          load_state.onTick          = [this] { send_cmd("LOAD_STATE\n"); };
@@ -123,28 +124,32 @@ class Remote : public ToggleWindow
          dsp_config.onTick          = [this] { send_cmd("DSP_CONFIG\n"); };
          mute.onTick                = [this] { send_cmd("MUTE\n"); };
 
+         shader.onTick              = [this] { send_arg_cmd("SET_SHADER"); };
+
          const int remote_button_w = 180;
 
          vbox[0].append(quit, remote_button_w, 0);
 
-         vbox[1].append(load_state, remote_button_w, 0);
-         vbox[1].append(save_state, remote_button_w, 0);
-         vbox[1].append(state_slot_plus, remote_button_w, 0);
-         vbox[1].append(state_slot_minus, remote_button_w, 0);
-         vbox[1].append(reset, remote_button_w, 0);
+         vbox[1].append(shader, remote_button_w, 0);
 
-         vbox[2].append(pause_toggle, remote_button_w, 0);
-         vbox[2].append(frameadvance, remote_button_w, 0);
-         vbox[2].append(fast_forward, remote_button_w, 0);
-         vbox[2].append(fullscreen_toggle, remote_button_w, 0);
+         vbox[2].append(load_state, remote_button_w, 0);
+         vbox[2].append(save_state, remote_button_w, 0);
+         vbox[2].append(state_slot_plus, remote_button_w, 0);
+         vbox[2].append(state_slot_minus, remote_button_w, 0);
+         vbox[2].append(reset, remote_button_w, 0);
 
-         vbox[3].append(cheat_index_plus, remote_button_w, 0);
-         vbox[3].append(cheat_index_minus, remote_button_w, 0);
-         vbox[3].append(cheat_toggle, remote_button_w, 0);
-         vbox[3].append(movie_record_toggle, remote_button_w, 0);
-         vbox[3].append(screenshot, remote_button_w, 0);
-         vbox[3].append(dsp_config, remote_button_w, 0);
-         vbox[3].append(mute, remote_button_w, 0);
+         vbox[3].append(pause_toggle, remote_button_w, 0);
+         vbox[3].append(frameadvance, remote_button_w, 0);
+         vbox[3].append(fast_forward, remote_button_w, 0);
+         vbox[3].append(fullscreen_toggle, remote_button_w, 0);
+
+         vbox[4].append(cheat_index_plus, remote_button_w, 0);
+         vbox[4].append(cheat_index_minus, remote_button_w, 0);
+         vbox[4].append(cheat_toggle, remote_button_w, 0);
+         vbox[4].append(movie_record_toggle, remote_button_w, 0);
+         vbox[4].append(screenshot, remote_button_w, 0);
+         vbox[4].append(dsp_config, remote_button_w, 0);
+         vbox[4].append(mute, remote_button_w, 0);
 
          foreach(v, vbox)
             layout.append(v);
@@ -165,19 +170,30 @@ class Remote : public ToggleWindow
       void send_cmd(const char *cmd) { write(fd, cmd, strlen(cmd)); }
 #endif
 
+      void send_arg_cmd(const char *cmd)
+      {
+         string file = OS::fileLoad(Window::None, "", "XML shader, Cg shader, Cg-meta shader (*.shader,*.cg,*.cgp)");
+         if (file.length() == 0)
+            return;
+
+         string cmd_str = { cmd, " ", file, "\n" };
+         send_cmd(cmd_str);
+      }
+
    private:
 #ifdef _WIN32
       HANDLE handle;
 #else
       int fd;
 #endif
-      VerticalLayout vbox[4];
+      VerticalLayout vbox[5];
       HorizontalLayout layout;
       Button save_state, load_state;
       Button fast_forward, fullscreen_toggle, quit, state_slot_plus, state_slot_minus;
       Button movie_record_toggle, pause_toggle, frameadvance, reset;
       Button cheat_index_plus, cheat_index_minus, cheat_toggle, screenshot, dsp_config;
       Button mute;
+      Button shader;
 };
 
 class LogWindow : public ToggleWindow
