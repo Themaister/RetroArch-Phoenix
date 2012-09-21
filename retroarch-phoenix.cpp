@@ -82,120 +82,6 @@ namespace Internal
 #endif
 }
 
-class Remote : public ToggleWindow
-{
-   public:
-      Remote() : ToggleWindow("RetroArch || Remote")
-      {
-         save_state.setText("Save state");
-         load_state.setText("Load state");
-         fast_forward.setText("Fast forward toggle");
-         fullscreen_toggle.setText("Fullscreen toggle");
-         quit.setText("Quit");
-         state_slot_plus.setText("State/movie slot (+)");
-         state_slot_minus.setText("State/movie slot (-)");
-         movie_record_toggle.setText("Movie record toggle");
-         pause_toggle.setText("Pause toggle");
-         frameadvance.setText("Frame advance");
-         reset.setText("Reset");
-         cheat_index_plus.setText("Cheat index (+)");
-         cheat_index_minus.setText("Cheat index (-)");
-         cheat_toggle.setText("Cheat toggle");
-         screenshot.setText("Screenshot");
-         dsp_config.setText("DSP config");
-         mute.setText("Mute audio");
-         shader.setText("Set shader ...");
-
-         save_state.onTick          = [this] { send_cmd("SAVE_STATE\n"); };
-         load_state.onTick          = [this] { send_cmd("LOAD_STATE\n"); };
-         fast_forward.onTick        = [this] { send_cmd("FAST_FORWARD\n"); };
-         fullscreen_toggle.onTick   = [this] { send_cmd("FULLSCREEN_TOGGLE\n"); };
-         quit.onTick                = [this] { send_cmd("QUIT\n"); };
-         state_slot_plus.onTick     = [this] { send_cmd("STATE_SLOT_PLUS\n"); };
-         state_slot_minus.onTick    = [this] { send_cmd("STATE_SLOT_MINUS\n"); };
-         movie_record_toggle.onTick = [this] { send_cmd("MOVIE_RECORD_TOGGLE\n"); };
-         pause_toggle.onTick        = [this] { send_cmd("PAUSE_TOGGLE\n"); };
-         frameadvance.onTick        = [this] { send_cmd("FRAMEADVANCE\n"); };
-         reset.onTick               = [this] { send_cmd("RESET\n"); };
-         cheat_index_plus.onTick    = [this] { send_cmd("CHEAT_INDEX_PLUS\n"); };
-         cheat_index_minus.onTick   = [this] { send_cmd("CHEAT_INDEX_MINUS\n"); };
-         cheat_toggle.onTick        = [this] { send_cmd("CHEAT_TOGGLE\n"); };
-         screenshot.onTick          = [this] { send_cmd("SCREENSHOT\n"); };
-         dsp_config.onTick          = [this] { send_cmd("DSP_CONFIG\n"); };
-         mute.onTick                = [this] { send_cmd("MUTE\n"); };
-
-         shader.onTick              = [this] { send_arg_cmd("SET_SHADER"); };
-
-         const int remote_button_w = 180;
-
-         vbox[0].append(quit, remote_button_w, 0);
-
-         vbox[1].append(shader, remote_button_w, 0);
-
-         vbox[2].append(load_state, remote_button_w, 0);
-         vbox[2].append(save_state, remote_button_w, 0);
-         vbox[2].append(state_slot_plus, remote_button_w, 0);
-         vbox[2].append(state_slot_minus, remote_button_w, 0);
-         vbox[2].append(reset, remote_button_w, 0);
-
-         vbox[3].append(pause_toggle, remote_button_w, 0);
-         vbox[3].append(frameadvance, remote_button_w, 0);
-         vbox[3].append(fast_forward, remote_button_w, 0);
-         vbox[3].append(fullscreen_toggle, remote_button_w, 0);
-
-         vbox[4].append(cheat_index_plus, remote_button_w, 0);
-         vbox[4].append(cheat_index_minus, remote_button_w, 0);
-         vbox[4].append(cheat_toggle, remote_button_w, 0);
-         vbox[4].append(movie_record_toggle, remote_button_w, 0);
-         vbox[4].append(screenshot, remote_button_w, 0);
-         vbox[4].append(dsp_config, remote_button_w, 0);
-         vbox[4].append(mute, remote_button_w, 0);
-
-         foreach(v, vbox)
-            layout.append(v);
-
-         auto minimum = layout.minimumGeometry();
-         setGeometry({100, 100, minimum.width, minimum.height});
-         append(layout);
-      }
-
-      // Comment out to test "remote".
-      //void show() {}
-
-#ifdef _WIN32
-      void set_handle(HANDLE file) { this->handle = file; }
-      void send_cmd(const char *cmd) { DWORD written; WriteFile(handle, cmd, strlen(cmd), &written, NULL); }
-#else
-      void set_fd(int fd) { this->fd = fd; }
-      void send_cmd(const char *cmd) { write(fd, cmd, strlen(cmd)); }
-#endif
-
-      void send_arg_cmd(const char *cmd)
-      {
-         string file = OS::fileLoad(Window::None, "", "XML shader, Cg shader, Cg-meta shader (*.shader,*.cg,*.cgp)");
-         if (file.length() == 0)
-            return;
-
-         string cmd_str = { cmd, " ", file, "\n" };
-         send_cmd(cmd_str);
-      }
-
-   private:
-#ifdef _WIN32
-      HANDLE handle;
-#else
-      int fd;
-#endif
-      VerticalLayout vbox[5];
-      HorizontalLayout layout;
-      Button save_state, load_state;
-      Button fast_forward, fullscreen_toggle, quit, state_slot_plus, state_slot_minus;
-      Button movie_record_toggle, pause_toggle, frameadvance, reset;
-      Button cheat_index_plus, cheat_index_minus, cheat_toggle, screenshot, dsp_config;
-      Button mute;
-      Button shader;
-};
-
 class LogWindow : public ToggleWindow
 {
    public:
@@ -257,6 +143,125 @@ class LogWindow : public ToggleWindow
 
 };
 
+class Remote : public ToggleWindow
+{
+   public:
+      Remote() : ToggleWindow("RetroArch || Remote"), logger(0)
+      {
+         save_state.setText("Save state");
+         load_state.setText("Load state");
+         fast_forward.setText("Fast forward toggle");
+         fullscreen_toggle.setText("Fullscreen toggle");
+         quit.setText("Quit");
+         state_slot_plus.setText("State/movie slot (+)");
+         state_slot_minus.setText("State/movie slot (-)");
+         movie_record_toggle.setText("Movie record toggle");
+         pause_toggle.setText("Pause toggle");
+         frameadvance.setText("Frame advance");
+         reset.setText("Reset");
+         cheat_index_plus.setText("Cheat index (+)");
+         cheat_index_minus.setText("Cheat index (-)");
+         cheat_toggle.setText("Cheat toggle");
+         screenshot.setText("Screenshot");
+         dsp_config.setText("DSP config");
+         mute.setText("Mute audio");
+         shader.setText("Set shader ...");
+         log.setText("Show log");
+
+         save_state.onTick          = [this] { send_cmd("SAVE_STATE\n"); };
+         load_state.onTick          = [this] { send_cmd("LOAD_STATE\n"); };
+         fast_forward.onTick        = [this] { send_cmd("FAST_FORWARD\n"); };
+         fullscreen_toggle.onTick   = [this] { send_cmd("FULLSCREEN_TOGGLE\n"); };
+         quit.onTick                = [this] { send_cmd("QUIT\n"); };
+         state_slot_plus.onTick     = [this] { send_cmd("STATE_SLOT_PLUS\n"); };
+         state_slot_minus.onTick    = [this] { send_cmd("STATE_SLOT_MINUS\n"); };
+         movie_record_toggle.onTick = [this] { send_cmd("MOVIE_RECORD_TOGGLE\n"); };
+         pause_toggle.onTick        = [this] { send_cmd("PAUSE_TOGGLE\n"); };
+         frameadvance.onTick        = [this] { send_cmd("FRAMEADVANCE\n"); };
+         reset.onTick               = [this] { send_cmd("RESET\n"); };
+         cheat_index_plus.onTick    = [this] { send_cmd("CHEAT_INDEX_PLUS\n"); };
+         cheat_index_minus.onTick   = [this] { send_cmd("CHEAT_INDEX_MINUS\n"); };
+         cheat_toggle.onTick        = [this] { send_cmd("CHEAT_TOGGLE\n"); };
+         screenshot.onTick          = [this] { send_cmd("SCREENSHOT\n"); };
+         dsp_config.onTick          = [this] { send_cmd("DSP_CONFIG\n"); };
+         mute.onTick                = [this] { send_cmd("MUTE\n"); };
+
+         shader.onTick              = [this] { send_arg_cmd("SET_SHADER"); };
+         log.onTick                 = [this] { if (logger) logger->show(); };
+
+         const int remote_button_w = 180;
+
+         vbox[0].append(quit, remote_button_w, 0);
+
+         vbox[1].append(shader, remote_button_w, 0);
+         vbox[1].append(log, remote_button_w, 0);
+
+         vbox[2].append(load_state, remote_button_w, 0);
+         vbox[2].append(save_state, remote_button_w, 0);
+         vbox[2].append(state_slot_plus, remote_button_w, 0);
+         vbox[2].append(state_slot_minus, remote_button_w, 0);
+         vbox[2].append(reset, remote_button_w, 0);
+
+         vbox[3].append(pause_toggle, remote_button_w, 0);
+         vbox[3].append(frameadvance, remote_button_w, 0);
+         vbox[3].append(fast_forward, remote_button_w, 0);
+         vbox[3].append(fullscreen_toggle, remote_button_w, 0);
+
+         vbox[4].append(cheat_index_plus, remote_button_w, 0);
+         vbox[4].append(cheat_index_minus, remote_button_w, 0);
+         vbox[4].append(cheat_toggle, remote_button_w, 0);
+         vbox[4].append(movie_record_toggle, remote_button_w, 0);
+         vbox[4].append(screenshot, remote_button_w, 0);
+         vbox[4].append(dsp_config, remote_button_w, 0);
+         vbox[4].append(mute, remote_button_w, 0);
+
+         foreach(v, vbox)
+            layout.append(v);
+
+         auto minimum = layout.minimumGeometry();
+         setGeometry({100, 100, minimum.width, minimum.height});
+         append(layout);
+      }
+
+      // Comment out to test "remote".
+      //void show() {}
+
+#ifdef _WIN32
+      void set_handle(HANDLE file) { this->handle = file; }
+      void send_cmd(const char *cmd) { DWORD written; WriteFile(handle, cmd, strlen(cmd), &written, NULL); }
+#else
+      void set_fd(int fd) { this->fd = fd; }
+      void send_cmd(const char *cmd) { write(fd, cmd, strlen(cmd)); }
+#endif
+
+      void send_arg_cmd(const char *cmd)
+      {
+         string file = OS::fileLoad(Window::None, "", "XML shader, Cg shader, Cg-meta shader (*.shader,*.cg,*.cgp)");
+         if (file.length() == 0)
+            return;
+
+         string cmd_str = { cmd, " ", file, "\n" };
+         send_cmd(cmd_str);
+      }
+
+      LogWindow *logger;
+
+   private:
+#ifdef _WIN32
+      HANDLE handle;
+#else
+      int fd;
+#endif
+      VerticalLayout vbox[5];
+      HorizontalLayout layout;
+      Button save_state, load_state;
+      Button fast_forward, fullscreen_toggle, quit, state_slot_plus, state_slot_minus;
+      Button movie_record_toggle, pause_toggle, frameadvance, reset;
+      Button cheat_index_plus, cheat_index_minus, cheat_toggle, screenshot, dsp_config;
+      Button mute;
+      Button shader, log;
+};
+
 class MainWindow : public Window
 {
    public:
@@ -282,6 +287,8 @@ class MainWindow : public Window
 
          init_config();
          setVisible();
+
+         remote.logger = &log_win;
       }
 
       ~MainWindow()
