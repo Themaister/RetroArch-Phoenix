@@ -954,7 +954,7 @@ class General : public ToggleWindow
          widgets.append(BoolSetting::shared(_conf, "video_h264_record", "Enable H.264 recording:", true));
          widgets.append(BoolSetting::shared(_conf, "video_post_filter_record", "Records filtered output:", false));
          widgets.append(BoolSetting::shared(_conf, "video_gpu_record", "Records post-shaded output:", false));
-         widgets.append(BoolSetting::shared(_conf, "network_cmd_enable", "Enable external command interface:", false));
+         widgets.append(BoolSetting::shared(_conf, "network_cmd_enable", "Enable UDP command interface:", false));
 
          widgets.append(DirSetting::shared(_conf, "system_directory", "System directory:", string("")));
          widgets.append(PathSetting::shared(_conf, "cheat_database_path", "XML cheat database:", string(""), "XML files (*.xml)"));
