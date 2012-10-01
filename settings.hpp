@@ -1221,6 +1221,7 @@ namespace Internal
       { "input_player" #n_player "_r2", "R2", "", "" }, \
       { "input_player" #n_player "_l3", "L3", "", "" }, \
       { "input_player" #n_player "_r3", "R3", "", "" }, \
+      { "input_player" #n_player "_turbo", "Turbo", "", "" }, \
       ANALOG_BINDS(n_player)
 
 #define DEFINE_BINDS_OTHER(n_player) \
@@ -1240,6 +1241,7 @@ namespace Internal
       { "input_player" #n_player "_r2", "R2", "", "" }, \
       { "input_player" #n_player "_l3", "L3", "", "" }, \
       { "input_player" #n_player "_r3", "R3", "", "" }, \
+      { "input_player" #n_player "_turbo", "Turbo", "", "" }, \
       ANALOG_BINDS(n_player)
  
 
