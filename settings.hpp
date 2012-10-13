@@ -1291,8 +1291,6 @@ namespace Internal
       { "input_pause_toggle", "Pause toggle", "", "p" },
       { "input_frame_advance", "Frame advance", "", "k" },
       { "input_movie_record_toggle", "Movie record toggle", "", "o" },
-      { "input_rate_step_up", "Audio input rate step up", "", "kp_plus" },
-      { "input_rate_step_down", "Audio input rate step down", "", "kp_minus" },
       { "input_rewind", "Rewind", "", "r" },
       { "input_reset", "Reset", "", "h" },
       { "input_shader_next", "Next shader", "", "m" },
