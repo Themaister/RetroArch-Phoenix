@@ -1020,7 +1020,12 @@ class General : public ToggleWindow
 namespace Internal
 {
    static const linear_vector<combo_selection> video_drivers = {
-#if defined(_WIN32) || defined(__APPLE__)
+#if defined(_WIN32)
+      { "gl", "OpenGL" },
+      { "d3d9", "Direct3D9" },
+      { "sdl", "SDL" },
+      { "ext", "External" },
+#elif defined(__APPLE__)
       { "gl", "OpenGL" },
       { "sdl", "SDL" },
       { "ext", "External" },
