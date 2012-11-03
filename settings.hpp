@@ -1309,6 +1309,8 @@ namespace Internal
       { "input_audio_mute", "Mute/unmute audio", "", "f9" },
       { "input_netplay_flip_players", "Netplay flip players", "", "i" },
       { "input_slowmotion", "Slow motion", "", "e" },
+      { "input_volume_up", "Increase volume", "", "kp_plus" },
+      { "input_volume_down", "Decrease volume", "", "kp_minus" },
    };
 
    static const linear_vector<linear_vector<input_selection>> binds = { 
