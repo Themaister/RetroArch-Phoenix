@@ -164,6 +164,8 @@ class Remote : public ToggleWindow
          cheat_toggle.setText("Cheat toggle");
          screenshot.setText("Screenshot");
          dsp_config.setText("DSP config");
+         vol_up.setText("Volume (+)");
+         vol_down.setText("Volume (-)");
          mute.setText("Mute audio");
          shader.setText("Set shader ...");
          log.setText("Show log");
@@ -184,6 +186,8 @@ class Remote : public ToggleWindow
          cheat_toggle.onTick        = [this] { send_cmd("CHEAT_TOGGLE\n"); };
          screenshot.onTick          = [this] { send_cmd("SCREENSHOT\n"); };
          dsp_config.onTick          = [this] { send_cmd("DSP_CONFIG\n"); };
+         vol_up.onTick              = [this] { send_cmd("VOLUME_UP\n"); };
+         vol_down .onTick           = [this] { send_cmd("VOLUME_DOWN\n"); };
          mute.onTick                = [this] { send_cmd("MUTE\n"); };
 
          shader.onTick              = [this] { send_arg_cmd("SET_SHADER"); };
@@ -200,6 +204,9 @@ class Remote : public ToggleWindow
          vbox[2].append(save_state, remote_button_w, 0);
          vbox[2].append(state_slot_plus, remote_button_w, 0);
          vbox[2].append(state_slot_minus, remote_button_w, 0);
+         vbox[2].append(cheat_index_plus, remote_button_w, 0);
+         vbox[2].append(cheat_index_minus, remote_button_w, 0);
+         vbox[2].append(cheat_toggle, remote_button_w, 0);
          vbox[2].append(reset, remote_button_w, 0);
 
          vbox[3].append(pause_toggle, remote_button_w, 0);
@@ -207,12 +214,11 @@ class Remote : public ToggleWindow
          vbox[3].append(fast_forward, remote_button_w, 0);
          vbox[3].append(fullscreen_toggle, remote_button_w, 0);
 
-         vbox[4].append(cheat_index_plus, remote_button_w, 0);
-         vbox[4].append(cheat_index_minus, remote_button_w, 0);
-         vbox[4].append(cheat_toggle, remote_button_w, 0);
          vbox[4].append(movie_record_toggle, remote_button_w, 0);
          vbox[4].append(screenshot, remote_button_w, 0);
          vbox[4].append(dsp_config, remote_button_w, 0);
+         vbox[4].append(vol_up, remote_button_w, 0);
+         vbox[4].append(vol_down, remote_button_w, 0);
          vbox[4].append(mute, remote_button_w, 0);
 
          foreach(v, vbox)
@@ -257,7 +263,7 @@ class Remote : public ToggleWindow
       Button save_state, load_state;
       Button fast_forward, fullscreen_toggle, quit, state_slot_plus, state_slot_minus;
       Button movie_record_toggle, pause_toggle, frameadvance, reset;
-      Button cheat_index_plus, cheat_index_minus, cheat_toggle, screenshot, dsp_config;
+      Button cheat_index_plus, cheat_index_minus, cheat_toggle, screenshot, dsp_config, vol_up, vol_down;
       Button mute;
       Button shader, log;
 };
