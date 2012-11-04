@@ -1285,7 +1285,7 @@ namespace Internal
    };
 
    static const linear_vector<input_selection> misc = {
-      { "input_enable_hotkey", "Enable hotkey", "", "" },
+      { "input_enable_hotkey", "Hold to use hotkeys", "", "" },
       { "input_save_state", "Save state", "", "f2" },
       { "input_load_state", "Load state", "", "f4" },
       { "input_state_slot_increase", "Increase state slot", "", "f7" },
