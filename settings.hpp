@@ -1112,7 +1112,7 @@ class Video : public ToggleWindow
          widgets.append(DoubleSetting::shared(_conf, "video_refresh_rate", "Monitor refresh rate (Hz):", 59.95));
          widgets.append(BoolSetting::shared(_conf, "video_vsync", "VSync:", true));
          widgets.append(BoolSetting::shared(_conf, "video_fullscreen", "Start in fullscreen:", false));
-         widgets.append(BoolSetting::shared(_conf, "video_windowed_fullscreen", "Prefer windowed fullscreen:", false));
+         widgets.append(BoolSetting::shared(_conf, "video_windowed_fullscreen", "Prefer windowed fullscreen:", true));
          widgets.append(IntSetting::shared(_conf, "video_monitor_index", "Preferred monitor index:", 0));
          widgets.append(BoolSetting::shared(_conf, "video_force_16bit", "Force 16-bit color:", false));
          widgets.append(BoolSetting::shared(_conf, "video_disable_composition", "Disable composition (Win Vista/7):", false));
