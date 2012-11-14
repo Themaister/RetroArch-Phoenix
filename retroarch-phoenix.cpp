@@ -271,7 +271,9 @@ class Remote : public ToggleWindow
 class MainWindow : public Window
 {
    public:
-      MainWindow() : input(configs.cli), general(configs.gui, configs.cli), video(configs.cli), audio(configs.cli), ext_rom(configs.gui)
+      MainWindow(const nall::string &libretro_path) :
+         input(configs.cli), general(configs.gui, configs.cli), video(configs.cli), audio(configs.cli), ext_rom(configs.gui),
+         m_cli_path(libretro_path), m_cli_custom_path(libretro_path.length())
       {
          setTitle("RetroArch || Phoenix");
          setIcon("/usr/share/icons/retroarch-phoenix.png");
@@ -332,6 +334,7 @@ class MainWindow : public Window
 #endif
 
       string m_cli_path;
+      bool m_cli_custom_path;
 
       lstring tempfiles;
 
@@ -884,8 +887,6 @@ class MainWindow : public Window
 
          if (configs.gui.get("retroarch_path", tmp)) retroarch.setPath(tmp);
          retroarch.setConfig(configs.gui, "retroarch_path");
-         if (configs.gui.get("last_rom", tmp)) rom.setPath(tmp);
-         rom.setConfig(configs.gui, "last_rom");
          if (configs.gui.get("last_movie", tmp)) bsv_movie.setPath(tmp);
          bsv_movie.setConfig(configs.gui, "last_movie");
          if (configs.gui.get("record_path", tmp)) record.setPath(tmp);
@@ -908,14 +909,21 @@ class MainWindow : public Window
             rom_type.allow_patch(patches);
          rom_type.setConfig(configs.gui);
 
-         m_cli_path = cli_config_path();
+
+         if (!m_cli_custom_path)
+            m_cli_path = cli_config_path();
+
+         print("Loading CLI path: ", m_cli_path, "\n");
          configs.cli = ConfigFile(m_cli_path);
+         config.setPath(m_cli_path);
+         rom.setConfig(configs.cli, "phoenix_last_rom");
 
          init_cli_config();
       }
 
       void reload_cli_config(const string& path)
       {
+         print("Reloading config: ", path, "\n");
          if (path.length() > 0)
          {
             configs.cli = ConfigFile(path);
@@ -937,6 +945,11 @@ class MainWindow : public Window
             libretro.setPath(tmp);
          else
             libretro.setPath("");
+
+         if (configs.cli.get("phoenix_last_rom", tmp))
+            rom.setPath(tmp);
+         else
+            rom.setPath("");
 
          general.update();
          video.update();
@@ -1236,8 +1249,10 @@ extracted:
             return;
          }
 
+         // Need to force this for remote to work.
          configs.cli.set("stdin_cmd_enable", true);
 
+#if 0
          string sysdir;
          if (!configs.cli.get("system_directory", sysdir) || sysdir.length() == 0)
          {
@@ -1245,6 +1260,7 @@ extracted:
                   "System directory (Settings -> General -> System directory) is not set.\n"
                   "Some libretro cores that rely on this might not work as intended.");
          }
+#endif
 
          linear_vector<const char*> vec_cmd;
          string retroarch_path = retroarch.getPath();
@@ -1984,7 +2000,7 @@ extracted:
       }
 };
 
-int main()
+int main(int argc, char *argv[])
 {
 #ifndef _WIN32
    struct sigaction sa;
@@ -1994,6 +2010,16 @@ int main()
    sigaction(SIGPIPE, &sa, NULL);
 #endif
 
-   MainWindow win;
+   if (argc > 2)
+   {
+      print("Usage: retroarch-phoenix [RetroArch config file]\n");
+      return 1;
+   }
+
+   nall::string libretro_path;
+   if (argc == 2)
+      libretro_path = argv[1];
+
+   MainWindow win(libretro_path);
    OS::main();
 }
