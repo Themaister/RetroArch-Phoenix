@@ -449,6 +449,8 @@ class MainWindow : public Window
                      *delim = '\0';
                      start_path = buf;
                   }
+                  else
+                     start_path = ".";
                }
                else
                {
@@ -461,7 +463,7 @@ class MainWindow : public Window
                if (save_file)
                {
                   file = OS::fileSave(Window::None, start_path, filter);
-                  if (file.length() > 0 && !strchr(file, '.'))
+                  if (file.length() > 0 && !file.endswith(short_filter))
                      file.append(short_filter);
                }
                else
@@ -876,6 +878,36 @@ class MainWindow : public Window
             configs.gui.set("controller_2", string("justifier"));
          else if (settings.justifiers_2.checked())
             configs.gui.set("controller_2", string("justifiers"));
+      }
+
+      void save_config()
+      {
+         nall::string current_conf = config.getPath();
+         char buf[1024];
+         nall::strlcpy(buf, current_conf, sizeof(buf));
+         char *delim = strrchr(buf, '/');
+         if (!delim)
+            delim = strrchr(buf, '\\');
+
+         nall::string start_path;
+         if (delim)
+         {
+            *delim = '\0';
+            start_path = buf;
+         }
+         else
+            start_path = ".";
+
+         string file = OS::fileSave(Window::None, start_path, "Config File (*.cfg)");
+         if (file.length() > 0 && !file.endswith(".cfg"))
+            file.append(".cfg");
+
+         if (file.length() > 0)
+         {
+            configs.cli.write(file);
+            configs.cli.replace_path(file);
+            config.setPath(file);
+         }
       }
 
       void init_config()
@@ -1848,13 +1880,12 @@ extracted:
 
       struct
       {
+         Item save_config;
          Item general;
-         Separator sep;
+         Separator sep1, sep2, sep3;
          Item video;
          Item audio;
          Item input;
-
-         Separator sep2;
 
          Menu controllers;
          Menu port_1;
@@ -1906,6 +1937,7 @@ extracted:
          file.log.setText("Show log");
          file.quit.setText("Quit");
 
+         settings.save_config.setText("Save RetroArch config");
          settings.general.setText("General");
          settings.video.setText("Video");
          settings.audio.setText("Audio");
@@ -1917,12 +1949,14 @@ extracted:
          file_menu.append(file.log);
          file_menu.append(file.sep);
          file_menu.append(file.quit);
+         settings_menu.append(settings.save_config);
+         settings_menu.append(settings.sep1);
          settings_menu.append(settings.general);
-         settings_menu.append(settings.sep);
+         settings_menu.append(settings.sep2);
          settings_menu.append(settings.video);
          settings_menu.append(settings.audio);
          settings_menu.append(settings.input);
-         settings_menu.append(settings.sep2);
+         settings_menu.append(settings.sep3);
 
          settings.controllers.setText("Controllers");
          settings.port_1.setText("Port 1");
@@ -1978,6 +2012,7 @@ extracted:
          file.quit.onTick = []() { OS::quit(); };
          help.about.onTick = [this]() { MessageWindow::information(*this, "RetroArch/Phoenix\nHans-Kristian Arntzen (Themaister) (C) - 2011-2012\nThis is free software released under GNU GPLv3\nPhoenix (C) byuu - 2011"); };
 
+         settings.save_config.onTick = {&MainWindow::save_config, this};
          settings.general.onTick = [this]() { general.show(); };
          settings.video.onTick = [this]() { video.show(); };
          settings.audio.onTick = [this]() { audio.show(); };

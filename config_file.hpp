@@ -122,6 +122,8 @@ class ConfigFile
       }
 
       void write() { if (conf && path[0]) config_file_write(conf, path); }
+      void write(const string& path) { config_file_write(conf, path); }
+      void replace_path(const string& path) { this->path = path; }
 
       ConfigFile(ConfigFile&& _in) { *this = std::move(_in); }
 
