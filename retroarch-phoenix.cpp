@@ -2015,6 +2015,11 @@ int main(int argc, char *argv[])
       print("Usage: retroarch-phoenix [RetroArch config file]\n");
       return 1;
    }
+   else if (argc == 2 && (!strcmp(argv[1], "-h") || !strcmp(argv[1], "--help")))
+   {
+      print("Usage: retroarch-phoenix [RetroArch config file]\n");
+      return 0;
+   }
 
    nall::string libretro_path;
    if (argc == 2)
