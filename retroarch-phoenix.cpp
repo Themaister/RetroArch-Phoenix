@@ -990,14 +990,24 @@ class MainWindow : public Window
 
          if (configs.cli.get("phoenix_default_rom_dir", tmp))
             rom.setStartPath(tmp);
+         else
+            rom.setStartPath("");
          if (configs.cli.get("phoenix_default_bsv_movie_dir", tmp))
             bsv_movie.setStartPath(tmp);
+         else
+            bsv_movie.setStartPath("");
          if (configs.cli.get("phoenix_default_record_dir", tmp))
             record.setStartPath(tmp);
+         else
+            record.setStartPath("");
          if (configs.cli.get("phoenix_default_config_dir", tmp))
             config.setStartPath(tmp);
+         else
+            config.setStartPath("");
          if (configs.cli.get("phoenix_default_libretro_dir", tmp))
             libretro.setStartPath(tmp);
+         else
+            libretro.setStartPath("");
 
          general.update();
          video.update();
