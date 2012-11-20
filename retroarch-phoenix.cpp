@@ -435,10 +435,7 @@ class MainWindow : public Window
             button.onTick = [this]() {
                string start_path;
                string path;
-               if (default_start_path)
-                  path = default_start_path;
-               else
-                  path = this->getPath();
+               path = this->getPath();
                
                if (path.length() > 0)
                {
@@ -456,6 +453,8 @@ class MainWindow : public Window
                   else
                      start_path = ".";
                }
+               else if (default_start_path.length() > 0)
+                  start_path = default_start_path;
                else
                {
                   const char *path = std::getenv("HOME");
