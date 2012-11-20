@@ -415,6 +415,7 @@ class MainWindow : public Window
          Button clear;
          string filter;
          string short_filter;
+         string default_start_path;
          bool save_file;
 
          ConfigFile *conf;
@@ -434,7 +435,10 @@ class MainWindow : public Window
             button.onTick = [this]() {
                string start_path;
                string path;
-               path = this->getPath();
+               if (default_start_path)
+                  path = default_start_path;
+               else
+                  path = this->getPath();
                
                if (path.length() > 0)
                {
@@ -494,6 +498,11 @@ class MainWindow : public Window
             };
 
             edit.setEditable(false);
+         }
+
+         void setStartPath(const string& _start_path)
+         {
+            default_start_path = _start_path;
          }
 
          void setFilter(const string& _filter, const string& _short_filter = "")
@@ -982,6 +991,17 @@ class MainWindow : public Window
             rom.setPath(tmp);
          else
             rom.setPath("");
+
+         if (configs.cli.get("start_path_rom", tmp))
+            rom.setStartPath(tmp);
+         if (configs.cli.get("start_path_bsv_movie", tmp))
+            bsv_movie.setStartPath(tmp);
+         if (configs.cli.get("start_path_record", tmp))
+            record.setStartPath(tmp);
+         if (configs.cli.get("start_path_config", tmp))
+            config.setStartPath(tmp);
+         if (configs.cli.get("start_path_libretro", tmp))
+            libretro.setStartPath(tmp);
 
          general.update();
          video.update();
