@@ -417,6 +417,8 @@ class MainWindow : public Window
          string short_filter;
          bool save_file;
 
+         string default_start_path;
+
          ConfigFile *conf;
          string config_key;
 
@@ -452,6 +454,8 @@ class MainWindow : public Window
                   else
                      start_path = ".";
                }
+               else if (default_start_path.length() > 0)
+                  start_path = default_start_path;
                else
                {
                   const char *path = std::getenv("HOME");
@@ -510,6 +514,7 @@ class MainWindow : public Window
             config_key = key;
             cb = _cb;
          }
+         void setStartPath(const string& _start_path) { default_start_path = _start_path; }
          string getPath() { return edit.text(); }
          
          HorizontalLayout& layout() { return hlayout; }
@@ -982,6 +987,19 @@ class MainWindow : public Window
             rom.setPath(tmp);
          else
             rom.setPath("");
+
+         if (configs.cli.get("phoenix_default_rom_dir", tmp))
+            rom.setStartPath(tmp);
+         else
+            rom.setStartPath("");
+         if (configs.cli.get("phoenix_default_bsv_movie_dir", tmp))
+            bsv_movie.setStartPath(tmp);
+         else
+            bsv_movie.setStartPath("");
+         if (configs.cli.get("phoenix_default_record_dir", tmp))
+            record.setStartPath(tmp);
+         else
+            record.setStartPath("");
 
          general.update();
          video.update();
