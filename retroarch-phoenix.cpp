@@ -1000,14 +1000,6 @@ class MainWindow : public Window
             record.setStartPath(tmp);
          else
             record.setStartPath("");
-         if (configs.cli.get("phoenix_default_config_dir", tmp))
-            config.setStartPath(tmp);
-         else
-            config.setStartPath("");
-         if (configs.cli.get("phoenix_default_libretro_dir", tmp))
-            libretro.setStartPath(tmp);
-         else
-            libretro.setStartPath("");
 
          general.update();
          video.update();
