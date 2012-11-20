@@ -991,15 +991,15 @@ class MainWindow : public Window
          else
             rom.setPath("");
 
-         if (configs.cli.get("start_path_rom", tmp))
+         if (configs.cli.get("phoenix_default_rom_dir", tmp))
             rom.setStartPath(tmp);
-         if (configs.cli.get("start_path_bsv_movie", tmp))
+         if (configs.cli.get("phoenix_default_bsv_movie_dir", tmp))
             bsv_movie.setStartPath(tmp);
-         if (configs.cli.get("start_path_record", tmp))
+         if (configs.cli.get("phoenix_default_record_dir", tmp))
             record.setStartPath(tmp);
-         if (configs.cli.get("start_path_config", tmp))
+         if (configs.cli.get("phoenix_default_config_dir", tmp))
             config.setStartPath(tmp);
-         if (configs.cli.get("start_path_libretro", tmp))
+         if (configs.cli.get("phoenix_default_libretro_dir", tmp))
             libretro.setStartPath(tmp);
 
          general.update();
