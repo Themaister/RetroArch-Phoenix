@@ -415,8 +415,9 @@ class MainWindow : public Window
          Button clear;
          string filter;
          string short_filter;
-         string default_start_path;
          bool save_file;
+
+         string default_start_path;
 
          ConfigFile *conf;
          string config_key;
@@ -499,11 +500,6 @@ class MainWindow : public Window
             edit.setEditable(false);
          }
 
-         void setStartPath(const string& _start_path)
-         {
-            default_start_path = _start_path;
-         }
-
          void setFilter(const string& _filter, const string& _short_filter = "")
          {
             filter = _filter;
@@ -518,6 +514,7 @@ class MainWindow : public Window
             config_key = key;
             cb = _cb;
          }
+         void setStartPath(const string& _start_path) { default_start_path = _start_path; }
          string getPath() { return edit.text(); }
          
          HorizontalLayout& layout() { return hlayout; }
