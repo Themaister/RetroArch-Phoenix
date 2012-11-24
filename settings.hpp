@@ -950,8 +950,6 @@ class General : public ToggleWindow
          widgets.append(BoolSetting::shared(_conf, "block_sram_overwrite", "Block SRAM overwrite:", false));
          widgets.append(BoolSetting::shared(_conf, "savestate_auto_index", "Auto-increment save state slots:", false));
          widgets.append(BoolSetting::shared(_conf, "savestate_auto_save", "Autosave state on exit:", false));
-         widgets.append(BoolSetting::shared(_conf, "video_hires_record", "Record in hi-res:", false));
-         widgets.append(BoolSetting::shared(_conf, "video_h264_record", "Enable H.264 recording:", true));
          widgets.append(BoolSetting::shared(_conf, "video_post_filter_record", "Records filtered output:", false));
          widgets.append(BoolSetting::shared(_conf, "video_gpu_record", "Records post-shaded output:", false));
          widgets.append(BoolSetting::shared(_conf, "network_cmd_enable", "Enable UDP command interface:", false));
