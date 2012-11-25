@@ -88,7 +88,7 @@ class PathSetting : public SettingLayout, public util::Shared<PathSetting>
          hlayout.append(clear, 0, 0);
          hlayout.append(button, 0, 0);
 
-         edit.setEditable(false);
+         //edit.setEditable(false);
 
          button.onTick = [this]() {
             string start_path;
@@ -146,7 +146,7 @@ class DirSetting : public SettingLayout, public util::Shared<DirSetting>
          hlayout.append(clear, 0, 0);
          hlayout.append(button, 0, 0);
 
-         edit.setEditable(false);
+         //edit.setEditable(false);
 
          button.onTick = [this]() {
             string start_path;

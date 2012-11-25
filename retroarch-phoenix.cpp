@@ -497,7 +497,7 @@ class MainWindow : public Window
                cb("");
             };
 
-            edit.setEditable(false);
+            //edit.setEditable(false);
          }
 
          void setFilter(const string& _filter, const string& _short_filter = "")
