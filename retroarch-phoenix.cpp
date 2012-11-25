@@ -529,7 +529,7 @@ class MainWindow : public Window
                hlayout.append(clear, 0, 0);
                hlayout.append(button, 0, 0);
             }
-      } rom, config, retroarch, libretro;
+      } rom, config, retroarch, libretro, record_config;
 
       struct bsv_entry : entry
       {
@@ -928,6 +928,8 @@ class MainWindow : public Window
          bsv_movie.setConfig(configs.gui, "last_movie");
          if (configs.gui.get("record_path", tmp)) record.setPath(tmp);
          record.setConfig(configs.gui, "record_path");
+         if (configs.gui.get("record_config_path", tmp)) record_config.setPath(tmp);
+         record_config.setConfig(configs.gui, "record_config_path");
 
          if (configs.gui.get("nickname", tmp)) net.nick.setText(tmp);
          net.setConfig(configs.gui, "nickname");
@@ -992,14 +994,21 @@ class MainWindow : public Window
             rom.setStartPath(tmp);
          else
             rom.setStartPath("");
+
          if (configs.cli.get("phoenix_default_bsv_movie_dir", tmp))
             bsv_movie.setStartPath(tmp);
          else
             bsv_movie.setStartPath("");
+
          if (configs.cli.get("phoenix_default_record_dir", tmp))
             record.setStartPath(tmp);
          else
             record.setStartPath("");
+
+         if (configs.cli.get("phoenix_default_record_config_dir", tmp))
+            record_config.setStartPath(tmp);
+         else
+            record_config.setStartPath("");
 
          general.update();
          video.update();
@@ -1023,6 +1032,7 @@ class MainWindow : public Window
          rom.setLabel("Normal ROM path:");
          bsv_movie.setLabel("BSV movie:");
          record.setLabel("FFmpeg movie output:");
+         record_config.setLabel("FFmpeg config:");
          config.setLabel("RetroArch config file:");
          retroarch.setLabel("RetroArch path:");
          libretro.setLabel("libretro core path:");
@@ -1034,7 +1044,9 @@ class MainWindow : public Window
          vbox.append(bsv_movie.layout_opt(), 8);
          record.save_file = true;
          record.setFilter("Matroska (*.mkv)", ".mkv");
-         vbox.append(record.layout(), 10);
+         vbox.append(record.layout(), 3);
+         record_config.setFilter("Config file (*.cfg)");
+         vbox.append(record_config.layout(), 10);
          vbox.append(config.layout(), 3);
          vbox.append(retroarch.layout(), 3);
          vbox.append(libretro.layout(), 3);
@@ -1322,6 +1334,7 @@ extracted:
          string frames;
          string movie_path;
          string record_path;
+         string record_config_path;
          string record_size;
          string nickname;
 
@@ -1400,6 +1413,13 @@ extracted:
             vec_cmd.append("--record");
             record_path = record.getPath();
             vec_cmd.append(record_path);
+         }
+
+         record_config_path = record_config.getPath();
+         if (record_config_path.length() > 0)
+         {
+            vec_cmd.append("--recordconfig");
+            vec_cmd.append(record_config_path);
          }
 
          if (record.dim_edit.text().length() > 0)
