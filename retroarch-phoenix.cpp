@@ -310,6 +310,14 @@ class MainWindow : public Window
             ::unlink(tempfile);
 #endif
          }
+
+         rom.saveConfig();
+         config.saveConfig();
+         retroarch.saveConfig();
+         libretro.saveConfig();
+         record_config.saveConfig();
+         bsv_movie.saveConfig();
+         record.saveConfig(); 
       }
 
    private:
@@ -498,6 +506,12 @@ class MainWindow : public Window
             };
 
             //edit.setEditable(false);
+         }
+
+         void saveConfig()
+         {
+            if (conf)
+               conf->set(config_key, getPath());
          }
 
          void setFilter(const string& _filter, const string& _short_filter = "")
