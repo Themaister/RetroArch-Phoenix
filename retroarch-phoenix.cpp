@@ -310,14 +310,6 @@ class MainWindow : public Window
             ::unlink(tempfile);
 #endif
          }
-
-         rom.saveConfig();
-         config.saveConfig();
-         retroarch.saveConfig();
-         libretro.saveConfig();
-         record_config.saveConfig();
-         bsv_movie.saveConfig();
-         record.saveConfig(); 
       }
 
    private:
@@ -506,6 +498,11 @@ class MainWindow : public Window
             };
 
             //edit.setEditable(false);
+         }
+
+         ~entry()
+         {
+            saveConfig();
          }
 
          void saveConfig()
