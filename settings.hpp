@@ -1022,16 +1022,13 @@ namespace Internal
       { "gl", "OpenGL" },
       { "d3d9", "Direct3D9" },
       { "sdl", "SDL" },
-      { "ext", "External" },
 #elif defined(__APPLE__)
       { "gl", "OpenGL" },
       { "sdl", "SDL" },
-      { "ext", "External" },
 #else
       { "gl", "OpenGL" },
       { "xvideo", "XVideo" },
       { "sdl", "SDL" },
-      { "ext", "External" },
 #endif
    };
 }
@@ -1102,7 +1099,6 @@ class Video : public ToggleWindow
       Video(ConfigFile &_conf) : ToggleWindow("RetroArch || Video settings"), shader_setting(_conf), font_setting(_conf)
       {
          widgets.append(ComboSetting::shared(_conf, "video_driver", "Video driver:", Internal::video_drivers, 0));
-         widgets.append(PathSetting::shared(_conf, "video_external_driver", "External video driver:", "", "Dynamic library (" DYNAMIC_EXTENSION ")"));
          widgets.append(DoubleSetting::shared(_conf, "video_xscale", "Windowed X scale:", 3.0));
          widgets.append(DoubleSetting::shared(_conf, "video_yscale", "Windowed Y scale:", 3.0));
          widgets.append(IntSetting::shared(_conf, "video_fullscreen_x", "Fullscreen X resolution:", 0));
@@ -1178,13 +1174,11 @@ namespace Internal
       {"xaudio", "XAudio2"},
       {"sdl", "SDL"},
       {"rsound", "RSound"},
-      {"ext", "External"},
 #elif defined(__APPLE__)
       {"coreaudio", "CoreAudio"},
       {"openal", "OpenAL"},
       {"sdl", "SDL"},
       {"rsound", "RSound"},
-      {"ext", "External"},
 #else
       {"alsa", "ALSA"},
       {"pulse", "PulseAudio"},
@@ -1194,7 +1188,6 @@ namespace Internal
       {"roar", "RoarAudio"},
       {"openal", "OpenAL"},
       {"sdl", "SDL"},
-      {"ext", "External"},
 #endif
    };
 
@@ -1322,7 +1315,6 @@ class Audio : public ToggleWindow
       {
          widgets.append(BoolSetting::shared(_conf, "audio_enable", "Enable audio:", true));
          widgets.append(ComboSetting::shared(_conf, "audio_driver", "Audio driver:", Internal::audio_drivers, 0));
-         widgets.append(PathSetting::shared(_conf, "audio_external_driver", "External audio driver:", string(""), "Dynamic library (" DYNAMIC_EXTENSION ")"));
          widgets.append(PathSetting::shared(_conf, "audio_dsp_plugin", "Audio DSP plugin:", string(""), "Dynamic library (" DYNAMIC_EXTENSION ")"));
          widgets.append(IntSetting::shared(_conf, "audio_out_rate", "Audio sample rate:", 48000));
          widgets.append(StringSetting::shared(_conf, "audio_device", "Audio device:", ""));
