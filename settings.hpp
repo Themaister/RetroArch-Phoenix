@@ -1345,6 +1345,7 @@ class Input : public ToggleWindow
       Input(ConfigFile &_conf) : ToggleWindow("RetroArch || Input settings")
       {
          widgets.append(SliderSetting::shared(_conf, "input_axis_threshold", "Input axis threshold:", 0.5, 0.0, 1.0));
+         widgets.append(PathSetting::shared(_conf, "input_overlay", "Overlay config:", string(""), "Config file (*.cfg)"));
          widgets.append(BoolSetting::shared(_conf, "netplay_client_swap_input", "Use Player 1 binds as netplay client:", true));
          widgets.append(input_setting = InputSetting::shared(_conf, Internal::binds, 
                   [this](const string& msg) { this->setStatusText(msg); }, 
