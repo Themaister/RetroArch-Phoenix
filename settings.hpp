@@ -1111,6 +1111,7 @@ class Video : public ToggleWindow
          widgets.append(BoolSetting::shared(_conf, "video_disable_composition", "Disable composition (Win Vista/7):", false));
          widgets.append(BoolSetting::shared(_conf, "video_smooth", "Bilinear filtering:", true));
          widgets.append(BoolSetting::shared(_conf, "video_force_aspect", "Lock aspect ratio:", true));
+         widgets.append(BoolSetting::shared(_conf, "video_scale_integer", "Integer scale:", false));
          widgets.append(BoolSetting::shared(_conf, "video_crop_overscan", "Crop overscan:", true));
          widgets.append(AspectSetting::shared(_conf, "video_aspect_ratio", "Aspect ratio:"));
          widgets.append(BoolSetting::shared(_conf, "video_aspect_ratio_auto", "Prefer game aspect over 1:1 PAR:", false));
