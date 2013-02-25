@@ -30,8 +30,19 @@
   #include <gdk/gdk.h>
   #include <gdk/gdkx.h>
   #include <cairo.h>
-  #include <gdk/gdkkeysyms.h>
   #include <X11/Xatom.h>
+  #include <gdk/gdkkeysyms.h>
+
+  // Support legacy version of gdk/gdkkeysyms.h (Debian Squeeze, Ubuntu 10.04 
+  // among others)
+  #ifndef GDK_KEY_Home
+  #define GDK_KEY_Home GDK_Home
+  #define GDK_KEY_End GDK_End
+  #define GDK_KEY_Up GDK_Up
+  #define GDK_KEY_Down GDK_Down
+  #define GDK_KEY_Page_Up GDK_Page_Up
+  #define GDK_KEY_Page_Down GDK_Page_Down
+  #endif
 
   #undef None
   #undef Window
