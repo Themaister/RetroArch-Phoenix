@@ -1302,6 +1302,10 @@ namespace Internal
       { "input_slowmotion", "Slow motion", "", "e" },
       { "input_volume_up", "Increase volume", "", "kp_plus" },
       { "input_volume_down", "Decrease volume", "", "kp_minus" },
+      { "input_overlay_next", "Overlay next", "", "" },
+      { "input_disk_eject_toggle", "Disk eject toggle", "", "" },
+      { "input_disk_next", "Disk next", "", "" },
+      { "input_menu_toggle", "RGUI menu toggle", "", "f1" },
    };
 
    static const linear_vector<linear_vector<input_selection>> binds = { 
