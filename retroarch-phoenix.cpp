@@ -518,7 +518,7 @@ class MainWindow : public Window
          }
 
          void setLabel(const string& name) { label.setText(name); }
-         void setPath(const string& name) { edit.setText(name.length() > 0 ? name : string("")); }
+         void setPath(const string& name) { edit.setText(name.length() > 0 ? name : string("")); cb(this->getPath()); }
          void setConfig(ConfigFile& file, const string& key, const function<void (const string&)>& _cb = &entry::dummy) 
          { 
             conf = &file;
@@ -947,7 +947,11 @@ class MainWindow : public Window
 
          if (configs.gui.get("config_path", tmp)) config.setPath(tmp);
          config.setConfig(configs.gui, "config_path", {&MainWindow::reload_cli_config, this});
-         libretro.setConfig(configs.cli, "libretro_path");
+
+         libretro.setConfig(configs.cli, "libretro_path",
+               [this](const string& path) {
+                  update_rom_filter(path);
+               });
 
          init_controllers();
 
@@ -1026,6 +1030,26 @@ class MainWindow : public Window
          audio.update();
          input.update();
          ext_rom.update();
+      }
+
+      void update_rom_filter(const string& libretro_path)
+      {
+         struct retro_system_info info = {0};
+         lstring exts = get_system_info(info, libretro_path);
+
+         string filter;
+         if (exts.size() == 0)
+            filter = "Game ROM (*)";
+         else
+         {
+            filter = "Game ROM (";
+            foreach(ext, exts)
+               filter.append("*.", ext, ",");
+            filter.append("*.zip)");
+         }
+
+         print("ROM filter: ", filter, "\n");
+         rom.setFilter(filter);
       }
 
       void init_main_frame()
@@ -2059,7 +2083,7 @@ extracted:
          file.log.onTick = [this]() { if (file.log.checked()) log_win.show(); else log_win.hide(); };
          log_win.setCloseCallback([this]() { file.log.setChecked(false); });
          file.quit.onTick = []() { OS::quit(); };
-         help.about.onTick = [this]() { MessageWindow::information(*this, "RetroArch/Phoenix\nHans-Kristian Arntzen (Themaister) (C) - 2011-2012\nThis is free software released under GNU GPLv3\nPhoenix (C) byuu - 2011"); };
+         help.about.onTick = [this]() { MessageWindow::information(*this, "RetroArch/Phoenix\nHans-Kristian Arntzen (Themaister) (C) - 2011-2013\nThis is free software released under GNU GPLv3\nPhoenix (C) byuu - 2011"); };
 
          settings.save_config.onTick = {&MainWindow::save_config, this};
          settings.general.onTick = [this]() { general.show(); };
