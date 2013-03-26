@@ -1102,6 +1102,7 @@ class MainWindow : public Window
       {
          lstring ret;
          string roms;
+         bool has_ext = false;
 
          dylib_t lib = dylib_load(path);
          if (!lib)
@@ -1124,12 +1125,16 @@ class MainWindow : public Window
          pgetinfo(&sys_info);
 
          if (sys_info.valid_extensions)
+         {
             roms = sys_info.valid_extensions;
+            has_ext = true;
+         }
 
 end:
          dylib_close(lib);
 
-         ret.split("|", roms);
+         if (has_ext)
+            ret.split("|", roms);
          return ret;
       }
 
