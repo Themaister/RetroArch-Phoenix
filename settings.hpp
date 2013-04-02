@@ -1039,10 +1039,10 @@ class ShaderVideo : public ToggleWindow
       ShaderVideo(ConfigFile &_conf) : ToggleWindow("RetroArch || Shader settings")
       {
          paths.append(PathSetting::shared(_conf, "video_cg_shader", "Cg pixel shader:", "", "Cg shader, Cg meta-shader (*.cg,*.cgp)"));
-         paths.append(PathSetting::shared(_conf, "video_bsnes_shader", "bSNES XML shader:", "", "XML shader (*.shader)"));
+         paths.append(PathSetting::shared(_conf, "video_xml_shader", "XML shader:", "", "XML shader (*.shader)"));
          widgets.append(ShaderSetting::shared(_conf, "video_shader_type", 
-                  linear_vector<string>({"Automatic", "Cg", "bSNES XML", "None"}), 
-                  linear_vector<string>({"auto", "cg", "bsnes", "none"}), paths));
+                  linear_vector<string>({"Automatic", "Cg", "XML", "None"}), 
+                  linear_vector<string>({"auto", "cg", "xml", "none"}), paths));
          widgets.append(DirSetting::shared(_conf, "video_shader_dir", "Shader directory:", ""));
          widgets.append(BoolSetting::shared(_conf, "video_render_to_texture", "Render-to-texture (2-pass rendering):", false));
          widgets.append(DoubleSetting::shared(_conf, "video_fbo_scale_x", "FBO Scale X:", 2.0));
