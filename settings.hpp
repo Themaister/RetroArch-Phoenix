@@ -960,7 +960,7 @@ class General : public ToggleWindow
          savefile_dir = DirSetting::shared(_pconf, "savefile_dir", "Savefile/movie directory:", string(""));
          savestate_dir = DirSetting::shared(_pconf, "savestate_dir", "Savestate directory:", string(""));
          widgets.append(DirSetting::shared(_conf, "screenshot_directory", "Screenshot directory:", string("")));
-         widgets.append(StringSetting::shared(_conf, "environment_variables", "Environment variables:", string("")));
+         widgets.append(PathSetting::shared(_conf, "core_options_path", "Core options config:", string(""), "Config files (*.cfg)"));
          async_fork = BoolSetting::shared(_pconf, "async_fork", "Keep UI visible:", false);
 
          widgets.append(savefile_dir);
