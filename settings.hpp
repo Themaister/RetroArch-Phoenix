@@ -1044,11 +1044,6 @@ class ShaderVideo : public ToggleWindow
                   linear_vector<string>({"Automatic", "Cg", "XML", "None"}), 
                   linear_vector<string>({"auto", "cg", "xml", "none"}), paths));
          widgets.append(DirSetting::shared(_conf, "video_shader_dir", "Shader directory:", ""));
-         widgets.append(BoolSetting::shared(_conf, "video_render_to_texture", "Render-to-texture (2-pass rendering):", false));
-         widgets.append(DoubleSetting::shared(_conf, "video_fbo_scale_x", "FBO Scale X:", 2.0));
-         widgets.append(DoubleSetting::shared(_conf, "video_fbo_scale_y", "FBO Scale Y:", 2.0));
-         widgets.append(BoolSetting::shared(_conf, "video_second_pass_smooth", "Bilinear filtering (2. pass):", true));
-         widgets.append(PathSetting::shared(_conf, "video_second_pass_shader", "Shader (2. pass):", "", "Cg shader, XML shader (*.cg,*.shader)"));
          widgets.append(PathSetting::shared(_conf, "video_filter", "bSNES video filter:", "", "bSNES filter (*.filter)"));
 
          foreach(i, widgets) { vbox.append(i->layout(), 3); }
