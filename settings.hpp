@@ -1038,11 +1038,8 @@ class ShaderVideo : public ToggleWindow
    public:
       ShaderVideo(ConfigFile &_conf) : ToggleWindow("RetroArch || Shader settings")
       {
-         paths.append(PathSetting::shared(_conf, "video_cg_shader", "Cg pixel shader:", "", "Cg shader, Cg meta-shader (*.cg,*.cgp)"));
-         paths.append(PathSetting::shared(_conf, "video_xml_shader", "XML shader:", "", "XML shader (*.shader)"));
-         widgets.append(ShaderSetting::shared(_conf, "video_shader_type", 
-                  linear_vector<string>({"Automatic", "Cg", "XML", "None"}), 
-                  linear_vector<string>({"auto", "cg", "xml", "none"}), paths));
+         widgets.append(PathSetting::shared(_conf, "video_shader", "Video Shader:", "", "Cg shader, Cg meta-shader, XML/GLSL (*.cg,*.cgp,*.shader)"));
+         widgets.append(BoolSetting::shared(_conf, "video_shader_enable", "Enable shader:", false));
          widgets.append(DirSetting::shared(_conf, "video_shader_dir", "Shader directory:", ""));
          widgets.append(PathSetting::shared(_conf, "video_filter", "bSNES video filter:", "", "bSNES filter (*.filter)"));
 
@@ -1056,7 +1053,6 @@ class ShaderVideo : public ToggleWindow
       void update() { foreach(i, widgets) i->update(); }
 
    private:
-      linear_vector<PathSetting::Ptr> paths;
       linear_vector<SettingLayout::APtr> widgets;
       VerticalLayout vbox;
 };
