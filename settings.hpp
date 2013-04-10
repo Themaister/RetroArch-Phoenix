@@ -1038,7 +1038,7 @@ class ShaderVideo : public ToggleWindow
    public:
       ShaderVideo(ConfigFile &_conf) : ToggleWindow("RetroArch || Shader settings")
       {
-         widgets.append(PathSetting::shared(_conf, "video_shader", "Video Shader:", "", "Cg shader, Cg meta-shader, XML/GLSL (*.cg,*.cgp,*.shader)"));
+         widgets.append(PathSetting::shared(_conf, "video_shader", "Video Shader:", "", "Cg shader, Cg meta-shader, XML/GLSL, GLSL, GLSLP (*.cg,*.cgp,*.shader,*.glsl,*.glslp)"));
          widgets.append(BoolSetting::shared(_conf, "video_shader_enable", "Enable shader:", false));
          widgets.append(DirSetting::shared(_conf, "video_shader_dir", "Shader directory:", ""));
          widgets.append(PathSetting::shared(_conf, "video_filter", "bSNES video filter:", "", "bSNES filter (*.filter)"));
