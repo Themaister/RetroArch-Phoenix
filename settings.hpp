@@ -941,6 +941,8 @@ class General : public ToggleWindow
    public:
       General(ConfigFile &_pconf, ConfigFile &_conf) : ToggleWindow("RetroArch || General settings")
       {
+         widgets.append(DirSetting::shared(_conf, "rgui_browser_directory",
+            "RGUI ROM directory:", string("")));
          widgets.append(BoolSetting::shared(_conf, "rewind_enable", "Enable rewind:", false));
          widgets.append(IntSetting::shared(_conf, "rewind_buffer_size", "Rewind buffer size (MB):", 20));
          widgets.append(IntSetting::shared(_conf, "rewind_granularity", "Rewind frames granularity:", 1));
