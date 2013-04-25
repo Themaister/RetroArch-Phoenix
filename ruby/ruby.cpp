@@ -310,6 +310,10 @@ void InputInterface::driver(const char *driver) {
   else if(!strcmp(driver, "SDL")) p = new InputSDL();
   #endif
 
+  #ifdef __linux
+  else if(!strcmp(driver, "LinuxRaw")) p = new InputLinuxRaw();
+  #endif
+
   #ifdef INPUT_X
   else if(!strcmp(driver, "X-Windows")) p = new InputX();
   #endif

@@ -1374,6 +1374,8 @@ class Input : public ToggleWindow
          ruby::input.driver("DirectInput");
 #elif defined(__APPLE__)
          ruby::input.driver("Carbon");
+#elif defined(__linux)
+         ruby::input.driver("LinuxRaw");
 #else
          ruby::input.driver("SDL");
 #endif

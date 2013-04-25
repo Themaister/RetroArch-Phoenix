@@ -177,6 +177,10 @@
   #include <ruby/input/sdl.cpp>
 #endif
 
+#ifdef __linux
+  #include <ruby/input/linuxraw.cpp>
+#endif
+
 #ifdef INPUT_X
   #include <ruby/input/x.cpp>
 #endif
