@@ -31,6 +31,27 @@ using namespace phoenix;
 
 namespace Internal
 {
+   extern "C"
+   {
+      bool environ_cb(unsigned cmd, void *data);
+   }
+
+   static bool *load_no_rom;
+   bool environ_cb(unsigned cmd, void *data)
+   {
+      switch (cmd)
+      {
+         case RETRO_ENVIRONMENT_SET_SUPPORT_NO_GAME:
+            *load_no_rom = *(const bool*)data;
+            break;
+
+         default:
+            return false;
+      }
+
+      return true;
+   }
+
    static lstring split_strings(const char *text, unsigned size)
    {
       lstring list;
@@ -273,7 +294,7 @@ class MainWindow : public Window
    public:
       MainWindow(const nall::string &libretro_path) :
          input(configs.cli), general(configs.gui, configs.cli), video(configs.cli), audio(configs.cli), ext_rom(configs.gui),
-         m_cli_path(libretro_path), m_cli_custom_path(libretro_path.length())
+         m_cli_path(libretro_path), load_no_rom(false), m_cli_custom_path(libretro_path.length())
       {
          setTitle("RetroArch || Phoenix");
          setIcon("/usr/share/icons/retroarch-phoenix.png");
@@ -335,6 +356,7 @@ class MainWindow : public Window
 
       string m_cli_path;
       bool m_cli_custom_path;
+      bool load_no_rom;
 
       lstring tempfiles;
 
@@ -1035,7 +1057,7 @@ class MainWindow : public Window
       void update_rom_filter(const string& libretro_path)
       {
          struct retro_system_info info = {0};
-         lstring exts = get_system_info(info, libretro_path);
+         lstring exts = get_system_info(info, libretro_path, load_no_rom);
 
          string filter;
          if (exts.size() == 0)
@@ -1098,8 +1120,10 @@ class MainWindow : public Window
          MessageWindow::warning(Window::None, err);
       }
 
-      lstring get_system_info(struct retro_system_info &sys_info, const string &path)
+      lstring get_system_info(struct retro_system_info &sys_info, const string &path, bool &load_no_rom)
       {
+         load_no_rom = false;
+
          lstring ret;
          string roms;
          bool has_ext = false;
@@ -1110,6 +1134,7 @@ class MainWindow : public Window
 
          unsigned (*pver)() = NULL;
          void (*pgetinfo)(struct retro_system_info*) = NULL;
+         void (*set_environ)(retro_environment_t) = NULL;
 
          pver = (unsigned (*)())dylib_proc(lib, "retro_api_version");
          if (!pver)
@@ -1130,6 +1155,14 @@ class MainWindow : public Window
             has_ext = true;
          }
 
+         set_environ = (void (*)(retro_environment_t))dylib_proc(lib, "retro_set_environment");
+
+         if (set_environ)
+         {
+            Internal::load_no_rom = &load_no_rom;
+            set_environ(Internal::environ_cb);
+         }
+
 end:
          dylib_close(lib);
 
@@ -1141,7 +1174,7 @@ end:
       bool check_zip(string& rom_path)
       {
          struct retro_system_info sys_info = {0};
-         lstring exts = get_system_info(sys_info, libretro.getPath());
+         lstring exts = get_system_info(sys_info, libretro.getPath(), load_no_rom);
          if (sys_info.block_extract)
             return true;
 
@@ -1254,6 +1287,9 @@ extracted:
 
          bool sufami_a = false, sufami_b = false;
          bool slotted = false;
+
+         if (load_no_rom && rom_path.length() == 0)
+            return true;
 
          switch (rom_type.type())
          {
