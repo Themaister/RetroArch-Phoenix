@@ -1576,51 +1576,6 @@ extracted:
          if (!rom_type.allow_patch())
             vec_cmd.append("--no-patch");
 
-         string savefile_dir, savestate_dir;
-         char basename_buf[1024];
-
-         nall::strlcpy(basename_buf, rom_path, sizeof(basename_buf));
-         char *basename_ptr;
-         
-         if ((basename_ptr = strrchr(basename_buf, '.')))
-         {
-            *basename_ptr = '\0';
-            nall::strlcat(basename_buf, ".srm", sizeof(basename_buf));
-         }
-
-         if (!(basename_ptr = strrchr(basename_buf, '/')))
-            basename_ptr = strrchr(basename_buf, '\\');
-         if (basename_ptr)
-            basename_ptr++;
-
-         if (general.getSavefileDir(savefile_dir))
-         {
-            if (basename_ptr)
-               savefile_dir.append(basename_ptr);
-            vec_cmd.append("-s");
-            vec_cmd.append(savefile_dir);
-         }
-
-         nall::strlcpy(basename_buf, rom_path, sizeof(basename_buf));
-         if ((basename_ptr = strrchr(basename_buf, '.')))
-         {
-            *basename_ptr = '\0';
-            nall::strlcat(basename_buf, ".state", sizeof(basename_buf));
-         }
-
-         if (!(basename_ptr = strrchr(basename_buf, '/')))
-            basename_ptr = strrchr(basename_buf, '\\');
-         if (basename_ptr)
-            basename_ptr++;
-
-         if (general.getSavestateDir(savestate_dir))
-         {
-            if (basename_ptr)
-               savestate_dir.append(basename_ptr);
-            vec_cmd.append("-S");
-            vec_cmd.append(savestate_dir);
-         }
-
          vec_cmd.append(NULL);
          configs.gui.write();
          configs.cli.write();

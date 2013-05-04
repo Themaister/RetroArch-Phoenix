@@ -959,14 +959,12 @@ class General : public ToggleWindow
          widgets.append(DirSetting::shared(_conf, "system_directory", "System directory:", string("")));
          widgets.append(PathSetting::shared(_conf, "cheat_database_path", "XML cheat database:", string(""), "XML files (*.xml)"));
          widgets.append(PathSetting::shared(_conf, "cheat_settings_path", "XML cheat settings:", string(""), "Config files (*.cfg)"));
-         savefile_dir = DirSetting::shared(_pconf, "savefile_dir", "Savefile/movie directory:", string(""));
-         savestate_dir = DirSetting::shared(_pconf, "savestate_dir", "Savestate directory:", string(""));
+         widgets.append(DirSetting::shared(_conf, "savefile_directory", "Savefile/movie directory:", string("")));
+         widgets.append(DirSetting::shared(_conf, "savestate_directory", "Savestate directory:", string("")));
          widgets.append(DirSetting::shared(_conf, "screenshot_directory", "Screenshot directory:", string("")));
          widgets.append(PathSetting::shared(_conf, "core_options_path", "Core options config:", string(""), "Config files (*.cfg)"));
          async_fork = BoolSetting::shared(_pconf, "async_fork", "Keep UI visible:", false);
 
-         widgets.append(savefile_dir);
-         widgets.append(savestate_dir);
          widgets.append(async_fork);
 
          foreach(i, widgets) { vbox.append(i->layout(), 3); }
@@ -980,30 +978,6 @@ class General : public ToggleWindow
 
       void update() { foreach(i, widgets) i->update(); }
 
-      bool getSavefileDir(string& dir)
-      {
-         string str = savefile_dir->edit.text();
-         if (str.length() > 0)
-         {
-            dir = str;
-            return true;
-         }
-         else
-            return false;
-      }
-
-      bool getSavestateDir(string& dir)
-      {
-         string str = savestate_dir->edit.text();
-         if (str.length() > 0)
-         {
-            dir = str;
-            return true;
-         }
-         else
-            return false;
-      }
-
       bool getAsyncFork()
       {
          return async_fork->check.checked();
@@ -1012,9 +986,7 @@ class General : public ToggleWindow
    private:
       linear_vector<SettingLayout::APtr> widgets;
       VerticalLayout vbox;
-      DirSetting::Ptr savefile_dir, savestate_dir;
       BoolSetting::Ptr async_fork;
-
 };
 
 namespace Internal
