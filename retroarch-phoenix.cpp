@@ -1,6 +1,5 @@
 #include <phoenix.hpp>
 #include <cstdlib>
-#include <nall/zip.hpp>
 
 #ifndef _WIN32
 #include <unistd.h>
@@ -659,10 +658,6 @@ class MainWindow : public Window
             box.append("BSX");
             box.append("BSX slotted");
 
-            extract_tick.setText("Extract ZIPs");
-            extract_tick.setChecked();
-            extract_tick.onTick = [this] { file->set("extract_zip", extract_tick.checked()); };
-
             allow_patches.setText("Check for ROM patches");
             allow_patches.setChecked();
             allow_patches.onTick = [this] { file->set("allow_patches", allow_patches.checked()); };
@@ -670,7 +665,6 @@ class MainWindow : public Window
             label.setText("ROM type:");
             hlayout.append(label, 150, 0);
             hlayout.append(box, 200, 0, 30);
-            hlayout.append(extract_tick, 0, 0);
             hlayout.append(allow_patches, 0, 0);
          }
 
@@ -685,9 +679,7 @@ class MainWindow : public Window
             return types[box.selection()];
          }
 
-         bool extract() { return extract_tick.checked(); }
          bool allow_patch() { return allow_patches.checked(); }
-         void extract(bool allow) { extract_tick.setChecked(allow); }
          void allow_patch(bool allow) { allow_patches.setChecked(allow); }
 
          HorizontalLayout& layout() { return hlayout; }
@@ -696,7 +688,6 @@ class MainWindow : public Window
             ComboBox box;
             Label label;
             HorizontalLayout hlayout;
-            CheckBox extract_tick;
             CheckBox allow_patches;
             ConfigFile *file;
       } rom_type;
@@ -977,9 +968,6 @@ class MainWindow : public Window
 
          init_controllers();
 
-         bool zip;
-         if (configs.gui.get("extract_zip", zip))
-            rom_type.extract(zip);
          bool patches;
          if (configs.gui.get("allow_patches", patches))
             rom_type.allow_patch(patches);
@@ -1171,113 +1159,6 @@ end:
          return ret;
       }
 
-      bool check_zip(string& rom_path)
-      {
-         struct retro_system_info sys_info = {0};
-         lstring exts = get_system_info(sys_info, libretro.getPath(), load_no_rom);
-         if (sys_info.block_extract)
-            return true;
-
-         string orig_rom_path = rom_path;
-         char *ext = strrchr(rom_path(), '.');
-
-         if (!ext)
-            return true;
-         if (strcasecmp(ext, ".zip") != 0)
-            return true;
-         if (!rom_type.extract())
-            return true;
-
-         *ext = '\0';
-
-         ext = strrchr(rom_path(), '/');
-         if (!ext)
-            ext = strrchr(rom_path(), '\\');
-
-         *ext = '\0';
-         string rom_dir = {rom_path, "/"};
-         string rom_basename = ext + 1;
-         string rom_extension;
-
-         nall::zip z;
-         if (!z.open(orig_rom_path))
-         {
-            MessageWindow::critical(*this, "Failed opening ZIP!");
-            return false;
-         }
-
-         foreach (known_ext, exts)
-            print("Known extension: ", known_ext, "\n");
-
-         foreach (file, z.file)
-         {
-            print("Checking file: ", file.name, "\n");
-            foreach (known_ext, exts)
-            {
-               if (!file.name.endswith(known_ext))
-                  continue;
-
-               rom_extension = known_ext;
-
-               uint8_t *data;
-               unsigned size;
-               if (!z.extract(file, data, size))
-               {
-                  MessageWindow::critical(*this,
-                        "Failed to load ROM from archive!");
-                  return false;
-               }
-
-               if (!data || !size)
-               {
-                  MessageWindow::critical(*this,
-                        "Received invalid result from nall::zip. This should not happen, but it did anyways ... ;)");
-                  return false;
-               }
-
-               bool has_extracted;
-
-               rom_path = {rom_dir, rom_basename, ".", rom_extension};
-
-               bool already_extracted = tempfiles.find(rom_path);
-
-               if (nall::file::exists(rom_path) && !already_extracted)
-               {
-                  auto response = MessageWindow::information(*this,
-                        {"Attempting to extract ROM to ",
-                        rom_path, ", but it already exists. Do you want to overwrite it?"},
-                        MessageWindow::Buttons::YesNo);
-
-                  if (response == MessageWindow::Response::No)
-                  {
-                     MessageWindow::information(*this,
-                           "ROM loading aborted!");
-                     delete [] data;
-                     return false;
-                  }
-               }
-
-               has_extracted = nall::file::write(rom_path, data, size);
-
-               delete [] data;
-               if (has_extracted)
-                  goto extracted;
-               else
-               {
-                  MessageWindow::critical(*this,
-                        {"Failed extracting ROM to: ", rom_path, "!"});
-                  return false;
-               }
-            }
-         }
-         MessageWindow::critical(*this, "Failed to find valid rom in archive!");
-         return false;
-
-extracted:
-         tempfiles.append(rom_path);
-         return true;
-      }
-
       bool append_rom(string& rom_path, linear_vector<const char*>& vec_cmd)
       {
          // Need static since we're referencing a const char*.
@@ -1300,8 +1181,6 @@ extracted:
                   show_error("No ROM selected :(");
                   return false;
                }
-               if (!check_zip(rom_path))
-                  return false;
                vec_cmd.append(rom_path);
                return true;
 
