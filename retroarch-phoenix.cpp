@@ -322,14 +322,6 @@ class MainWindow : public Window
       ~MainWindow()
       {
          save_controllers();
-         foreach (tempfile, tempfiles)
-         {
-#ifdef _WIN32
-            DeleteFileA(tempfile);
-#else
-            ::unlink(tempfile);
-#endif
-         }
       }
 
    private:
@@ -356,8 +348,6 @@ class MainWindow : public Window
       string m_cli_path;
       bool m_cli_custom_path;
       bool load_no_rom;
-
-      lstring tempfiles;
 
       struct netplay
       {
