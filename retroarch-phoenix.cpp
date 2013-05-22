@@ -1528,6 +1528,9 @@ end:
                setStatusText("RetroArch returned successfully!");
             else
                setStatusText({"RetroArch returned with an error! Code: ", (unsigned)exit_status});
+
+            configs.cli.replace_path("");
+            reload_cli_config(m_cli_path);
          }
 
          forked_timer.setEnabled(false);
@@ -1598,6 +1601,9 @@ end:
                setStatusText("Failed to open ROM!");
             else
                setStatusText("RetroArch exited successfully.");
+
+            configs.cli.replace_path("");
+            reload_cli_config(m_cli_path);
 
             setVisible();
             remote.hide();
