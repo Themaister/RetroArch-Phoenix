@@ -205,7 +205,7 @@ void Updater::start_download(const string &path)
    cancel_download.setEnabled(true);
 
    transfer.file_path = path;
-   spawn_thread(&Updater::download_thread, this, path);
+   transfer.thread = nall::thread(&Updater::download_thread, this, path);
 
    timer.setEnabled(true);
 }
@@ -464,12 +464,18 @@ void Updater::timer_event()
 
       if (transfer.version.length() > 0)
          enable_downloads();
+
+      lock.unlock();
+      transfer.thread.join();
    }
    else if (transfer.cancelled)
    {
       timer.setEnabled(false);
       enable_downloads();
       cancel_download.setEnabled(false);
+
+      lock.unlock();
+      transfer.thread.join();
    }
 
    update_progress();

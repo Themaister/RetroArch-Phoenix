@@ -36,6 +36,7 @@ class Updater : public Window
       static unsigned current_redist_version();
       struct
       {
+         nall::thread thread;
          bool finished;
          bool success;
          bool cancelled;

@@ -63,10 +63,12 @@ namespace nall {
   class scoped_lock
   {
     public:
-      scoped_lock(mutex &lock) : m_lock(lock) { m_lock.lock(); }
-      ~scoped_lock() { m_lock.unlock(); }
+      scoped_lock(mutex &lock) : m_lock(lock), locked(true) { m_lock.lock(); }
+      void unlock() { if(locked) m_lock.unlock(); locked = false; } // Early unlock
+      ~scoped_lock() { if(locked) m_lock.unlock(); }
     private:
       mutex &m_lock;
+      bool locked;
   };
 
   // Events using Win32 model where a signaled object stays signaled until it is waited on.
